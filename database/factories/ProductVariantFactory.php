@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ProductVariantStatus;
 use App\Models\OperatingSystem;
 use App\Models\Platform;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Region;
-use App\Enums\ProductVariantStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ComplaintStatus;
 use App\Models\Complaint;
 use App\Models\OrderItem;
-use App\Enums\ComplaintStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

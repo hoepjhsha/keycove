@@ -6,6 +6,4 @@ namespace App\Contracts\Repositories;
 
 use App\Abstracts\RepositoryInterface;
 
-interface UserRepositoryInterface extends RepositoryInterface
-{
-}
+interface UserRepositoryInterface extends RepositoryInterface {}

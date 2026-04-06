@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ProductListingStatus;
 use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Seller;
-use App\Enums\ProductListingStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

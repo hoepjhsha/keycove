@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\EscrowStatus;
 use App\Models\Escrow;
 use App\Models\Order;
-use App\Enums\EscrowStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

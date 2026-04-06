@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\Gender;
 use App\Models\User;
 use App\Models\UserProfile;
-use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

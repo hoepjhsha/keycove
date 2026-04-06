@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ProductKeyStatus;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
-use App\Enums\ProductKeyStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
