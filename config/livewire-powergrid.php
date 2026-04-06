@@ -6,7 +6,7 @@ use PowerComponents\LivewirePowerGrid\FilterAttributes\Boolean;
 use PowerComponents\LivewirePowerGrid\FilterAttributes\InputText;
 use PowerComponents\LivewirePowerGrid\FilterAttributes\Number;
 use PowerComponents\LivewirePowerGrid\FilterAttributes\Select;
-use PowerComponents\LivewirePowerGrid\Themes\DaisyUI;
+use PowerComponents\LivewirePowerGrid\Themes\Tailwind;
 
 return [
 
@@ -19,8 +19,8 @@ return [
     | Configure here the theme of your choice.
     */
 
-    // 'theme' => \PowerComponents\LivewirePowerGrid\Themes\Tailwind::class,
-    'theme' => DaisyUI::class,
+    'theme' => Tailwind::class,
+    // 'theme' => \PowerComponents\LivewirePowerGrid\Themes\DaisyUI::class,
     // 'theme' => \PowerComponents\LivewirePowerGrid\Themes\Bootstrap5::class,
 
     'cache_ttl' => null,
