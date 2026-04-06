@@ -1,0 +1,83 @@
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: keycove_nginx
+    ports:
+      - "${DOCKER_NGINX_PORT:-8000}:80"
+    volumes:
+      - ./:/var/www/html:cached
+      - ./.docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+    networks:
+      - keycove_network
+
+  app:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    container_name: keycove_app
+    working_dir: /var/www/html
+    networks:
+      - keycove_network
+    depends_on:
+      - db
+      - redis
+      - minio
+
+  db:
+    image: mariadb:11.8
+    container_name: keycove_db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-keycove}
+      MYSQL_USER: ${DB_USERNAME:-keycove}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-keycove}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - keycove_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: keycove_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/var/lib/redis
+    networks:
+      - keycove_network
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: keycove_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/var/lib/minio
+    networks:
+      - keycove_network
+
+  node:
+    image: node:22-slim
+    container_name: keycove_node
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    user: "1000:1000"
+    networks:
+      - keycove_network
+    entrypoint: ["sh", "-c", "npm install && npm run dev -- --host"]
+
+networks:
+  keycove_network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local

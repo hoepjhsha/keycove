@@ -1,0 +1,26 @@
+services:
+  app:
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html:cached
+      - ~/.composer-docker/cache:/home/appuser/.composer/cache:delegated
+
+  db:
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_DB_PORT:-3307}:3306"
+
+  redis:
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_REDIS_PORT:-6380}:6379"
+
+  minio:
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_MINIO_PORT:-9001}:9000"
+      - "${DOCKER_MINIO_CONSOLE_PORT:-9002}:9001"
+
+  node:
+    ports:
+      - "${DOCKER_NODE_PORT:-5173}:5173"
