@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Logout;
+use App\Http\Controllers\Auth\Logout;
 use App\Livewire\Auth\Action\ForgotPassword;
 use App\Livewire\Auth\Action\Login;
 use App\Livewire\Auth\Action\Register;

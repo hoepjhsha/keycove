@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Auth;
 
 use App\Abstracts\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -13,13 +13,13 @@ class Logout extends Controller
 {
     public function logout(): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        Auth::guard('admin')->logout();
 
         Session::invalidate();
         Session::regenerateToken();
 
         flash()->use('theme.aurora')->success('You have been logged out.');
 
-        return redirect()->route('app.auth.login');
+        return redirect()->route('admin.auth.login');
     }
 }

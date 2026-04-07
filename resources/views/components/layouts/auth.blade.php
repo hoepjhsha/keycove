@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app :title="$title ?? 'Authentication'">
     <div class="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
          style="background-image: url('https://wallpapercave.com/wp/wp14802192.webp');">
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 require_once __DIR__.'/auth.php';
+require_once __DIR__.'/admin.php';
 
 Route::get('/', function () {
     return view('pages.landing.shop');
