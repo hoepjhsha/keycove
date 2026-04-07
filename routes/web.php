@@ -9,10 +9,6 @@ Route::get('/', function () {
     return view('pages.landing.shop');
 })->name('app.shop.index');
 
-Route::get('/admin/dashboard', function () {
-    return view('pages.landing.admin-dashboard');
-})->name('admin.dashboard.index');
-
 Route::get('/seller/dashboard', function () {
     return view('pages.landing.seller-dashboard');
 })->name('seller.dashboard.index');

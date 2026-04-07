@@ -1,4 +1,6 @@
 <div>
+    @section('pre-app-name', 'Admin')
+
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Admin Login</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Please enter your credentials to access the admin panel</p>

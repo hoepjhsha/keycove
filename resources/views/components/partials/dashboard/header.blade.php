@@ -32,8 +32,8 @@
                      alt="avatar">
                 <span class="hidden lg:flex lg:items-center ml-4">
                     <span class="flex flex-col items-start text-left">
-                        <span class="text-sm font-semibold leading-tight text-gray-900 dark:text-gray-200" aria-hidden="true">{{ auth()->user()?->username ?? 'Sample user' }}</span>
-                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5" aria-hidden="true">{{ auth()->user()?->role->lablel() ?? 'Sample role' }}</span>
+                        <span class="text-sm font-semibold leading-tight text-gray-900 dark:text-gray-200" aria-hidden="true">{{ auth()->guard('admin')->user()?->username ?? 'Sample user' }}</span>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5" aria-hidden="true">{{ auth()->guard('admin')->user()?->role->label() ?? 'Sample role' }}</span>
                     </span>
                     <i class="fa-solid fa-chevron-down ml-3 text-sm text-gray-400"></i>
                 </span>

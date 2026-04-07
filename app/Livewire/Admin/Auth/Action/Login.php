@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Admin Login')]
+#[Title('Login')]
 class Login extends Component
 {
     public LoginForm $form;

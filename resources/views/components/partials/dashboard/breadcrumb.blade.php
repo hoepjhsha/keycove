@@ -3,7 +3,7 @@
 <nav aria-label="Breadcrumb">
     <ol class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
         <li>
-            <a href="/" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a href="{{ route('admin.dashboard.index') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                 <i class="fa-solid fa-house"></i>
             </a>
         </li>
