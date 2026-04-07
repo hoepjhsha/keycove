@@ -3,7 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import fg from 'fast-glob';
 
-const logoImages = fg.sync('resources/images/*.png');
+const logoImages = fg.sync('resources/images/**/*.png');
 
 export default defineConfig({
     plugins: [
