@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div class="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-         style="background-image: url('https://wallpapercave.com/wp/wp14567834.jpg');">
+         style="background-image: url('https://wallpapercave.com/wp/wp14802192.webp');">
 
         <div class="absolute inset-0 bg-black/20 dark:bg-black/50 transition-colors duration-300"></div>
 

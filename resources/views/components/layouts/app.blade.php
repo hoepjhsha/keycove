@@ -12,7 +12,7 @@
 
         <title>{{ $title ?? '' }} - @yield('pre-app-name') {{ config('app.name') }}</title>
 
-        <link rel="shortcut icon" href="{{ public_path('favicon.ico') }}" />
+        <link rel="shortcut icon" href="{{ Vite::asset('resources/images/favicon.ico') }}" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 

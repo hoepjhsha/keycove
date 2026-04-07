@@ -7,13 +7,17 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">Enter your email and we'll send you an OTP to reset your password.</p>
     </div>
 
-    <form action="#" method="POST">
-        @csrf
-        <div class="relative mb-6">
+    <form wire:submit="sendOtp">
+        <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <i class="fa-regular fa-envelope"></i>
             </div>
-            <input type="email" name="email" class="w-full pl-10 pr-3 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="Enter your email" required autofocus>
+            <input type="email" wire:model="form.email" class="w-full pl-10 pr-3 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="Enter your email" required autofocus>
+        </div>
+        <div class="mb-6">
+            @error('form.email')
+                <small class="text-red-500 block mt-1 font-semibold">{{ $message }}</small>
+            @enderror
         </div>
 
         <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm shadow-md shadow-indigo-500/30">
@@ -22,7 +26,7 @@
     </form>
 
     <div class="mt-8 text-center">
-        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium flex items-center justify-center gap-2">
+        <a href="{{ route('app.auth.login') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium flex items-center justify-center gap-2">
             <i class="fa-solid fa-arrow-left"></i> Back to log in
         </a>
     </div>
