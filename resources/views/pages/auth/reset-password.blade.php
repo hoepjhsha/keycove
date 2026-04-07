@@ -7,28 +7,35 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">Must be at least 8 characters.</p>
     </div>
 
-    <form action="#" method="POST">
-        @csrf
-        <input type="hidden" name="email" value="you@example.com">
-
-        <div class="relative mb-4" x-data="{ show: false }">
+    <form wire:submit="resetPassword">
+        <div class="relative" x-data="{ show: false }">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <input :type="show ? 'text' : 'password'" name="password" class="w-full pl-10 pr-10 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="New Password" required autofocus>
+            <input :type="show ? 'text' : 'password'" wire:model="form.password" class="w-full pl-10 pr-10 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="New Password" required autofocus>
             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
                 <i class="fa-regular" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
             </button>
         </div>
+        <div class="mb-4">
+            @error('form.password')
+                <small class="text-red-500 block mt-1 font-semibold">{{ $message }}</small>
+            @enderror
+        </div>
 
-        <div class="relative mb-6" x-data="{ show: false }">
+        <div class="relative" x-data="{ show: false }">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <input :type="show ? 'text' : 'password'" name="password_confirmation" class="w-full pl-10 pr-10 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="Confirm New Password" required>
+            <input :type="show ? 'text' : 'password'" wire:model="form.password_confirmation" class="w-full pl-10 pr-10 py-2.5 bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:focus:ring-indigo-400" placeholder="Confirm New Password" required>
             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
                 <i class="fa-regular" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
             </button>
+        </div>
+        <div class="mb-6">
+            @error('form.password_confirmation')
+                <small class="text-red-500 block mt-1 font-semibold">{{ $message }}</small>
+            @enderror
         </div>
 
         <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm shadow-md shadow-indigo-500/30">
@@ -37,7 +44,7 @@
     </form>
 
     <div class="mt-8 text-center">
-        <a href="#" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium flex items-center justify-center gap-2">
+        <a href="{{ route('app.auth.login') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium flex items-center justify-center gap-2">
             <i class="fa-solid fa-arrow-left"></i> Back to log in
         </a>
     </div>

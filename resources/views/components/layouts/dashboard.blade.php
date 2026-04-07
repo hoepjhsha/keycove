@@ -1,4 +1,6 @@
 <x-layouts.app :title="$title ?? 'Dashboard'">
+    @section('pre-app-name', 'Admin')
+
     <div class="flex h-screen overflow-hidden">
 
         <x-partials.dashboard.sidebar />

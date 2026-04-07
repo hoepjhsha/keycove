@@ -10,7 +10,7 @@
         Thank you for confirming your account.
     </p>
 
-    <a href="#" class="flex justify-center items-center w-full py-3 mb-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm shadow-md shadow-indigo-500/30">
-        Continue to Dashboard
+    <a href="{{ route('app.shop.index') }}" class="flex justify-center items-center w-full py-3 mb-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm shadow-md shadow-indigo-500/30">
+        Continue to App
     </a>
 </div>
