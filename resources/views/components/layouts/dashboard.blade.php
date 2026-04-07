@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app :title="$title ?? 'Dashboard'">
     <div class="flex h-screen overflow-hidden">
 
         <x-partials.dashboard.sidebar />
