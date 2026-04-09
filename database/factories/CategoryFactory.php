@@ -87,4 +87,60 @@ class CategoryFactory extends Factory
             'status' => GeneralStatus::Hidden,
         ]);
     }
+
+    /**
+     * Seed game genre categories with hierarchical structure.
+     * Creates parent categories and their subcategories.
+     */
+    public static function seedGameGenres(): void
+    {
+        $categories = [
+            ['id' => 1, 'name' => 'Action', 'slug' => 'action', 'parent_name' => null],
+            ['id' => 2, 'name' => 'First-Person Shooter', 'slug' => 'fps', 'parent_name' => 'Action'],
+            ['id' => 3, 'name' => 'Fighting', 'slug' => 'fighting', 'parent_name' => 'Action'],
+            ['id' => 4, 'name' => 'Platformer', 'slug' => 'platformer', 'parent_name' => 'Action'],
+            ['id' => 5, 'name' => 'Adventure', 'slug' => 'adventure', 'parent_name' => null],
+            ['id' => 6, 'name' => 'Point-and-Click', 'slug' => 'point-and-click', 'parent_name' => 'Adventure'],
+            ['id' => 7, 'name' => 'Role-Playing (RPG)', 'slug' => 'rpg', 'parent_name' => null],
+            ['id' => 8, 'name' => 'Action RPG', 'slug' => 'action-rpg', 'parent_name' => 'Role-Playing (RPG)'],
+            ['id' => 9, 'name' => 'MMORPG', 'slug' => 'mmorpg', 'parent_name' => 'Role-Playing (RPG)'],
+            ['id' => 10, 'name' => 'JRPG', 'slug' => 'jrpg', 'parent_name' => 'Role-Playing (RPG)'],
+            ['id' => 11, 'name' => 'Strategy', 'slug' => 'strategy', 'parent_name' => null],
+            ['id' => 12, 'name' => 'Real-Time Strategy (RTS)', 'slug' => 'rts', 'parent_name' => 'Strategy'],
+            ['id' => 13, 'name' => 'Turn-Based Strategy', 'slug' => 'tbs', 'parent_name' => 'Strategy'],
+            ['id' => 14, 'name' => 'Simulation', 'slug' => 'simulation', 'parent_name' => null],
+            ['id' => 15, 'name' => 'Life Simulation', 'slug' => 'life-simulation', 'parent_name' => 'Simulation'],
+            ['id' => 16, 'name' => 'Racing', 'slug' => 'racing', 'parent_name' => 'Simulation'],
+            ['id' => 17, 'name' => 'Sports', 'slug' => 'sports', 'parent_name' => null],
+            ['id' => 18, 'name' => 'Puzzle', 'slug' => 'puzzle', 'parent_name' => null],
+            ['id' => 19, 'name' => 'Horror', 'slug' => 'horror', 'parent_name' => null],
+            ['id' => 20, 'name' => 'Survival Horror', 'slug' => 'survival-horror', 'parent_name' => 'Horror'],
+        ];
+
+        $parentMap = [];
+
+        // First pass: create parent categories (parent_name = null)
+        foreach ($categories as $cat) {
+            if ($cat['parent_name'] === null) {
+                $created = Category::create([
+                    'name' => $cat['name'],
+                    'slug' => $cat['slug'],
+                    'status' => GeneralStatus::Active,
+                ]);
+                $parentMap[$cat['name']] = $created->id;
+            }
+        }
+
+        // Second pass: create child categories with parent_id
+        foreach ($categories as $cat) {
+            if ($cat['parent_name'] !== null) {
+                Category::create([
+                    'name' => $cat['name'],
+                    'slug' => $cat['slug'],
+                    'parent_id' => $parentMap[$cat['parent_name']],
+                    'status' => GeneralStatus::Active,
+                ]);
+            }
+        }
+    }
 }

@@ -25,6 +25,22 @@
 
         @livewireScripts
 
+        <script src="https://unpkg.com/@popperjs/core@2"></script>
+        <script src="https://unpkg.com/tippy.js@6"></script>
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.directive('tooltip', (el, { expression }) => {
+                    tippy(el, {
+                        content: expression,
+                        duration: 0,
+                        placement: 'top',
+                        animation: 'shift-away',
+                    });
+                });
+            });
+        </script>
+
         @stack('scripts')
     </body>
 </html>

@@ -173,7 +173,6 @@ class ProductFactory extends Factory
         $gameName = fake()->randomElement($gameNames);
 
         return [
-            'category_id' => Category::factory(),
             'name' => $gameName,
             'slug' => Str::slug($gameName),
             'image_thumbnail_path' => 'products/thumbnails/'.Str::slug($gameName).'.jpg',
@@ -207,12 +206,19 @@ class ProductFactory extends Factory
         ];
     }
 
-    public function withCategory(?Category $category = null): static
+    /**
+     * Attach categories to the product after creation.
+     * Usage: Product::factory()->withCategories($categories)->create()
+     * where $categories can be a single Category, array of Categories, or array of IDs
+     */
+    public function withCategories($categories, array $pivotData = []): static
     {
-        return $this->state(function (array $attributes) use ($category) {
-            return [
-                'category_id' => $category?->id ?? Category::factory()->create()->id,
-            ];
+        return $this->afterCreating(function (Product $product) use ($categories, $pivotData) {
+            if ($categories instanceof Category) {
+                $product->categories()->attach($categories->id, $pivotData);
+            } elseif (is_array($categories)) {
+                $product->categories()->attach($categories, $pivotData);
+            }
         });
     }
 

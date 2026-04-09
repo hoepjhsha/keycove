@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,10 +23,12 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'username' => 'hoepjhsha',
-            'email' => 'hoepjhsha@hoep.com',
+            'email' => 'hoep@hoep.com',
             'password' => Hash::make('hoep'),
             'role' => UserRole::SuperAdmin,
             'status' => UserStatus::Active,
         ]);
+
+        Category::factory()->seedGameGenres();
     }
 }
