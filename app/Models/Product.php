@@ -44,6 +44,20 @@ class Product extends Model
             ->withTimestamps();
     }
 
+    public function getDisplayCategoriesAttribute()
+    {
+        if ($this->categories->isEmpty()) {
+            return collect([
+                (object) [
+                    'name' => 'Uncategorized',
+                    'slug' => 'uncategorized',
+                ],
+            ]);
+        }
+
+        return $this->categories;
+    }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);

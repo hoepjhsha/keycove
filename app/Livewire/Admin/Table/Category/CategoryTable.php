@@ -7,6 +7,7 @@ use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -233,11 +234,17 @@ final class CategoryTable extends PowerGridComponent
     #[On('performDelete')]
     public function performDelete($id): void
     {
-        $category = Category::findOrFail($id);
-        $category->status = GeneralStatus::Deleted;
-        $category->save();
+        DB::transaction(function () use ($id) {
+            $category = Category::findOrFail($id);
 
-        $category->delete();
+            // Detach this category from all associated products
+            $category->products()->detach();
+
+            $category->status = GeneralStatus::Deleted;
+            $category->save();
+
+            $category->delete();
+        });
 
         $this->dispatch('swal:success', ['message' => 'Category Deleted Successfully']);
     }
@@ -297,12 +304,17 @@ final class CategoryTable extends PowerGridComponent
             return;
         }
 
-        Category::whereIn('id', $this->checkboxValues)
-            ->update([
-                'status' => GeneralStatus::Deleted,
-            ]);
+        DB::transaction(function () {
+            // Detach products for all selected categories
+            DB::table('category_product')->whereIn('category_id', $this->checkboxValues)->delete();
 
-        Category::whereIn('id', $this->checkboxValues)->delete();
+            Category::whereIn('id', $this->checkboxValues)
+                ->update([
+                    'status' => GeneralStatus::Deleted,
+                ]);
+
+            Category::whereIn('id', $this->checkboxValues)->delete();
+        });
 
         $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
     }
