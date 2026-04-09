@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\Logout;
+use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,11 @@ Route::middleware('auth:admin')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('pages.landing.admin-dashboard');
-        })->name('admin.dashboard.index');
+        })->name('dashboard.index');
+
+        Route::prefix('/categories')
+            ->name('categories.')
+            ->group(function () {
+                Route::get('/', CategoryIndex::class)->name('index');
+            });
     });

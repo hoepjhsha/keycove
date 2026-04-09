@@ -17,11 +17,11 @@
             <i class="fa-regular fa-bell text-xl"></i>
         </button>
 
-        <button type="button" @click="theme = theme === 'light' ? 'dark' : 'light'" class="-m-2.5 p-2.5 mr-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
-            <span class="sr-only">Toggle Dark Mode</span>
-            <i x-show="theme === 'dark'" style="display: none;" class="fa-solid fa-sun text-xl"></i>
-            <i x-show="theme === 'light'" class="fa-solid fa-moon text-xl"></i>
-        </button>
+{{--        <button type="button" @click="theme = theme === 'light' ? 'dark' : 'light'" class="-m-2.5 p-2.5 mr-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">--}}
+{{--            <span class="sr-only">Toggle Dark Mode</span>--}}
+{{--            <i x-show="theme === 'dark'" style="display: none;" class="fa-solid fa-sun text-xl"></i>--}}
+{{--            <i x-show="theme === 'light'" class="fa-solid fa-moon text-xl"></i>--}}
+{{--        </button>--}}
 
         <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" aria-hidden="true"></div>
 

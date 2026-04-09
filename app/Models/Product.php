@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Enums\GeneralStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,7 +16,6 @@ class Product extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category_id',
         'name',
         'slug',
         'image_thumbnail_path',
@@ -37,9 +36,12 @@ class Product extends Model
         ];
     }
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class)
+            ->using(CategoryProduct::class)
+            ->withPivot(['sort_order', 'is_featured'])
+            ->withTimestamps();
     }
 
     public function variants(): HasMany
