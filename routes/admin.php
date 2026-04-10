@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\Auth\Logout;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
+use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
+use App\Livewire\Admin\Action\Platform\PlatformIndex;
+use App\Livewire\Admin\Action\Region\RegionIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -31,5 +34,23 @@ Route::middleware('auth:admin')
             ->name('categories.')
             ->group(function () {
                 Route::get('/', CategoryIndex::class)->name('index');
+            });
+
+        Route::prefix('/regions')
+            ->name('regions.')
+            ->group(function () {
+                Route::get('/', RegionIndex::class)->name('index');
+            });
+
+        Route::prefix('/platforms')
+            ->name('platforms.')
+            ->group(function () {
+                Route::get('/', PlatformIndex::class)->name('index');
+            });
+
+        Route::prefix('/operating-systems')
+            ->name('operating_systems.')
+            ->group(function () {
+                Route::get('/', OperatingSystemIndex::class)->name('index');
             });
     });
