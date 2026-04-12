@@ -23,11 +23,13 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'username' => 'hoepjhsha',
-            'email' => 'hoep@hoep.com',
+            'email' => 'hoep@hoep',
             'password' => Hash::make('hoep'),
             'role' => UserRole::SuperAdmin,
             'status' => UserStatus::Active,
         ]);
+
+        $this->call(UserSeeder::class);
 
         Category::factory()->seedGameGenres();
     }
