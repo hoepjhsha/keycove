@@ -25,8 +25,8 @@
 
         <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" aria-hidden="true"></div>
 
-        <div class="relative">
-            <button type="button" class="-m-1.5 flex items-center p-1.5" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+        <div class="relative" x-data="{ open: false }">
+            <button type="button" @click="open = !open" class="-m-1.5 flex items-center p-1.5" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                 <img class="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 object-cover"
                      src="{{ Vite::asset('resources/images/user/avatar.png') }}"
                      alt="avatar">
@@ -38,6 +38,34 @@
                     <i class="fa-solid fa-chevron-down ml-3 text-sm text-gray-400"></i>
                 </span>
             </button>
+
+            <div x-show="open"
+                 @click.outside="open = false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 py-2 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700/50 focus:outline-none"
+                 style="display: none;"
+                 role="menu"
+                 aria-orientation="vertical"
+                 aria-labelledby="user-menu-button">
+                <a href="#"
+                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                   role="menuitem">
+                    <i class="fa-solid fa-gear w-4 text-center text-gray-400"></i>
+                    <span>Account Settings</span>
+                </a>
+                <div class="my-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+                <a href="{{ route('admin.auth.logout') }}"
+                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                   role="menuitem">
+                    <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </div>
     </div>
 </header>
