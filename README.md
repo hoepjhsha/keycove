@@ -56,7 +56,7 @@ KeyCove operates as a **Multi-model E-commerce Platform**:
 ### 3. Trading & Order Processing
 - **Shopping Cart:** Add, remove, and update quantities from multiple sellers simultaneously.
 - **Automated Fulfillment:** System instantly fetches the key from the secure vault and delivers it via UI/Email upon successful payment.
-- **Payment Gateways:** Integrated with MoMo, VNPAY, and Stripe.
+- **Payment Gateways:** Integrated with VNPAY, and Stripe.
 - **Order Tracking:** Detailed history of order statuses (Completed, Disputed, Refunded).
 
 ### 4. E-Wallet & Escrow System
