@@ -122,11 +122,13 @@ class CategoryFactory extends Factory
         // First pass: create parent categories (parent_name = null)
         foreach ($categories as $cat) {
             if ($cat['parent_name'] === null) {
-                $created = Category::create([
-                    'name' => $cat['name'],
-                    'slug' => $cat['slug'],
-                    'status' => GeneralStatus::Active,
-                ]);
+                $created = Category::firstOrCreate(
+                    ['slug' => $cat['slug']],
+                    [
+                        'name' => $cat['name'],
+                        'status' => GeneralStatus::Active,
+                    ]
+                );
                 $parentMap[$cat['name']] = $created->id;
             }
         }
@@ -134,12 +136,14 @@ class CategoryFactory extends Factory
         // Second pass: create child categories with parent_id
         foreach ($categories as $cat) {
             if ($cat['parent_name'] !== null) {
-                Category::create([
-                    'name' => $cat['name'],
-                    'slug' => $cat['slug'],
-                    'parent_id' => $parentMap[$cat['parent_name']],
-                    'status' => GeneralStatus::Active,
-                ]);
+                Category::firstOrCreate(
+                    ['slug' => $cat['slug']],
+                    [
+                        'name' => $cat['name'],
+                        'parent_id' => $parentMap[$cat['parent_name']],
+                        'status' => GeneralStatus::Active,
+                    ]
+                );
             }
         }
     }

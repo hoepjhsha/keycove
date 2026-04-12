@@ -8,51 +8,166 @@
              alt="logo dark" />
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-8">
+    <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-6">
         <ul class="space-y-1">
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400">
-                    <i class="fa-solid fa-house text-lg w-5 text-center shrink-0"></i>
+                <a href="{{ route('admin.dashboard.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.dashboard.index') ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors">
+                    <i class="fa-solid fa-chart-pie text-lg w-5 text-center shrink-0"></i>
                     Dashboard
                 </a>
             </li>
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                    <i class="fa-solid fa-users text-lg w-5 text-center shrink-0"></i>
-                    Team
-                </a>
+                <details class="group/catalog [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.categories.*', 'admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'open' : '' }}>
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.categories.*', 'admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-key text-lg w-5 text-center shrink-0"></i>
+                            Catalog & Keys
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open/catalog:rotate-180"></i>
+                    </summary>
+
+                    <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/catalog:grid-rows-[1fr]">
+                        <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
+                            <li>
+                                <a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
+                                    Products List
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('admin.categories.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                    Categories
+                                </a>
+                            </li>
+
+                            <li>
+                                <details class="group/attributes [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'open' : '' }}>
+                                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }} transition-colors cursor-pointer list-none">
+                                        <span>Attributes</span>
+                                        <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-open/attributes:rotate-180"></i>
+                                    </summary>
+
+                                    <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/attributes:grid-rows-[1fr]">
+                                        <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-4 border-l border-gray-200 dark:border-gray-700 ml-2">
+                                            <li>
+                                                <a href="{{ route('admin.regions.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.regions.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                    Regions
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ route('admin.operating_systems.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.operating_systems.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                    Operating Systems
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ route('admin.platforms.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.platforms.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                    Platforms
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </details>
+                            </li>
+
+                            <li>
+                                <a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
+                                    Bulk Import Keys
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </details>
             </li>
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                    <i class="fa-solid fa-folder text-lg w-5 text-center shrink-0"></i>
-                    Projects
-                </a>
+                <details class="group/orders [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors cursor-pointer list-none">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-cart-shopping text-lg w-5 text-center shrink-0"></i>
+                            Orders
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open/orders:rotate-180"></i>
+                    </summary>
+                    <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/orders:grid-rows-[1fr]">
+                        <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Transaction History</a></li>
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Escrow Management</a></li>
+                        </ul>
+                    </div>
+                </details>
             </li>
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                    <i class="fa-solid fa-calendar-days text-lg w-5 text-center shrink-0"></i>
-                    Calendar
-                </a>
+                <details class="group/finance [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors cursor-pointer list-none">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-wallet text-lg w-5 text-center shrink-0"></i>
+                            Finance & Wallet
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open/finance:rotate-180"></i>
+                    </summary>
+                    <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/finance:grid-rows-[1fr]">
+                        <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Internal Wallet</a></li>
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 flex justify-between items-center">Withdrawal Requests <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold dark:bg-red-900/30 dark:text-red-400">3</span></a></li>
+                        </ul>
+                    </div>
+                </details>
             </li>
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                    <i class="fa-solid fa-file-lines text-lg w-5 text-center shrink-0"></i>
-                    Documents
-                </a>
+                <details class="group/users [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.users.*']) ? 'open' : '' }}>
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.users.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-users-gear text-lg w-5 text-center shrink-0"></i>
+                            Users & Vendors
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open/users:rotate-180"></i>
+                    </summary>
+                    <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/users:grid-rows-[1fr]">
+                        <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
+                            <li><a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">Users List</a></li>
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Seller Approvals (KYC)</a></li>
+                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Roles & Permissions</a></li>
+                        </ul>
+                    </div>
+                </details>
             </li>
+
             <li>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-                    <i class="fa-solid fa-chart-pie text-lg w-5 text-center shrink-0"></i>
-                    Reports
+                <a href="#" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-scale-balanced text-lg w-5 text-center shrink-0"></i>
+                        Dispute Center
+                    </div>
+                    <span class="flex h-2 w-2 rounded-full bg-red-500"></span>
                 </a>
             </li>
         </ul>
+
+        <div class="pt-6 mt-6 border-t border-gray-200 dark:border-gray-800">
+            <ul class="space-y-1">
+                <li>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
+                        <i class="fa-solid fa-gear text-lg w-5 text-center shrink-0"></i>
+                        System Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
     </nav>
 
-    <div class="p-4 mt-auto">
+    <div class="p-4 mt-auto border-t border-gray-200 dark:border-gray-800">
         <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-            <i class="fa-solid fa-gear text-lg w-5 text-center shrink-0"></i>
-            Settings
+            <i class="fa-solid fa-user-gear text-lg w-5 text-center shrink-0"></i>
+            Account Settings
+        </a>
+
+        <a href="{{ route('admin.auth.logout') }}" class="flex items-center gap-3 px-3 py-2 mt-1 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors">
+            <i class="fa-solid fa-arrow-right-from-bracket text-lg w-5 text-center shrink-0"></i>
+            Logout
         </a>
     </div>
 </aside>
