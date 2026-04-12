@@ -30,7 +30,7 @@ class UserProfileFactory extends Factory
             'first_name' => fake()->firstName($gender === Gender::Male ? 'male' : 'female'),
             'last_name' => fake()->lastName(),
             'avatar' => fake()->imageUrl(200, 200, 'people', true, 'avatar'),
-            'dob' => fake()->dateTimeBetween('-50 years', '-18 years'),
+            'dob' => fake()->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
             'gender' => $gender,
             'phone_number' => fake()->phoneNumber(),
             'bio' => fake()->optional(0.7)->sentence(15),

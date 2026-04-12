@@ -42,3 +42,8 @@ Thumbs.db
 
 # ===== Miscellaneous =====
 /html
+
+# ===== AI skills & Instructions =====
+/.agents
+/.gemini
+GEMINI.md

@@ -5,6 +5,7 @@ use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
+use App\Livewire\Admin\Action\User\UserIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -52,5 +53,11 @@ Route::middleware('auth:admin')
             ->name('operating_systems.')
             ->group(function () {
                 Route::get('/', OperatingSystemIndex::class)->name('index');
+            });
+
+        Route::prefix('/users')
+            ->name('users.')
+            ->group(function () {
+                Route::get('/', UserIndex::class)->name('index');
             });
     });

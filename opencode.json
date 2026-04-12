@@ -1,8 +1,11 @@
 {
-    "mcpServers": {
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
         "laravel-boost": {
-            "command": "wsl.exe",
-            "args": [
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "wsl.exe",
                 "/usr/bin/php8.4",
                 "/home/hoep/projects/keycove/artisan",
                 "boost:mcp"
