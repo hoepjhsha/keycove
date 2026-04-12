@@ -1,58 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🔑 KeyCove - Smart Digital Product Trading Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Slogan:** *Unlock your world, Securely & Smartly.*
 
-## About Laravel
+## 📖 Table of Contents
+- [About the Project](#-about-the-project)
+- [Business Model](#-business-model)
+- [Core Value Proposition](#-core-value-proposition)
+- [System Architecture](#-system-architecture)
+- [Key Features](#-key-features)
+- [User Roles & Workflows](#-user-roles--workflows)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🌍 About the Project
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+In the digital era, the demand for software, games (Steam, Epic, Origin), and online services (Netflix, Spotify) is growing rapidly. However, the current digital key trading market faces two major challenges:
+1. **Fraud Risks:** Buyers worry about receiving used keys or keys locked to the wrong geographical region.
+2. **Dispute Resolution Friction:** Existing platforms spend excessive time and human resources verifying evidence during disputes between buyers and sellers.
 
-## Learning Laravel
+**KeyCove** solves this by providing a secure, automated, and escrow-backed e-commerce platform dedicated to digital products.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 💼 Business Model
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+KeyCove operates as a **Multi-model E-commerce Platform**:
+- **B2C (Business-to-Consumer):** The platform administration imports genuine keys and sells them directly to end-users.
+- **C2C (Consumer-to-Consumer):** Individual users can register as vendors (sellers), list their unused digital keys, and create a vibrant exchange ecosystem.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 💎 Core Value Proposition
 
-## Agentic Development
+- **For Buyers:** Purchase digital keys at competitive prices with absolute safety, guaranteed by the platform's Escrow protection mechanism.
+- **For Sellers:** Access a streamlined platform to reach a broader customer base and manage cash flow professionally.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🏗 System Architecture
 
-```bash
-composer require laravel/boost --dev
+- **Architecture Pattern:** Domain-Driven Design (DDD) & Modular Monolith architecture, ensuring the system is highly maintainable, scalable, and easy to transition to microservices in the future if needed.
+- **Security:** Database Encryption for keys, One-time Reveal mechanisms.
 
-php artisan boost:install
-```
+## ✨ Key Features
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 1. Identity & Access Management (IAM)
+- **Authentication:** Email/Password and Social Login (Google, Facebook).
+- **Security:** Multi-Factor Authentication (2FA) for enhanced security, especially for Sellers and Admins.
+- **Authorization:** Role-Based Access Control (RBAC) defining Buyers, Sellers, and Admins.
+- **Trust & Verification:** KYC (Know Your Customer) identity verification required for C2C Sellers.
 
-## Contributing
+### 2. Catalog & Inventory Management
+- **Smart Categorization:** Filter by Games (Steam, Epic), Software (Office, Adobe), Services (Netflix, Spotify).
+- **Product Attributes:** Granular tagging for Region (Global, SEA, Turkey, etc.) and Platform (PC, Console).
+- **Secure Key Vault:**
+  - Bulk key imports via Excel/CSV.
+  - Database-level encryption for all stored keys.
+  - **"One-time Reveal":** Purchased keys are displayed only once to the buyer to prevent compromise.
+- **Inventory Tracking:** Automated low-stock warnings and auto-hiding of out-of-stock products.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Trading & Order Processing
+- **Shopping Cart:** Add, remove, and update quantities from multiple sellers simultaneously.
+- **Automated Fulfillment:** System instantly fetches the key from the secure vault and delivers it via UI/Email upon successful payment.
+- **Payment Gateways:** Integrated with MoMo, VNPAY, and Stripe.
+- **Order Tracking:** Detailed history of order statuses (Completed, Disputed, Refunded).
 
-## Code of Conduct
+### 4. E-Wallet & Escrow System
+- **Internal Wallet:** Store user balances and track transaction history.
+- **Withdrawals:** Sellers can withdraw revenue to bank accounts (minus platform commission).
+- **Escrow Mechanism (Tạm giữ tiền):** 
+  - Buyer payments are held securely by the platform for a specific timeframe (e.g., 24-48 hours).
+  - Funds are only released to the seller when the buyer confirms the key works, or when the dispute window expires.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Vendor Dashboard
+- **Product Listing:** Intuitive interface for C2C sellers to create listings and upload keys.
+- **Analytics:** Revenue growth charts and best-selling product tracking.
+- **Order & Cashflow Management:** Track sold orders and monitor funds currently in Escrow.
 
-## Security Vulnerabilities
+### 6. Dispute & Support Center
+- **Ticketing System:** Buyers can submit support requests for faulty keys, attaching video/image evidence.
+- **Admin Intervention:** Administrators act as arbitrators, reviewing evidence from both parties to decide on a Refund (to buyer) or Release (to seller).
+- **Rating System:** Post-transaction star ratings and reviews to build seller reputation.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 7. Administration
+- **User & Product Control:** Ban violating accounts, approve new product listings, and verify KYC requests.
+- **Platform Configuration:** Adjust platform commission rates dynamically.
+- **Global Reporting:** Comprehensive dashboards covering total platform revenue, transaction volumes, and dispute rates.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 👥 User Roles & Workflows
+
+### 🛒 Guest / Buyer
+- Register / Login and manage personal profile & security.
+- Browse catalog, view detailed product info (region, attributes, ratings).
+- Manage cart and proceed to checkout.
+- Receive "One-time Reveal" key immediately after payment.
+- Leave reviews/ratings after successful transactions.
+- Submit dispute tickets if a key is invalid.
+
+### 🏪 Seller (Vendor)
+- Complete KYC verification to upgrade from Buyer to Seller.
+- Manage product categories and inventory (add/edit products, upload keys).
+- Track sold orders and Escrow balance.
+- Withdraw available wallet balance to a personal bank account.
+- Respond to buyer complaints and disputes.
+- View business analytics and sales statistics.
+
+### 🛡️ Administrator
+- Manage all users (lock violating accounts, change permissions).
+- Approve C2C seller applications (KYC verification).
+- Act as the final judge in dispute resolution.
+- Configure system settings and platform commission fees.
+- Monitor overall platform health and financial reports.
