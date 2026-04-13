@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\Logout;
+use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
+use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +37,14 @@ Route::middleware('auth:admin')
             ->name('categories.')
             ->group(function () {
                 Route::get('/', CategoryIndex::class)->name('index');
+            });
+
+        Route::prefix('/seller-verifications')
+            ->name('seller_verifications.')
+            ->group(function () {
+                Route::get('/', SellerKycIndex::class)->name('index');
+
+                Route::get('/{seller}/image/{type}', SellerKycImageController::class)->name('image');
             });
 
         Route::prefix('/regions')

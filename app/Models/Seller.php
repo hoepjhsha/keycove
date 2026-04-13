@@ -15,13 +15,14 @@ class Seller extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
         'user_id',
         'shop_name',
         'cccd_number',
+        'cccd_front_image',
+        'cccd_back_image',
         'kyc_status',
+        'kyc_rejected_reason',
     ];
 
     protected function casts(): array

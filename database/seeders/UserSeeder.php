@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\Wallet;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class UserSeeder extends Seeder
 {
@@ -128,12 +129,24 @@ class UserSeeder extends Seeder
                 ]
             );
 
+            $frontImage = 'sellers/kyc/front_'.fake()->uuid().'.jpg';
+            $backImage = 'sellers/kyc/back_'.fake()->uuid().'.jpg';
+
+            $disk = config('filesystems.default');
+            Storage::disk($disk)->makeDirectory('sellers/kyc');
+            Storage::disk($disk)->put($frontImage, file_get_contents('https://placehold.co/800x500/EEE/31343C/png?text=Front+ID+Card'));
+            Storage::disk($disk)->put($backImage, file_get_contents('https://placehold.co/800x500/EEE/31343C/png?text=Back+ID+Card'));
+
             $seller = Seller::firstOrCreate(
                 ['user_id' => $user->id],
                 [
                     'shop_name' => $data['shop_name'],
                     'cccd_number' => fake()->numerify('############'),
+                    'cccd_front_image' => $frontImage,
+                    'cccd_back_image' => $backImage,
                     'kyc_status' => $data['kyc_status'],
+                    'created_at' => now()->subDays(rand(1, 30)),
+                    'updated_at' => now()->subDays(rand(1, 5)),
                 ]
             );
 
