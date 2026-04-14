@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Utilities\StorageUtility;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $loader = AliasLoader::getInstance();
+        $loader->alias('StorageUtility', StorageUtility::class);
     }
 }
