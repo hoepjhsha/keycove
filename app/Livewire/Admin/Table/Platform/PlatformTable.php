@@ -20,6 +20,10 @@ final class PlatformTable extends PowerGridComponent
 {
     public string $tableName = 'platformTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -36,7 +40,7 @@ final class PlatformTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Platform::query()->orderByDesc('created_at');
+        return Platform::query();
     }
 
     public function relationSearch(): array

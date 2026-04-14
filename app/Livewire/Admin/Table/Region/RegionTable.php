@@ -20,6 +20,10 @@ final class RegionTable extends PowerGridComponent
 {
     public string $tableName = 'regionTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -36,7 +40,7 @@ final class RegionTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Region::query()->orderByDesc('created_at');
+        return Region::query();
     }
 
     public function relationSearch(): array

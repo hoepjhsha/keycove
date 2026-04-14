@@ -20,6 +20,10 @@ final class CategoryTable extends PowerGridComponent
 {
     public string $tableName = 'categoryTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -36,7 +40,7 @@ final class CategoryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Category::query()->orderByDesc('created_at');
+        return Category::query();
     }
 
     public function relationSearch(): array

@@ -20,6 +20,10 @@ final class OperatingSystemTable extends PowerGridComponent
 {
     public string $tableName = 'operatingSystemTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -36,7 +40,7 @@ final class OperatingSystemTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return OperatingSystem::query()->orderByDesc('created_at');
+        return OperatingSystem::query();
     }
 
     public function relationSearch(): array
