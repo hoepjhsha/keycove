@@ -72,7 +72,7 @@
                             </li>
 
                             <li>
-                                <a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
+                                <a href="{{ route('admin.products.keys.import') }}" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
                                     Bulk Import Keys
                                 </a>
                             </li>
