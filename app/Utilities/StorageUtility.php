@@ -6,6 +6,7 @@ namespace App\Utilities;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class StorageUtility
 {

@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Form\Platform;
 
 use App\Enums\GeneralStatus;
 use App\Models\Platform;
+use App\Utilities\StorageUtility;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
@@ -29,6 +30,14 @@ class PlatformEditForm extends Form
         'regex:/^[a-z]([a-z0-9-]*[a-z0-9])?$/',
     ])]
     public string $slug = '';
+
+    #[Validate([
+        'nullable',
+        'file',
+        'mimes:svg,png,jpg,jpeg,webp,gif',
+        'max:512',
+    ])]
+    public $icon_file = null;
 
     #[Validate([
         'nullable',
@@ -80,10 +89,16 @@ class PlatformEditForm extends Form
             ]);
         }
 
+        $iconPath = $this->icon_path;
+        if ($this->icon_file) {
+            $storedPath = StorageUtility::store($this->icon_file, 'icons/platforms', config('filesystems.public_disk'));
+            $iconPath = $storedPath;
+        }
+
         return $this->platform->update([
             'name' => $this->name,
             'slug' => $this->slug,
-            'icon_path' => $this->icon_path,
+            'icon_path' => $iconPath,
             'base_url' => $this->base_url,
             'status' => $this->status,
         ]);

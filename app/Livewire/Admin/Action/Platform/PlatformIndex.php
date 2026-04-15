@@ -12,10 +12,13 @@ use App\Models\Platform;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 #[Title('Manage Platforms')]
 class PlatformIndex extends Component
 {
+    use WithFileUploads;
+
     public bool $showCreateModal = false;
 
     public bool $showEditModal = false;
@@ -37,8 +40,10 @@ class PlatformIndex extends Component
     public function createPlatform(): void
     {
         $result = $this->createForm->store();
+
         if ($result) {
-            $this->reset('createForm');
+            $this->createForm->reset();
+
             sweetalert()->title('Success!')->showConfirmButton(false)->success('Platform created successfully');
             $this->dispatch('pg:eventRefresh-platformTable');
         } else {
@@ -52,6 +57,7 @@ class PlatformIndex extends Component
     {
         $result = $this->editForm->update();
         if ($result) {
+            $this->editForm->reset();
             sweetalert()->title('Success!')->showConfirmButton(false)->success('Platform updated successfully');
             $this->dispatch('pg:eventRefresh-platformTable');
         } else {
