@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
+use App\Livewire\Admin\Action\Product\ProductDetail;
+use App\Livewire\Admin\Action\Product\ProductIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
 use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
@@ -37,6 +39,13 @@ Route::middleware('auth:admin')
             ->name('categories.')
             ->group(function () {
                 Route::get('/', CategoryIndex::class)->name('index');
+            });
+
+        Route::prefix('/products')
+            ->name('products.')
+            ->group(function () {
+                Route::get('/', ProductIndex::class)->name('index');
+                Route::get('/{id}', ProductDetail::class)->name('detail');
             });
 
         Route::prefix('/seller-verifications')

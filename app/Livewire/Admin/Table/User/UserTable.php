@@ -21,6 +21,10 @@ final class UserTable extends PowerGridComponent
 {
     public string $tableName = 'userTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -38,8 +42,7 @@ final class UserTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $query = User::query()
-            ->where('id', '!=', auth('admin')->id())
-            ->orderByDesc('created_at');
+            ->where('id', '!=', auth('admin')->id());
 
         $currentUserRole = auth('admin')->user()->role;
         // Admins can only see Users and Sellers

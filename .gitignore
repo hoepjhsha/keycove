@@ -46,4 +46,5 @@ Thumbs.db
 # ===== AI skills & Instructions =====
 /.agents
 /.gemini
+/.kiro
 GEMINI.md

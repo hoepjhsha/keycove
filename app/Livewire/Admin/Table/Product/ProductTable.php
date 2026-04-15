@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Admin\Table\Region;
+namespace App\Livewire\Admin\Table\Product;
 
 use App\Enums\GeneralStatus;
-use App\Livewire\Admin\Action\Region\RegionIndex;
-use App\Models\Region;
+use App\Livewire\Admin\Action\Product\ProductIndex;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -16,9 +16,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class RegionTable extends PowerGridComponent
+final class ProductTable extends PowerGridComponent
 {
-    public string $tableName = 'regionTable';
+    public string $tableName = 'productTable';
 
     public string $sortField = 'created_at';
 
@@ -40,7 +40,7 @@ final class RegionTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Region::query();
+        return Product::query();
     }
 
     public function relationSearch(): array
@@ -52,11 +52,11 @@ final class RegionTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('parent', fn (Region $model) => $model->parent() ? $model->parent?->name : '')
             ->add('name')
             ->add('slug')
-            ->add('flag_code')
-            ->add('status_label', function (Region $model) {
+            ->add('publisher')
+            ->add('developer')
+            ->add('status_label', function (Product $model) {
                 $status = $model->status;
 
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
@@ -71,8 +71,8 @@ final class RegionTable extends PowerGridComponent
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
             })
-            ->add('created_at_formatted', fn (Region $model) => Carbon::parse($model->created_at)->format('d/m/Y H:i:s'))
-            ->add('updated_at_formatted', fn (Region $model) => Carbon::parse($model->updated_at)->format('d/m/Y H:i:s'));
+            ->add('created_at_formatted', fn (Product $model) => Carbon::parse($model->created_at)->format('d/m/Y H:i:s'))
+            ->add('updated_at_formatted', fn (Product $model) => Carbon::parse($model->updated_at)->format('d/m/Y H:i:s'));
     }
 
     public function columns(): array
@@ -80,7 +80,6 @@ final class RegionTable extends PowerGridComponent
         return [
             Column::make('#', 'id')
                 ->index(),
-            Column::make('Parent', 'parent', 'parent_id'),
             Column::make('Name', 'name')
                 ->sortable()
                 ->searchable(),
@@ -89,7 +88,11 @@ final class RegionTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Flag Code', 'flag_code')
+            Column::make('Publisher', 'publisher')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Developer', 'developer')
                 ->sortable()
                 ->searchable(),
 
@@ -112,11 +115,8 @@ final class RegionTable extends PowerGridComponent
         return [
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('slug')->operators(['contains']),
-
-            Filter::multiSelect('parent_id', 'parent_id')
-                ->dataSource(Region::whereNull('parent_id')->get())
-                ->optionValue('id')
-                ->optionLabel('name'),
+            Filter::inputText('publisher')->operators(['contains']),
+            Filter::inputText('developer')->operators(['contains']),
 
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(GeneralStatus::cases())->map(fn ($status) => [
@@ -151,7 +151,7 @@ final class RegionTable extends PowerGridComponent
         ];
     }
 
-    public function actions(Region $row): array
+    public function actions(Product $row): array
     {
         $deleteClass = $row->status === GeneralStatus::Deleted ? 'hidden' : '';
 
@@ -163,16 +163,16 @@ final class RegionTable extends PowerGridComponent
                 ->attributes([
                     'x-tooltip' => 'View Details',
                 ])
-                ->dispatch('viewRegion', ['rowId' => $row->id]),
+                ->dispatch('viewProduct', ['rowId' => $row->id]),
 
             Button::add('edit')
                 ->slot('<i class="fa-solid fa-pen-to-square"></i>')
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Region',
+                    'x-tooltip' => 'Edit Product',
                 ])
-                ->dispatch('editRegion', ['rowId' => $row->id]),
+                ->dispatch('editProduct', ['rowId' => $row->id]),
 
             Button::add('toggle-status')
                 ->slot($row->status === GeneralStatus::Active
@@ -192,7 +192,7 @@ final class RegionTable extends PowerGridComponent
                 ->attributes([
                     'x-tooltip' => 'Delete',
                 ])
-                ->dispatch('deleteRegion', ['rowId' => $row->id]),
+                ->dispatch('deleteProduct', ['rowId' => $row->id]),
 
             Button::add('revertDelete')
                 ->slot('<i class="fa-solid fa-rotate-left"></i>')
@@ -210,7 +210,7 @@ final class RegionTable extends PowerGridComponent
     {
         $this->dispatch('swal:confirm', [
             'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the status of this region?',
+            'text' => 'Are you sure you want to change the status of this product?',
             'method' => 'performToggleStatus',
             'id' => $rowId,
         ]);
@@ -219,22 +219,22 @@ final class RegionTable extends PowerGridComponent
     #[On('performToggleStatus')]
     public function performToggleStatus($id): void
     {
-        $region = Region::findOrFail($id);
-        $region->status = match ($region->status) {
+        $product = Product::findOrFail($id);
+        $product->status = match ($product->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
             default => GeneralStatus::Inactive,
         };
-        $region->save();
+        $product->save();
 
-        $this->dispatch('swal:success', ['message' => 'Region Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => 'Product Status Changed Successfully']);
     }
 
-    #[On('deleteRegion')]
-    public function deleteRegion($rowId): void
+    #[On('deleteProduct')]
+    public function deleteProduct($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Region?',
-            'text' => 'Are you sure you want to delete this region? This action cannot be undone.',
+            'title' => 'Delete Product?',
+            'text' => 'Are you sure you want to delete this product? This action cannot be undone.',
             'method' => 'performDelete',
             'id' => $rowId,
         ]);
@@ -244,23 +244,25 @@ final class RegionTable extends PowerGridComponent
     public function performDelete($id): void
     {
         DB::transaction(function () use ($id) {
-            $region = Region::findOrFail($id);
+            $product = Product::findOrFail($id);
 
-            $region->status = GeneralStatus::Deleted;
-            $region->save();
+            $product->categories()->detach();
 
-            $region->delete();
+            $product->status = GeneralStatus::Deleted;
+            $product->save();
+
+            $product->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Region Deleted Successfully']);
+        $this->dispatch('swal:success', ['message' => 'Product Deleted Successfully']);
     }
 
     #[On('revertDelete')]
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore Region?',
-            'text' => 'Are you sure you want to restore this region? This action cannot be undone.',
+            'title' => 'Restore Product?',
+            'text' => 'Are you sure you want to restore this product? This action cannot be undone.',
             'method' => 'performRevertDelete',
             'id' => $rowId,
         ]);
@@ -269,21 +271,21 @@ final class RegionTable extends PowerGridComponent
     #[On('performRevertDelete')]
     public function performRevertDelete($id): void
     {
-        $region = Region::withTrashed()->findOrFail($id);
+        $product = Product::withTrashed()->findOrFail($id);
 
-        $region->restore();
+        $product->restore();
 
-        $region->status = GeneralStatus::Inactive;
-        $region->save();
+        $product->status = GeneralStatus::Inactive;
+        $product->save();
 
-        $this->dispatch('swal:success', ['message' => 'Region Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => 'Product Restored Successfully']);
     }
 
     #[On('bulkDelete')]
     public function bulkDelete(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one region!']);
+            $this->dispatch('swal:error', ['message' => 'Please select at least one product!']);
 
             return;
         }
@@ -298,7 +300,7 @@ final class RegionTable extends PowerGridComponent
     #[On('performBulkDelete')]
     public function performBulkDelete(): void
     {
-        $alreadyDeletedExists = Region::onlyTrashed()
+        $alreadyDeletedExists = Product::onlyTrashed()
             ->whereIn('id', $this->checkboxValues)
             ->exists();
 
@@ -311,13 +313,15 @@ final class RegionTable extends PowerGridComponent
         }
 
         DB::transaction(function () {
+            // Detach categories for all selected products
+            DB::table('category_product')->whereIn('product_id', $this->checkboxValues)->delete();
 
-            Region::whereIn('id', $this->checkboxValues)
+            Product::whereIn('id', $this->checkboxValues)
                 ->update([
                     'status' => GeneralStatus::Deleted,
                 ]);
 
-            Region::whereIn('id', $this->checkboxValues)->delete();
+            Product::whereIn('id', $this->checkboxValues)->delete();
         });
 
         $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
@@ -327,11 +331,11 @@ final class RegionTable extends PowerGridComponent
     public function triggerBulkStatus(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one region!']);
+            $this->dispatch('swal:error', ['message' => 'Please select at least one product!']);
 
             return;
         }
 
-        $this->dispatch('openBulkStatusModal', ids: $this->checkboxValues)->to(RegionIndex::class);
+        $this->dispatch('openBulkStatusModal', ids: $this->checkboxValues)->to(ProductIndex::class);
     }
 }

@@ -20,6 +20,10 @@ final class SellerKycTable extends PowerGridComponent
 {
     public string $tableName = 'sellerKycTable';
 
+    public string $sortField = 'created_at';
+
+    public string $sortDirection = 'desc';
+
     public function setUp(): array
     {
         return [
@@ -33,7 +37,7 @@ final class SellerKycTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Seller::query()->with('user')->orderByDesc('created_at');
+        return Seller::query()->with('user');
     }
 
     public function relationSearch(): array

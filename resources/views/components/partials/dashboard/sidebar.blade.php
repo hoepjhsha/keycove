@@ -31,7 +31,7 @@
                     <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/catalog:grid-rows-[1fr]">
                         <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
                             <li>
-                                <a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
+                                <a href="{{ route('admin.products.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
                                     Products List
                                 </a>
                             </li>

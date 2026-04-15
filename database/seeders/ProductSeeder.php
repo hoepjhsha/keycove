@@ -48,10 +48,31 @@ class ProductSeeder extends Seeder
                 ]
             );
 
-            // Attach categories
+            // Attach categories - be forgiving: accept slug, name, or create missing categories
             if (! empty($productData['categories'])) {
-                $categoryIds = Category::whereIn('slug', $productData['categories'])->pluck('id');
-                if ($categoryIds->isNotEmpty()) {
+                $categoryIds = [];
+
+                foreach ($productData['categories'] as $cat) {
+                    $slug = Str::slug($cat);
+
+                    $category = Category::where('slug', $cat)
+                        ->orWhere('slug', $slug)
+                        ->orWhereRaw('LOWER(name) = ?', [strtolower($cat)])
+                        ->first();
+
+                    if (! $category) {
+                        // Create a simple category record so seeder always attaches something
+                        $category = Category::create([
+                            'name' => Str::title(str_replace('-', ' ', $cat)),
+                            'slug' => $slug,
+                            'status' => GeneralStatus::Active,
+                        ]);
+                    }
+
+                    $categoryIds[] = $category->id;
+                }
+
+                if (! empty($categoryIds)) {
                     $product->categories()->syncWithoutDetaching($categoryIds);
                 }
             }
