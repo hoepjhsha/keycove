@@ -12,10 +12,13 @@ use App\Models\OperatingSystem;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 #[Title('Manage OperatingSystems')]
 class OperatingSystemIndex extends Component
 {
+    use WithFileUploads;
+
     public bool $showCreateModal = false;
 
     public bool $showEditModal = false;
@@ -38,7 +41,7 @@ class OperatingSystemIndex extends Component
     {
         $result = $this->createForm->store();
         if ($result) {
-            $this->reset('createForm');
+            $this->createForm->reset();
             sweetalert()->title('Success!')->showConfirmButton(false)->success('OperatingSystem created successfully');
             $this->dispatch('pg:eventRefresh-operatingSystemTable');
         } else {

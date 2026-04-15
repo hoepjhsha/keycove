@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\OperatingSystem;
 
 use App\Models\OperatingSystem;
+use App\Utilities\StorageUtility;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -28,11 +29,19 @@ class OperatingSystemCreateForm extends Form
 
     #[Validate([
         'nullable',
+        'file',
+        'mimes:svg,png,jpg,jpeg,webp,gif',
+        'max:512',
+    ])]
+    public $icon_file = null;
+
+    #[Validate([
+        'nullable',
         'string',
     ])]
     public string $icon_path = '';
 
-    public function store()
+    public function store(): ?OperatingSystem
     {
         $this->validate();
 
@@ -46,10 +55,16 @@ class OperatingSystemCreateForm extends Form
             ]);
         }
 
+        $iconPath = $this->icon_path;
+        if ($this->icon_file) {
+            $storedPath = StorageUtility::store($this->icon_file, 'icons/operating-systems');
+            $iconPath = $storedPath;
+        }
+
         return OperatingSystem::create([
             'name' => $this->name,
             'slug' => $this->slug,
-            'icon_path' => $this->icon_path,
+            'icon_path' => $iconPath,
         ]);
     }
 }
