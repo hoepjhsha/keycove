@@ -76,7 +76,7 @@ class RegionFactory extends Factory
         ]);
     }
 
-    public function state(): static
+    public function asState(): static
     {
         return $this->state(function (array $attributes) {
             return [

@@ -312,9 +312,15 @@
         @endif
 
         <x-slot:footer>
-            <button wire:click="$set('showViewModal', false)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 transition-colors inline-flex items-center">
-                <i class="fa-solid fa-xmark mr-2"></i> Close
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <a href="{{ route('admin.products.detail', $viewData['id'] ?? -1) }}"
+                   class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors inline-flex items-center">
+                    <i class="fa-solid fa-arrow-right mr-2"></i> View more detail
+                </a>
+                <button wire:click="$set('showViewModal', false)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 transition-colors inline-flex items-center">
+                    <i class="fa-solid fa-xmark mr-2"></i> Close
+                </button>
+            </div>
         </x-slot:footer>
     </x-reusable.modal>
 
