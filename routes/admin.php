@@ -7,6 +7,7 @@ use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
 use App\Livewire\Admin\Action\Product\ProductDetail;
 use App\Livewire\Admin\Action\Product\ProductIndex;
+use App\Livewire\Admin\Action\ProductKey\BulkImportIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
 use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
@@ -46,6 +47,7 @@ Route::middleware('auth:admin')
             ->group(function () {
                 Route::get('/', ProductIndex::class)->name('index');
                 Route::get('/{id}', ProductDetail::class)->name('detail');
+                Route::get('/keys/import', BulkImportIndex::class)->name('keys.import');
             });
 
         Route::prefix('/seller-verifications')
