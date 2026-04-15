@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\Platform;
 
 use App\Models\Platform;
+use App\Utilities\StorageUtility;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -28,6 +29,14 @@ class PlatformCreateForm extends Form
 
     #[Validate([
         'nullable',
+        'file',
+        'mimes:svg,png,jpg,jpeg,webp,gif',
+        'max:512',
+    ])]
+    public $icon_file = null;
+
+    #[Validate([
+        'nullable',
         'string',
     ])]
     public string $icon_path = '';
@@ -39,7 +48,7 @@ class PlatformCreateForm extends Form
     ])]
     public string $base_url = '';
 
-    public function store()
+    public function store(): ?Platform
     {
         $this->validate();
 
@@ -53,10 +62,16 @@ class PlatformCreateForm extends Form
             ]);
         }
 
+        $iconPath = $this->icon_path;
+        if ($this->icon_file) {
+            $storedPath = StorageUtility::store($this->icon_file, 'icons/platforms', config('filesystems.public_disk'));
+            $iconPath = $storedPath;
+        }
+
         return Platform::create([
             'name' => $this->name,
             'slug' => $this->slug,
-            'icon_path' => $this->icon_path,
+            'icon_path' => $iconPath,
             'base_url' => $this->base_url,
         ]);
     }

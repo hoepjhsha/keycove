@@ -18,42 +18,79 @@
     </div>
 
     <x-reusable.modal wire:model="showCreateModal" title="Create new Platform" max-width="2xl">
-        <form id="createPlatformForm" class="space-y-4" wire:submit="createPlatform">
-            <div class="mb-2">
-                <label for="name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
-                <input wire:model="createForm.name" type="text" id="name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="Enter platform name" required>
-                @error('createForm.name')
-                    <small class="error block text-red-500 text-xs">{{ $message }}</small>
-                @enderror
+        <form id="createPlatformForm" wire:submit="createPlatform">
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-700">Basic Information</h3>
+                    <div class="space-y-4 pt-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Name <span class="text-red-500">*</span></label>
+                            <input wire:model="createForm.name" type="text" id="name"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                   placeholder="Enter platform name" required aria-required="true">
+                            @error('createForm.name')
+                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="slug" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Slug</label>
+                            <input wire:model="createForm.slug" type="text" id="slug"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                   placeholder="Enter slug or leave blank for auto-generation">
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Leave blank to auto-generate from name.</p>
+                            @error('createForm.slug')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-700">Visual & Links</h3>
+                    <div class="space-y-4 pt-4">
+                        <div>
+                            <label for="create_icon_file" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Icon</label>
+                            <input wire:model="createForm.icon_file" type="file" id="create_icon_file" accept=".svg,.png,.jpg,.jpeg,.webp,.gif"
+                                   class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 dark:hover:file:bg-slate-700 file:cursor-pointer file:transition-colors">
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">SVG, PNG, JPG, JPEG, WEBP, GIF. Max 512KB.</p>
+                            @if($createForm->icon_file)
+                                <div class="mt-2 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <img src="{{ $createForm->icon_file->temporaryUrl() }}"
+                                         alt="Icon preview"
+                                         class="w-12 h-12 object-contain">
+                                    <span class="text-sm text-slate-600 dark:text-slate-400">{{ $createForm->icon_file->getClientOriginalName() }}</span>
+                                </div>
+                            @endif
+                            @error('createForm.icon_file')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                            @error('createForm.icon_path')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="create_base_url" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Base URL</label>
+                            <input wire:model="createForm.base_url" type="url" id="create_base_url"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                   placeholder="https://example.com">
+                            @error('createForm.base_url')
+                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-2">
-                <label for="slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
-                <input wire:model="createForm.slug" type="text" id="slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="Enter slug or leave blank for auto-generation">
-                @error('createForm.slug')
-                    <small class="error block text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-            <div class="mb-2">
-                <label for="create_icon_path" class="font-medium text-sm text-slate-600 dark:text-slate-400">Icon Path</label>
-                <input wire:model="createForm.icon_path" type="text" id="create_icon_path" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="Icon path or URL">
-                @error('createForm.icon_path')
-                    <small class="error block text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-            <div class="mb-2">
-                <label for="create_base_url" class="font-medium text-sm text-slate-600 dark:text-slate-400">Base URL</label>
-                <input wire:model="createForm.base_url" type="url" id="create_base_url" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="https://example.com">
-                @error('createForm.base_url')
-                    <small class="error block text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-            <div class="flex items-center justify-end space-x-2">
-                <button wire:target="createPlatform" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">Submit</button>
-                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <button wire:target="createPlatform" type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50">
+                    <span wire:loading wire:target="createPlatform">Saving...</span>
+                    <span wire:loading.remove wire:target="createPlatform">Submit</span>
+                </button>
+                <button wire:click="$set('showCreateModal', false)" type="button"
+                        class="inline-flex items-center px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-sm font-medium rounded-lg border border-red-200 dark:border-red-500/30 transition-colors">
+                    Cancel
+                </button>
             </div>
         </form>
     </x-reusable.modal>
@@ -80,13 +117,26 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Icon Path</dt>
-                            <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['icon_path'] }}</dd>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">Icon</dt>
+                            <dd class="col-span-2 flex items-center gap-3">
+                                @if($viewData['icon_path'])
+                                    <img src="{{ \App\Utilities\StorageUtility::getUrl($viewData['icon_path']) }}"
+                                         alt="{{ $viewData['name'] ?? 'Platform' }} icon"
+                                         class="w-12 h-12 object-contain bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-image"></i>
+                                    </div>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400 font-mono">{{ $viewData['icon_path'] }}</span>
+                                @else
+                                    <span class="text-sm text-slate-400 dark:text-slate-500 italic">No icon set</span>
+                                @endif
+                            </dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
                             <dt class="font-medium text-slate-500 dark:text-slate-400">Base URL</dt>
-                            <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['base_url'] }}</dd>
+                            <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['base_url'] ?? '-' }}</dd>
                         </div>
 
 
@@ -120,56 +170,104 @@
     </x-reusable.modal>
 
     <x-reusable.modal wire:model="showEditModal" title="Edit Platform #{{ $editForm->platform?->id }}" max-width="2xl">
-        <form id="editPlatformForm" class="space-y-4" wire:submit="updatePlatform">
-            <div class="mb-2">
-                <label for="edit_name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
-                <input wire:model="editForm.name" type="text" id="edit_name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" required>
-                @error('editForm.name')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
+        <form id="editPlatformForm" wire:submit="updatePlatform">
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-700">Basic Information</h3>
+                    <div class="space-y-4 pt-4">
+                        <div>
+                            <label for="edit_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Name <span class="text-red-500">*</span></label>
+                            <input wire:model="editForm.name" type="text" id="edit_name"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                   required aria-required="true">
+                            @error('editForm.name')
+                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="edit_slug" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Slug</label>
+                            <input wire:model="editForm.slug" type="text" id="edit_slug"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors">
+                            @error('editForm.slug')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-700">Visual & Links</h3>
+                    <div class="space-y-4 pt-4">
+                        <div>
+                            <label for="edit_icon_file" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Icon</label>
+                            <input wire:model="editForm.icon_file" type="file" id="edit_icon_file" accept=".svg,.png,.jpg,.jpeg,.webp,.gif"
+                                   class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 dark:hover:file:bg-slate-700 file:cursor-pointer file:transition-colors">
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">SVG, PNG, JPG, JPEG, WEBP, GIF. Max 512KB.</p>
+                            @if($editForm->icon_file)
+                                <div class="mt-2 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <img src="{{ $editForm->icon_file->temporaryUrl() }}"
+                                         alt="Icon preview"
+                                         class="w-12 h-12 object-contain">
+                                    <span class="text-sm text-slate-600 dark:text-slate-400">{{ $editForm->icon_file->getClientOriginalName() }}</span>
+                                </div>
+                            @elseif($editForm->icon_path)
+                                <div class="mt-2 flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <img src="{{ \App\Utilities\StorageUtility::getUrl($editForm->icon_path) }}"
+                                         alt="{{ $editForm->name ?? 'Platform' }} icon"
+                                         class="w-12 h-12 object-contain"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="hidden w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-image"></i>
+                                    </div>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ $editForm->icon_path }}</span>
+                                </div>
+                            @endif
+                            @error('editForm.icon_file')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="edit_base_url" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Base URL</label>
+                            <input wire:model="editForm.base_url" type="url" id="edit_base_url"
+                                   class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                   placeholder="https://example.com">
+                            @error('editForm.base_url')
+                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-700">Status</h3>
+                    <div class="pt-4">
+                        <label for="edit_status" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Status <span class="text-red-500">*</span></label>
+                        <select wire:model="editForm.status" id="edit_status"
+                                class="w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-slate-600 dark:focus:border-primary-500 transition-colors"
+                                required aria-required="true">
+                            @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
+                                @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
+                                    <option value="{{ $statusEnum->value }}">{{ $statusEnum->label() }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @error('editForm.status')
+                            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400" role="alert">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-2">
-                <label for="edit_slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
-                <input wire:model="editForm.slug" type="text" id="edit_slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70">
-                @error('editForm.slug')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="edit_icon_path" class="font-medium text-sm text-slate-600 dark:text-slate-400">Icon Path</label>
-                <input wire:model="editForm.icon_path" type="text" id="edit_icon_path" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70">
-                @error('editForm.icon_path')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="edit_base_url" class="font-medium text-sm text-slate-600 dark:text-slate-400">Base URL</label>
-                <input wire:model="editForm.base_url" type="url" id="edit_base_url" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70">
-                @error('editForm.base_url')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
-                <select wire:model="editForm.status" id="edit_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
-                    @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
-                        @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
-                            <option value="{{ $statusEnum->value }}">{{ $statusEnum->label() }}</option>
-                        @endif
-                    @endforeach
-                </select>
-                @error('editForm.status')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="flex items-center justify-end space-x-2">
-                <button wire:target="updatePlatform" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">Update</button>
-                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+            <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <button wire:target="updatePlatform" type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50">
+                    <span wire:loading wire:target="updatePlatform">Saving...</span>
+                    <span wire:loading.remove wire:target="updatePlatform">Update</span>
+                </button>
+                <button wire:click="$set('showEditModal', false)" type="button"
+                        class="inline-flex items-center px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-sm font-medium rounded-lg border border-red-200 dark:border-red-500/30 transition-colors">
+                    Cancel
+                </button>
             </div>
         </form>
     </x-reusable.modal>

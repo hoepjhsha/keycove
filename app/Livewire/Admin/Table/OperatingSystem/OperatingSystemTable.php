@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Table\OperatingSystem;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Models\OperatingSystem;
+use App\Utilities\StorageUtility;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -55,6 +56,17 @@ final class OperatingSystemTable extends PowerGridComponent
             ->add('name')
             ->add('slug')
             ->add('icon_path')
+            ->add('icon_display', function (OperatingSystem $model) {
+                $iconUrl = StorageUtility::getUrl($model->icon_path);
+                $escapedPath = e($model->icon_path ?? '');
+                $escapedName = e($model->name ?? 'OS icon');
+
+                if ($iconUrl) {
+                    return '<img src="'.e($iconUrl).'" alt="'.$escapedName.' icon" class="w-8 h-8 object-contain" loading="lazy" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">';
+                }
+
+                return '<img src="" alt="" class="hidden w-8 h-8 object-contain"><div class="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded flex items-center justify-center text-slate-400"><i class="fa-solid fa-image text-xs"></i></div>';
+            })
             ->add('status_label', function (OperatingSystem $model) {
                 $status = $model->status;
 
@@ -87,7 +99,7 @@ final class OperatingSystemTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Icon', 'icon_path')
+            Column::make('Icon', 'icon_display', 'icon_path')
                 ->sortable()
                 ->searchable(),
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Table\Platform;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
 use App\Models\Platform;
+use App\Utilities\StorageUtility;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,18 @@ final class PlatformTable extends PowerGridComponent
             ->add('name')
             ->add('slug')
             ->add('icon_path')
-            ->add('base_url')
+            ->add('icon_display', function (Platform $model) {
+                $iconUrl = StorageUtility::getUrl($model->icon_path);
+                $escapedPath = e($model->icon_path ?? '');
+                $escapedName = e($model->name ?? 'Platform icon');
+
+                if ($iconUrl) {
+                    return '<img src="'.e($iconUrl).'" alt="'.$escapedName.' icon" class="w-8 h-8 object-contain" loading="lazy" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">';
+                }
+
+                return '<img src="" alt="" class="hidden w-8 h-8 object-contain"><div class="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded flex items-center justify-center text-slate-400"><i class="fa-solid fa-image text-xs"></i></div>';
+            })
+            ->add('base_url', fn (Platform $model) => '<a href="'.$model->base_url.'" target="_blank" class="text-blue-600 underline hover:text-blue-800 hover:no-underline transition-colors">'.$model->base_url.'</a>')
             ->add('status_label', function (Platform $model) {
                 $status = $model->status;
 
@@ -88,7 +100,7 @@ final class PlatformTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Icon', 'icon_path')
+            Column::make('Icon', 'icon_display', 'icon_path')
                 ->sortable()
                 ->searchable(),
 
