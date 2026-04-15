@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('product_keys', function (Blueprint $table) {
-            $table->unique('key_code');
+            $table->unique(['listing_id', 'key_code']);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('product_keys', function (Blueprint $table) {
-            //
+            $table->dropUnique(['listing_id', 'key_code']);
         });
     }
 };

@@ -112,8 +112,10 @@ class ImportValidator
     private function getExistingKeyCodes(array $data): array
     {
         $keyCodes = array_filter(array_unique(array_column($data, 'key_code')));
+        $listingIds = array_filter(array_unique(array_column($data, 'listing_id')));
 
         return $this->keyRepository->getModel()
+            ->whereIn('listing_id', $listingIds)
             ->whereIn('key_code', $keyCodes)
             ->pluck('key_code')
             ->toArray();
