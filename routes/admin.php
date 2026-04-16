@@ -58,22 +58,26 @@ Route::middleware('auth:admin')
                 Route::get('/{seller}/image/{type}', SellerKycImageController::class)->name('image');
             });
 
-        Route::prefix('/regions')
-            ->name('regions.')
+        Route::prefix('/attributes')
+            ->name('attributes.')
             ->group(function () {
-                Route::get('/', RegionIndex::class)->name('index');
-            });
+                Route::prefix('/regions')
+                    ->name('regions.')
+                    ->group(function () {
+                        Route::get('/', RegionIndex::class)->name('index');
+                    });
 
-        Route::prefix('/platforms')
-            ->name('platforms.')
-            ->group(function () {
-                Route::get('/', PlatformIndex::class)->name('index');
-            });
+                Route::prefix('/platforms')
+                    ->name('platforms.')
+                    ->group(function () {
+                        Route::get('/', PlatformIndex::class)->name('index');
+                    });
 
-        Route::prefix('/operating-systems')
-            ->name('operating_systems.')
-            ->group(function () {
-                Route::get('/', OperatingSystemIndex::class)->name('index');
+                Route::prefix('/operating-systems')
+                    ->name('operating_systems.')
+                    ->group(function () {
+                        Route::get('/', OperatingSystemIndex::class)->name('index');
+                    });
             });
 
         Route::prefix('/users')

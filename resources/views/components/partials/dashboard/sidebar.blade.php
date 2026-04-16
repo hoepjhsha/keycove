@@ -19,8 +19,8 @@
             </li>
 
             <li>
-                <details class="group/catalog [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.categories.*', 'admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'open' : '' }}>
-                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.categories.*', 'admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
+                <details class="group/catalog [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.categories.*', 'admin.attributes.regions.*', 'admin.attributes.operating_systems.*', 'admin.attributes.platforms.*']) ? 'open' : '' }}>
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.categories.*', 'admin.attributes.regions.*', 'admin.attributes.operating_systems.*', 'admin.attributes.platforms.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-key text-lg w-5 text-center shrink-0"></i>
                             Catalog & Keys
@@ -43,8 +43,8 @@
                             </li>
 
                             <li>
-                                <details class="group/attributes [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'open' : '' }}>
-                                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.regions.*', 'admin.operating_systems.*', 'admin.platforms.*']) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }} transition-colors cursor-pointer list-none">
+                                <details class="group/attributes [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.attributes.regions.*', 'admin.attributes.operating_systems.*', 'admin.attributes.platforms.*']) ? 'open' : '' }}>
+                                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.attributes.regions.*', 'admin.attributes.operating_systems.*', 'admin.attributes.platforms.*']) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }} transition-colors cursor-pointer list-none">
                                         <span>Attributes</span>
                                         <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300 group-open/attributes:rotate-180"></i>
                                     </summary>
@@ -52,17 +52,17 @@
                                     <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/attributes:grid-rows-[1fr]">
                                         <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-4 border-l border-gray-200 dark:border-gray-700 ml-2">
                                             <li>
-                                                <a href="{{ route('admin.regions.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.regions.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                <a href="{{ route('admin.attributes.regions.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.attributes.regions.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
                                                     Regions
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{{ route('admin.operating_systems.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.operating_systems.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                <a href="{{ route('admin.attributes.operating_systems.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.attributes.operating_systems.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
                                                     Operating Systems
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{{ route('admin.platforms.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.platforms.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                                <a href="{{ route('admin.attributes.platforms.index') }}" class="block px-3 py-1.5 text-sm font-medium rounded-md {{ request()->routeIs('admin.attributes.platforms.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-800' }}">
                                                     Platforms
                                                 </a>
                                             </li>
