@@ -196,48 +196,6 @@
     </x-reusable.modal>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener('livewire:initialized', () => {
-                Livewire.on('swal:confirm', (event) => {
-                    const data = event[0];
-                    Swal.fire({
-                        title: data.title,
-                        text: data.text ?? "You can not revert this action!",
-                        icon: data.type ?? 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Livewire.dispatch(data.method, [data.id]);
-                        }
-                    });
-                });
-
-                Livewire.on('swal:success', (event) => {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: event[0].message,
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    Livewire.dispatch('pg:eventRefresh-categoryTable');
-                });
-
-                Livewire.on('swal:error', (event) => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: event[0].message,
-                        icon: 'error',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                });
-            });
-        </script>
+        <x-admin.swal-listener table-name="categoryTable" />
     @endpush
 </div>
