@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\Auth\Logout;
 use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
+use App\Livewire\Admin\Action\Order\OrderDetail;
+use App\Livewire\Admin\Action\Order\OrderIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
 use App\Livewire\Admin\Action\Product\ProductDetail;
 use App\Livewire\Admin\Action\Product\ProductIndex;
@@ -91,5 +93,12 @@ Route::middleware('auth:admin')
             ->name('transactions.')
             ->group(function () {
                 Route::get('/', TransactionIndex::class)->name('index');
+            });
+
+        Route::prefix('/orders')
+            ->name('orders.')
+            ->group(function () {
+                Route::get('/', OrderIndex::class)->name('index');
+                Route::get('/{id}', OrderDetail::class)->name('detail');
             });
     });

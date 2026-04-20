@@ -27,7 +27,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'total_price' => 'decimal:2',
+            //            'total_price' => 'decimal:2',
             'status' => OrderStatus::class,
             'payment_method' => PaymentMethod::class,
         ];
