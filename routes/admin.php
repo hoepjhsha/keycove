@@ -10,6 +10,7 @@ use App\Livewire\Admin\Action\Product\ProductIndex;
 use App\Livewire\Admin\Action\ProductKey\BulkImportIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
 use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
+use App\Livewire\Admin\Action\Transaction\TransactionIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use Illuminate\Support\Facades\Route;
@@ -84,5 +85,11 @@ Route::middleware('auth:admin')
             ->name('users.')
             ->group(function () {
                 Route::get('/', UserIndex::class)->name('index');
+            });
+
+        Route::prefix('/transactions')
+            ->name('transactions.')
+            ->group(function () {
+                Route::get('/', TransactionIndex::class)->name('index');
             });
     });

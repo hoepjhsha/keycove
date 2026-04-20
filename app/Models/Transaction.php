@@ -29,7 +29,7 @@ class Transaction extends Model
     {
         return [
             'payment_info' => 'array',
-            'amount' => 'decimal:2',
+            //            'amount' => 'decimal:2',
             'type' => TransactionType::class,
             'status' => TransactionStatus::class,
         ];
