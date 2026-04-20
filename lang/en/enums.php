@@ -86,6 +86,7 @@ return [
     'transaction_type' => [
         'Withdraw' => 'Withdraw',
         'Pay' => 'Pay',
+        'Refund' => 'Refund',
     ],
 
     'withdraw_status' => [

@@ -21,4 +21,5 @@ enum TransactionType: int
 
     case Withdraw = 0;
     case Pay = 1;
+    case Refund = 2;
 }

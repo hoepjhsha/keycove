@@ -3,7 +3,7 @@
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Management', 'url' => 'javascript:void(0)'],
+            ['label' => 'Users & Vendors', 'url' => 'javascript:void(0)'],
             ['label' => 'Seller Verifications', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
@@ -17,7 +17,7 @@
         </div>
 
         <!-- Zoom Image Overlay -->
-        <div x-show="zoomedImage" style="display: none;" 
+        <div x-show="zoomedImage" style="display: none;"
              class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -61,7 +61,7 @@
                                 {!! $viewData['status_label'] !!}
                             </dd>
                         </div>
-                        
+
                         @if($viewData['kyc_rejected_reason'])
                         <div class="grid grid-cols-3 gap-4 py-3">
                             <dt class="font-medium text-slate-500 dark:text-slate-400">Rejection Reason</dt>
@@ -133,7 +133,7 @@
                     <small class="text-red-500 text-xs">{{ $message }}</small>
                 @enderror
             </div>
-            
+
             @if((int) $processForm->kyc_status === \App\Enums\KycStatus::Rejected->value)
             <div class="mb-4">
                 <label for="reject_reason" class="font-medium text-sm text-slate-600 dark:text-slate-400">Rejection Reason <span class="text-red-400">*</span></label>
@@ -152,48 +152,6 @@
     </x-reusable.modal>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener('livewire:initialized', () => {
-                Livewire.on('swal:confirm', (event) => {
-                    const data = event[0];
-                    Swal.fire({
-                        title: data.title,
-                        text: data.text ?? "You can not revert this action!",
-                        icon: data.type ?? 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Livewire.dispatch(data.method, [data.id]);
-                        }
-                    });
-                });
-
-                Livewire.on('swal:success', (event) => {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: event[0].message,
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    Livewire.dispatch('pg:eventRefresh-sellerKycTable');
-                });
-
-                Livewire.on('swal:error', (event) => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: event[0].message,
-                        icon: 'error',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                });
-            });
-        </script>
+        <x-admin.swal-listener table-name="sellerKycTable" />
     @endpush
 </div>
