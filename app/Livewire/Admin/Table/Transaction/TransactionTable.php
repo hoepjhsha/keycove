@@ -130,7 +130,8 @@ final class TransactionTable extends PowerGridComponent
                 ->optionValue('id')
                 ->optionLabel('name'),
 
-            Filter::datepicker('created_at_formatted', 'created_at'),
+            // TODO: Datepicker disabled - need to fix date range
+            //             Filter::datepicker('created_at_formatted', 'created_at'),
         ];
     }
 

@@ -142,10 +142,10 @@ final class EscrowTable extends PowerGridComponent
                 ->optionValue('id')
                 ->optionLabel('name'),
 
-            Filter::datepicker('release_date_formatted', 'escrows.release_date'),
-
-            Filter::datepicker('created_at_formatted', 'escrows.created_at'),
-            Filter::datepicker('updated_at_formatted', 'escrows.updated_at'),
+            // TODO: Datepicker filters disabled - need to fix date range handling
+            // Filter::datepicker('release_date_formatted', 'escrows.release_date'),
+            // Filter::datepicker('created_at_formatted', 'escrows.created_at'),
+            // Filter::datepicker('updated_at_formatted', 'escrows.updated_at'),
         ];
     }
 
