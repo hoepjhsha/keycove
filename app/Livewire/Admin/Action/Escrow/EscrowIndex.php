@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\Escrow;
 
-use App\Enums\AuditEvent;
+use App\Constants\Admin\EscrowConstant;
 use App\Enums\EscrowStatus;
-use App\Models\AuditLog;
+use App\Livewire\Admin\Form\Escrow\EscrowExtendHoldingForm;
 use App\Models\Escrow;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 #[Title('Manage Escrows')]
@@ -29,10 +26,7 @@ class EscrowIndex extends Component
 
     public ?int $extendEscrowId = null;
 
-    #[Validate('required|numeric|min:1|max:2')]
-    public ?int $extendDays = null;
-
-    private const MAX_EXTEND_DAYS_FROM_CREATED = 90; // Maximum 90 days from created_at
+    public EscrowExtendHoldingForm $extendExtendHoldingForm;
 
     public function render(): Factory|View|\Illuminate\View\View
     {
@@ -81,7 +75,6 @@ class EscrowIndex extends Component
     {
         $escrow = Escrow::findOrFail($id);
 
-        // Validate can extend
         if ($escrow->status !== EscrowStatus::Holding && $escrow->status !== EscrowStatus::Frozen) {
             $this->dispatch('swal:error', [
                 'message' => 'Only escrows with Holding or Frozen status can be extended.',
@@ -90,8 +83,7 @@ class EscrowIndex extends Component
             return;
         }
 
-        // Check if already at max extension
-        $maxAllowedDate = $escrow->created_at->addDays(self::MAX_EXTEND_DAYS_FROM_CREATED);
+        $maxAllowedDate = $escrow->created_at->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
         if ($escrow->release_date->greaterThanOrEqualTo($maxAllowedDate)) {
             $this->dispatch('swal:error', [
                 'message' => 'This escrow has reached the maximum extension limit.',
@@ -101,67 +93,22 @@ class EscrowIndex extends Component
         }
 
         $this->extendEscrowId = $id;
-        $this->extendDays = null;
+        $this->extendExtendHoldingForm->duration = '';
         $this->showExtendModal = true;
     }
 
     public function performExtendHolding(): void
     {
         try {
-            $this->validate();
-
-            DB::transaction(function () {
-                $escrow = Escrow::lockForUpdate()->findOrFail($this->extendEscrowId);
-
-                // Validate status
-                if ($escrow->status !== EscrowStatus::Holding && $escrow->status !== EscrowStatus::Frozen) {
-                    throw new Exception('Escrow status is no longer valid for extension.');
-                }
-
-                // Calculate new release date
-                $newReleaseDate = $escrow->release_date->addDays($this->extendDays);
-                $maxAllowedDate = $escrow->created_at->addDays(self::MAX_EXTEND_DAYS_FROM_CREATED);
-
-                // Validate max extension constraint
-                if ($newReleaseDate->greaterThan($maxAllowedDate)) {
-                    throw new Exception('Extension exceeds maximum allowed limit. Max extend to: '.$maxAllowedDate->format('d/m/Y'));
-                }
-
-                $oldValues = [
-                    'release_date' => $escrow->release_date->toDateTimeString(),
-                    'updated_at' => $escrow->updated_at->toDateTimeString(),
-                ];
-
-                // Update release_date
-                $escrow->release_date = $newReleaseDate;
-                $escrow->save();
-
-                $newValues = [
-                    'release_date' => $escrow->release_date->toDateTimeString(),
-                    'updated_at' => $escrow->updated_at->toDateTimeString(),
-                ];
-
-                // Create audit log
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'auditable_type' => Escrow::class,
-                    'auditable_id' => $escrow->id,
-                    'event' => AuditEvent::EscrowExtended,
-                    'old_values' => array_merge($oldValues, ['days_extended' => $this->extendDays]),
-                    'new_values' => $newValues,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                    'created_at' => now(),
-                ]);
-            });
+            $this->extendExtendHoldingForm->submit($this->extendEscrowId);
 
             $this->dispatch('swal:success', [
-                'message' => 'Escrow holding time extended successfully by '.$this->extendDays.' day(s).',
+                'message' => 'Escrow holding time extended successfully by '.$this->extendExtendHoldingForm->duration.' day(s).',
             ]);
 
             $this->showExtendModal = false;
             $this->extendEscrowId = null;
-            $this->extendDays = null;
+            $this->extendExtendHoldingForm->duration = '';
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
                 'message' => 'Failed to extend escrow: '.$e->getMessage(),
