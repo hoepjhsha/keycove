@@ -39,4 +39,12 @@ class Escrow extends Model
     {
         return $this->belongsTo(Seller::class);
     }
+
+    public function items()
+    {
+        return OrderItem::where('order_id', $this->order_id)
+            ->whereHas('listing', function ($query) {
+                $query->where('seller_id', $this->seller_id);
+            })->get();
+    }
 }
