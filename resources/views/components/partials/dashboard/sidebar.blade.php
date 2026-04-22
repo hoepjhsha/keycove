@@ -82,8 +82,8 @@
             </li>
 
             <li>
-                <details class="group/orders [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.orders.*']) ? 'open' : '' }}>
-                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.orders.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
+                <details class="group/orders [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.orders.*', 'admin.escrows.*']) ? 'open' : '' }}>
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.orders.*', 'admin.escrows.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-cart-shopping text-lg w-5 text-center shrink-0"></i>
                             Orders
@@ -93,7 +93,7 @@
                     <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-open/orders:grid-rows-[1fr]">
                         <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
                             <li><a href="{{ route('admin.orders.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.orders.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">Orders History</a></li>
-                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">Escrow Management</a></li>
+                            <li><a href="{{ route('admin.escrows.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.escrows.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">Escrow Management</a></li>
                         </ul>
                     </div>
                 </details>

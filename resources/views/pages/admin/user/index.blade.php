@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => 'Users & Vendors', 'url' => 'javascript:void(0)'],
-            ['label' => 'Users', 'url' => 'javascript:void(0)'],
+            ['label' => 'Users List', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 

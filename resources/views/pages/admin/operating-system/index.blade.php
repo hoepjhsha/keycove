@@ -5,7 +5,7 @@
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
             ['label' => 'Attributes', 'url' => 'javascript:void(0)'],
-            ['label' => 'OperatingSystem', 'url' => 'javascript:void(0)'],
+            ['label' => 'Operating Systems', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 

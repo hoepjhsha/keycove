@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => 'Users & Vendors', 'url' => 'javascript:void(0)'],
-            ['label' => 'Seller Verifications', 'url' => 'javascript:void(0)'],
+            ['label' => 'Seller Approved (KYC)', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 
