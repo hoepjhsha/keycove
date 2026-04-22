@@ -32,4 +32,14 @@ final class EscrowException extends Exception
     {
         return new self('Escrow status has changed during the process. Please try again.');
     }
+
+    public static function invalidStatusForFreeze(): self
+    {
+        return new self('Only escrows with Holding status can be frozen.');
+    }
+
+    public static function statusChangedDuringFreeze(): self
+    {
+        return new self('Escrow status is no longer Holding. Freeze cancelled.');
+    }
 }

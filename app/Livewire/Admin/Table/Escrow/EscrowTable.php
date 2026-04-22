@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Table\Escrow;
 
 use App\Enums\AuditEvent;
 use App\Enums\EscrowStatus;
+use App\Exceptions\Admin\EscrowException;
 use App\Models\AuditLog;
 use App\Models\Escrow;
 use Exception;
@@ -161,6 +162,15 @@ final class EscrowTable extends PowerGridComponent
                 ])
                 ->dispatch('viewEscrowDetail', ['rowId' => $row->id]),
 
+            Button::add('freeze')
+                ->slot('<i class="fa-solid fa-lock"></i>')
+                ->id()
+                ->class('text-purple-600 hover:text-purple-800 px-1 py-1 transition-all hover:scale-110')
+                ->attributes([
+                    'x-tooltip' => 'Freeze Escrow',
+                ])
+                ->dispatch('freezeEscrow', ['rowId' => $row->id]),
+
             Button::add('extend')
                 ->slot('<i class="fa-solid fa-hourglass-end"></i>')
                 ->id()
@@ -184,6 +194,10 @@ final class EscrowTable extends PowerGridComponent
     public function actionRules(Escrow $row): array
     {
         return [
+            Rule::button('freeze')
+                ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Holding)
+                ->hide(),
+
             Rule::button('extend')
                 ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Holding && $model->status !== EscrowStatus::Frozen)
                 ->hide(),
@@ -201,7 +215,7 @@ final class EscrowTable extends PowerGridComponent
 
         if ($escrow->status !== EscrowStatus::Holding) {
             $this->dispatch('swal:error', [
-                'message' => 'Only escrows with Holding status can be released.',
+                'message' => EscrowException::invalidStatusForRelease()->getMessage(),
             ]);
 
             return;
@@ -223,7 +237,7 @@ final class EscrowTable extends PowerGridComponent
                 $escrow = Escrow::lockForUpdate()->findOrFail($id);
 
                 if ($escrow->status !== EscrowStatus::Holding) {
-                    throw new Exception('Escrow status is no longer Holding. Release cancelled.');
+                    throw EscrowException::statusChangedDuringProcess();
                 }
 
                 $oldValues = [
@@ -258,6 +272,74 @@ final class EscrowTable extends PowerGridComponent
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
                 'message' => 'Failed to release escrow: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    #[On('freezeEscrow')]
+    public function freezeEscrow($rowId): void
+    {
+        $escrow = Escrow::findOrFail($rowId);
+
+        if ($escrow->status !== EscrowStatus::Holding) {
+            $this->dispatch('swal:error', [
+                'message' => EscrowException::invalidStatusForFreeze()->getMessage(),
+            ]);
+
+            return;
+        }
+
+        $this->dispatch('swal:confirm', [
+            'title' => 'Freeze Escrow?',
+            'text' => 'Are you sure you want to freeze this escrow? The holding timer will be paused. This action can be undone by extending the holding time.',
+            'method' => 'performFreezeEscrow',
+            'id' => $rowId,
+        ]);
+    }
+
+    #[On('performFreezeEscrow')]
+    public function performFreezeEscrow($id): void
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $escrow = Escrow::lockForUpdate()->findOrFail($id);
+
+                if ($escrow->status !== EscrowStatus::Holding) {
+                    throw EscrowException::statusChangedDuringFreeze();
+                }
+
+                $oldValues = [
+                    'status' => $escrow->status->name,
+                    'updated_at' => $escrow->updated_at->toDateTimeString(),
+                ];
+
+                $escrow->status = EscrowStatus::Frozen;
+                $escrow->save();
+
+                $newValues = [
+                    'status' => $escrow->status->name,
+                    'updated_at' => $escrow->updated_at->toDateTimeString(),
+                ];
+
+                AuditLog::create([
+                    'user_id' => Auth::id(),
+                    'auditable_type' => Escrow::class,
+                    'auditable_id' => $escrow->id,
+                    'event' => AuditEvent::EscrowFrozen,
+                    'old_values' => $oldValues,
+                    'new_values' => $newValues,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'created_at' => now(),
+                ]);
+            });
+
+            $this->dispatch('swal:success', [
+                'message' => 'Escrow frozen successfully.',
+            ]);
+        } catch (Exception $e) {
+            $this->dispatch('swal:error', [
+                'message' => 'Failed to freeze escrow: '.$e->getMessage(),
             ]);
         }
     }
