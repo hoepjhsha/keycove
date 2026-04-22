@@ -3,7 +3,7 @@
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Management', 'url' => 'javascript:void(0)'],
+            ['label' => 'Finance & Wallet', 'url' => 'javascript:void(0)'],
             ['label' => 'Transactions', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush

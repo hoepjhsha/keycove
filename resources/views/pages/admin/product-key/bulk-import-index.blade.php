@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
-            ['label' => 'Bulk Import', 'url' => 'javascript:void(0)'],
+            ['label' => 'Bulk Import Keys', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 

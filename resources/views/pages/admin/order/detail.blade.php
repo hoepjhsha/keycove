@@ -3,7 +3,8 @@
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Orders', 'url' => route('admin.orders.index')],
+            ['label' => 'Orders', 'url' => 'javascript:void(0)'],
+            ['label' => 'Orders History', 'url' => route('admin.orders.index')],
             ['label' => 'Details', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
