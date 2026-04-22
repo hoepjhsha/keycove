@@ -110,7 +110,7 @@ final class TransactionTable extends PowerGridComponent
         return [
             Filter::inputText('order_code', 'orders.order_code')->operators(['contains']),
 
-            Filter::multiSelect('status', 'status')
+            Filter::multiSelect('status', 'transactions.status')
                 ->dataSource(collect(TransactionStatus::cases())->map(fn ($status) => [
                     'id' => $status->value,
                     'name' => method_exists($status, 'label') ? $status->label() : $status->name,
@@ -118,11 +118,11 @@ final class TransactionTable extends PowerGridComponent
                 ->optionValue('id')
                 ->optionLabel('name'),
 
-            Filter::number('amount')
+            Filter::number('amount', 'transactions.amount')
                 ->thousands('.')
                 ->decimal(','),
 
-            Filter::multiSelect('type', 'type')
+            Filter::multiSelect('type', 'transactions.type')
                 ->dataSource(collect(TransactionType::cases())->map(fn ($type) => [
                     'id' => $type->value,
                     'name' => method_exists($type, 'label') ? $type->label() : $type->name,
@@ -131,7 +131,7 @@ final class TransactionTable extends PowerGridComponent
                 ->optionLabel('name'),
 
             // TODO: Datepicker disabled - need to fix date range
-            //             Filter::datepicker('created_at_formatted', 'created_at'),
+            // Filter::datepicker('created_at_formatted', 'transactions.created_at'),
         ];
     }
 
