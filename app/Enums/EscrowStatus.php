@@ -23,4 +23,5 @@ enum EscrowStatus: int
     case Holding = 0;
     case Released = 1;
     case Refunded = 2;
+    case Frozen = 3;
 }

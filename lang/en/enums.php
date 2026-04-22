@@ -108,5 +108,13 @@ return [
         'Holding' => 'Holding',
         'Released' => 'Released',
         'Refunded' => 'Refunded',
+        'Frozen' => 'Frozen',
+    ],
+
+    'audit_event' => [
+        'EscrowReleased' => 'Released',
+        'EscrowFrozen' => 'Frozen',
+        'EscrowExtended' => 'Extended',
+        'EscrowVoided' => 'Voided',
     ],
 ];
