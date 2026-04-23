@@ -29,22 +29,22 @@ class UserSeeder extends Seeder
     {
         $adminData = [
             [
-                'username' => 'admin_nguyen',
-                'email' => 'nguyen@keycove.com',
+                'username'   => 'admin_nguyen',
+                'email'      => 'nguyen@keycove.com',
                 'first_name' => 'Minh',
-                'last_name' => 'Nguyen',
+                'last_name'  => 'Nguyen',
             ],
             [
-                'username' => 'admin_tran',
-                'email' => 'tran@keycove.com',
+                'username'   => 'admin_tran',
+                'email'      => 'tran@keycove.com',
                 'first_name' => 'Lan',
-                'last_name' => 'Tran',
+                'last_name'  => 'Tran',
             ],
             [
-                'username' => 'admin_le',
-                'email' => 'le@keycove.com',
+                'username'   => 'admin_le',
+                'email'      => 'le@keycove.com',
                 'first_name' => 'Duc',
-                'last_name' => 'Le',
+                'last_name'  => 'Le',
             ],
         ];
 
@@ -54,8 +54,8 @@ class UserSeeder extends Seeder
                 [
                     'username' => $data['username'],
                     'password' => bcrypt('password'),
-                    'role' => UserRole::Admin,
-                    'status' => UserStatus::Active,
+                    'role'     => UserRole::Admin,
+                    'status'   => UserStatus::Active,
                 ]
             );
         }
@@ -65,42 +65,42 @@ class UserSeeder extends Seeder
     {
         $sellerData = [
             [
-                'username' => 'gamekey_store',
-                'email' => 'gamekey@store.com',
-                'first_name' => 'Hung',
-                'last_name' => 'Pham',
-                'shop_name' => 'GameKey Store VN',
-                'kyc_status' => KycStatus::Approved,
+                'username'       => 'gamekey_store',
+                'email'          => 'gamekey@store.com',
+                'first_name'     => 'Hung',
+                'last_name'      => 'Pham',
+                'shop_name'      => 'GameKey Store VN',
+                'kyc_status'     => KycStatus::Approved,
                 'wallet_balance' => 15420.50,
                 'wallet_holding' => 2340.00,
             ],
             [
-                'username' => 'digital_hub',
-                'email' => 'digital@hub.com',
-                'first_name' => 'Mai',
-                'last_name' => 'Hoang',
-                'shop_name' => 'Digital Keys Hub',
-                'kyc_status' => KycStatus::Approved,
+                'username'       => 'digital_hub',
+                'email'          => 'digital@hub.com',
+                'first_name'     => 'Mai',
+                'last_name'      => 'Hoang',
+                'shop_name'      => 'Digital Keys Hub',
+                'kyc_status'     => KycStatus::Approved,
                 'wallet_balance' => 8750.25,
                 'wallet_holding' => 1200.00,
             ],
             [
-                'username' => 'software_depot',
-                'email' => 'software@depot.com',
-                'first_name' => 'Tuan',
-                'last_name' => 'Vo',
-                'shop_name' => 'Software Depot',
-                'kyc_status' => KycStatus::Approved,
+                'username'       => 'software_depot',
+                'email'          => 'software@depot.com',
+                'first_name'     => 'Tuan',
+                'last_name'      => 'Vo',
+                'shop_name'      => 'Software Depot',
+                'kyc_status'     => KycStatus::Approved,
                 'wallet_balance' => 32100.00,
                 'wallet_holding' => 4500.00,
             ],
             [
-                'username' => 'keymaster_asia',
-                'email' => 'keymaster@asia.com',
-                'first_name' => 'Hoa',
-                'last_name' => 'Do',
-                'shop_name' => 'Keymaster Asia',
-                'kyc_status' => KycStatus::Pending,
+                'username'       => 'keymaster_asia',
+                'email'          => 'keymaster@asia.com',
+                'first_name'     => 'Hoa',
+                'last_name'      => 'Do',
+                'shop_name'      => 'Keymaster Asia',
+                'kyc_status'     => KycStatus::Pending,
                 'wallet_balance' => 1250.75,
                 'wallet_holding' => 450.00,
             ],
@@ -112,20 +112,20 @@ class UserSeeder extends Seeder
                 [
                     'username' => $data['username'],
                     'password' => bcrypt('password'),
-                    'role' => UserRole::Seller,
-                    'status' => UserStatus::Active,
+                    'role'     => UserRole::Seller,
+                    'status'   => UserStatus::Active,
                 ]
             );
 
             UserProfile::firstOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name'],
-                    'gender' => fake()->randomElement([Gender::Male, Gender::Female]),
+                    'first_name'   => $data['first_name'],
+                    'last_name'    => $data['last_name'],
+                    'gender'       => fake()->randomElement([Gender::Male, Gender::Female]),
                     'phone_number' => fake()->numerify('09########'),
-                    'avatar' => 'avatars/seller_'.fake()->numberBetween(1, 5).'.jpg',
-                    'bio' => 'Trusted seller on KeyCove. Fast delivery and competitive prices.',
+                    'avatar'       => 'avatars/seller_'.fake()->numberBetween(1, 5).'.jpg',
+                    'bio'          => 'Trusted seller on KeyCove. Fast delivery and competitive prices.',
                 ]
             );
 
@@ -140,13 +140,13 @@ class UserSeeder extends Seeder
             $seller = Seller::firstOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'shop_name' => $data['shop_name'],
-                    'cccd_number' => fake()->numerify('############'),
+                    'shop_name'        => $data['shop_name'],
+                    'cccd_number'      => fake()->numerify('############'),
                     'cccd_front_image' => $frontImage,
-                    'cccd_back_image' => $backImage,
-                    'kyc_status' => $data['kyc_status'],
-                    'created_at' => now()->subDays(rand(1, 30)),
-                    'updated_at' => now()->subDays(rand(1, 5)),
+                    'cccd_back_image'  => $backImage,
+                    'kyc_status'       => $data['kyc_status'],
+                    'created_at'       => now()->subDays(random_int(1, 30)),
+                    'updated_at'       => now()->subDays(random_int(1, 5)),
                 ]
             );
 
@@ -181,19 +181,19 @@ class UserSeeder extends Seeder
                 [
                     'username' => $data['username'],
                     'password' => bcrypt('password'),
-                    'role' => UserRole::User,
-                    'status' => UserStatus::Active,
+                    'role'     => UserRole::User,
+                    'status'   => UserStatus::Active,
                 ]
             );
 
             UserProfile::firstOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name'],
-                    'gender' => fake()->randomElement([Gender::Male, Gender::Female]),
+                    'first_name'   => $data['first_name'],
+                    'last_name'    => $data['last_name'],
+                    'gender'       => fake()->randomElement([Gender::Male, Gender::Female]),
                     'phone_number' => fake()->optional()->numerify('09########'),
-                    'avatar' => 'avatars/user_'.fake()->numberBetween(1, 10).'.jpg',
+                    'avatar'       => 'avatars/user_'.fake()->numberBetween(1, 10).'.jpg',
                 ]
             );
         }

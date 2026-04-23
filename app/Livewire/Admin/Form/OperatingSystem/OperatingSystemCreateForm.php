@@ -62,8 +62,8 @@ class OperatingSystemCreateForm extends Form
         }
 
         return OperatingSystem::create([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'icon_path' => $iconPath,
         ]);
     }

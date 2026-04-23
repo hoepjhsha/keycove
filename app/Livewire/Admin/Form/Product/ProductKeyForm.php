@@ -37,9 +37,9 @@ class ProductKeyForm extends Form
         $this->validate();
 
         return ProductKey::create([
-            'listing_id' => $this->listing_id,
-            'key_code' => $this->key_code,
-            'status' => ProductKeyStatus::Available->value,
+            'listing_id'    => $this->listing_id,
+            'key_code'      => $this->key_code,
+            'status'        => ProductKeyStatus::Available->value,
             'order_item_id' => null,
         ]);
     }

@@ -22,12 +22,8 @@ class ReviewSeeder extends Seeder
 
     protected function seedReviews(): void
     {
-        // Get order items from completed orders
-        $completedOrderItems = OrderItem::whereIn('order_id', function ($query) {
-            $query->select('id')
-                ->from('orders')
-                ->whereIn('status', [OrderStatus::Completed]);
-        })->get();
+        // Get order items that are completed under the new per-item status model.
+        $completedOrderItems = OrderItem::where('status', OrderStatus::Completed)->get();
 
         $sellers = User::where('role', UserRole::Seller)->get();
 
@@ -107,11 +103,11 @@ class ReviewSeeder extends Seeder
                 }
 
                 $review = Review::create([
-                    'user_id' => $order->buyer_id,
+                    'user_id'       => $order->buyer_id,
                     'order_item_id' => $orderItem->id,
-                    'rating' => $rating,
-                    'comment' => fake()->randomElement($comments[$rating]),
-                    'media' => fake()->optional(0.3)->passthrough([
+                    'rating'        => $rating,
+                    'comment'       => fake()->randomElement($comments[$rating]),
+                    'media'         => fake()->optional(0.3)->passthrough([
                         fake()->imageUrl(800, 600, 'screenshot'),
                     ]),
                     'created_at' => $order->created_at->copy()->addDays(rand(1, 7)),
@@ -135,9 +131,9 @@ class ReviewSeeder extends Seeder
                     ];
 
                     ReviewResponse::create([
-                        'review_id' => $review->id,
+                        'review_id'  => $review->id,
                         'replier_id' => $seller->id,
-                        'content' => fake()->randomElement($responseComments),
+                        'content'    => fake()->randomElement($responseComments),
                         'created_at' => $review->created_at->copy()->addHours(rand(1, 48)),
                     ]);
                 }

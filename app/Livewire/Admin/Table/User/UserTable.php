@@ -72,9 +72,9 @@ final class UserTable extends PowerGridComponent
                 $labelText = method_exists($role, 'label') ? $role->label() : $role->name;
 
                 $colorClass = match ($role) {
-                    UserRole::User => 'bg-blue-500/10 text-blue-500',
-                    UserRole::Seller => 'bg-indigo-500/10 text-indigo-500',
-                    UserRole::Admin => 'bg-purple-500/10 text-purple-500',
+                    UserRole::User       => 'bg-blue-500/10 text-blue-500',
+                    UserRole::Seller     => 'bg-indigo-500/10 text-indigo-500',
+                    UserRole::Admin      => 'bg-purple-500/10 text-purple-500',
                     UserRole::SuperAdmin => 'bg-emerald-500/10 text-emerald-500',
                 };
 
@@ -85,11 +85,11 @@ final class UserTable extends PowerGridComponent
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    UserStatus::Active => 'bg-green-500/10 text-green-500',
+                    UserStatus::Active   => 'bg-green-500/10 text-green-500',
                     UserStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                    UserStatus::Blocked => 'bg-yellow-500/10 text-yellow-500',
-                    UserStatus::Deleted => 'bg-red-500/10 text-red-500',
-                    default => 'bg-primary-500/10 text-primary-500',
+                    UserStatus::Blocked  => 'bg-yellow-500/10 text-yellow-500',
+                    UserStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                    default              => 'bg-primary-500/10 text-primary-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -128,7 +128,7 @@ final class UserTable extends PowerGridComponent
 
             Filter::multiSelect('role', 'role')
                 ->dataSource($roles->map(fn ($role) => [
-                    'id' => $role->value,
+                    'id'   => $role->value,
                     'name' => method_exists($role, 'label') ? $role->label() : $role->name,
                 ]))
                 ->optionValue('id')
@@ -136,7 +136,7 @@ final class UserTable extends PowerGridComponent
 
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(UserStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => method_exists($status, 'label') ? $status->label() : $status->name,
                 ]))
                 ->optionValue('id')
@@ -225,10 +225,10 @@ final class UserTable extends PowerGridComponent
     public function toggleBlock($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the block status of this user?',
+            'title'  => 'Change Status?',
+            'text'   => 'Are you sure you want to change the block status of this user?',
             'method' => 'performToggleBlock',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -246,7 +246,7 @@ final class UserTable extends PowerGridComponent
 
         $user->status = match ($user->status) {
             UserStatus::Blocked => UserStatus::Active,
-            default => UserStatus::Blocked,
+            default             => UserStatus::Blocked,
         };
         $user->save();
 
@@ -257,10 +257,10 @@ final class UserTable extends PowerGridComponent
     public function deleteUser($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete User?',
-            'text' => 'Are you sure you want to delete this user?',
+            'title'  => 'Delete User?',
+            'text'   => 'Are you sure you want to delete this user?',
             'method' => 'performDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -290,10 +290,10 @@ final class UserTable extends PowerGridComponent
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore User?',
-            'text' => 'Are you sure you want to restore this user?',
+            'title'  => 'Restore User?',
+            'text'   => 'Are you sure you want to restore this user?',
             'method' => 'performRevertDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -326,9 +326,9 @@ final class UserTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
             'method' => 'performBulkDelete',
-            'id' => null,
+            'id'     => null,
         ]);
     }
 

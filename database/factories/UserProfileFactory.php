@@ -26,14 +26,14 @@ class UserProfileFactory extends Factory
         $gender = fake()->randomElement([Gender::Male, Gender::Female]);
 
         return [
-            'user_id' => User::factory(),
-            'first_name' => fake()->firstName($gender === Gender::Male ? 'male' : 'female'),
-            'last_name' => fake()->lastName(),
-            'avatar' => fake()->imageUrl(200, 200, 'people', true, 'avatar'),
-            'dob' => fake()->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
-            'gender' => $gender,
+            'user_id'      => User::factory(),
+            'first_name'   => fake()->firstName($gender === Gender::Male ? 'male' : 'female'),
+            'last_name'    => fake()->lastName(),
+            'avatar'       => fake()->imageUrl(200, 200, 'people', true, 'avatar'),
+            'dob'          => fake()->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
+            'gender'       => $gender,
             'phone_number' => fake()->phoneNumber(),
-            'bio' => fake()->optional(0.7)->sentence(15),
+            'bio'          => fake()->optional(0.7)->sentence(15),
         ];
     }
 
@@ -49,7 +49,7 @@ class UserProfileFactory extends Factory
     public function male(): static
     {
         return $this->state(fn (array $attributes) => [
-            'gender' => Gender::Male,
+            'gender'     => Gender::Male,
             'first_name' => fake()->firstName('male'),
         ]);
     }
@@ -57,7 +57,7 @@ class UserProfileFactory extends Factory
     public function female(): static
     {
         return $this->state(fn (array $attributes) => [
-            'gender' => Gender::Female,
+            'gender'     => Gender::Female,
             'first_name' => fake()->firstName('female'),
         ]);
     }

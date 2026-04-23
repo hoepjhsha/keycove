@@ -58,11 +58,11 @@ class ReviewFactory extends Factory
         ];
 
         return [
-            'user_id' => User::factory(),
+            'user_id'       => User::factory(),
             'order_item_id' => OrderItem::factory(),
-            'rating' => $rating,
-            'comment' => fake()->randomElement($comments[$rating]),
-            'media' => fake()->optional(0.3)->passthrough([
+            'rating'        => $rating,
+            'comment'       => fake()->randomElement($comments[$rating]),
+            'media'         => fake()->optional(0.3)->passthrough([
                 fake()->imageUrl(800, 600, 'screenshot'),
                 fake()->imageUrl(800, 600, 'screenshot'),
             ]),
@@ -90,7 +90,7 @@ class ReviewFactory extends Factory
     public function oneStar(): static
     {
         return $this->state(fn (array $attributes) => [
-            'rating' => 1,
+            'rating'  => 1,
             'comment' => fake()->randomElement([
                 'Terrible product, complete waste of money.',
                 'Key didn\'t work at all. Very disappointed.',
@@ -102,7 +102,7 @@ class ReviewFactory extends Factory
     public function fiveStars(): static
     {
         return $this->state(fn (array $attributes) => [
-            'rating' => 5,
+            'rating'  => 5,
             'comment' => fake()->randomElement([
                 'Excellent! Best seller on this platform!',
                 'Perfect transaction. Instant delivery and key works flawlessly!',

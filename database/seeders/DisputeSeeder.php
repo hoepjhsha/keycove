@@ -23,12 +23,8 @@ class DisputeSeeder extends Seeder
 
     protected function seedDisputes(): void
     {
-        // Get order items from orders that are disputing, refunded, or some completed ones
-        $eligibleOrderItems = OrderItem::whereIn('order_id', function ($query) {
-            $query->select('id')
-                ->from('orders')
-                ->whereIn('status', [OrderStatus::Disputing, OrderStatus::Refunded]);
-        })->get();
+        // Get order items that are disputing or refunded under the new per-item status model.
+        $eligibleOrderItems = OrderItem::whereIn('status', [OrderStatus::Disputing, OrderStatus::Refunded])->get();
 
         $admins = User::where('role', UserRole::Admin)->get();
         $sellers = User::where('role', UserRole::Seller)->get();
@@ -42,7 +38,7 @@ class DisputeSeeder extends Seeder
             ['status' => ComplaintStatus::Open, 'count' => 3],
             ['status' => ComplaintStatus::InProcess, 'count' => 4],
             ['status' => ComplaintStatus::Escalated, 'count' => 2],
-            ['status' => ComplaintStatus::Resolved, 'count' => 3],
+            ['status' => ComplaintStatus::ApprovedRefund, 'count' => 3],
         ];
 
         $reasons = [
@@ -108,12 +104,12 @@ class DisputeSeeder extends Seeder
 
                 $complaint = Complaint::create([
                     'order_item_id' => $orderItem->id,
-                    'reason' => fake()->randomElement($reasons),
-                    'evidence' => fake()->optional(0.7)->passthrough([
+                    'reason'        => fake()->randomElement($reasons),
+                    'evidence'      => fake()->optional(0.7)->passthrough([
                         fake()->imageUrl(800, 600, 'error'),
                         'Screenshot showing activation error',
                     ]),
-                    'status' => $config['status'],
+                    'status'     => $config['status'],
                     'created_at' => $order->created_at->copy()->addDays(rand(1, 3)),
                 ]);
 
@@ -123,38 +119,38 @@ class DisputeSeeder extends Seeder
                 // Buyer's initial message
                 ComplaintMessage::create([
                     'complaint_id' => $complaint->id,
-                    'sender_id' => $order->buyer_id,
-                    'message' => fake()->randomElement($buyerMessages),
-                    'attachments' => fake()->optional(0.5)->passthrough([
+                    'sender_id'    => $order->buyer_id,
+                    'message'      => fake()->randomElement($buyerMessages),
+                    'attachments'  => fake()->optional(0.5)->passthrough([
                         fake()->imageUrl(800, 600, 'screenshot'),
                     ]),
                     'created_at' => $complaint->created_at->copy()->addHours(rand(1, 12)),
                 ]);
 
                 // Seller response (if in process or beyond)
-                if (in_array($config['status'], [ComplaintStatus::InProcess, ComplaintStatus::Escalated, ComplaintStatus::Resolved])) {
+                if (in_array($config['status'], [ComplaintStatus::InProcess, ComplaintStatus::Escalated, ComplaintStatus::ApprovedRefund], true)) {
                     if ($sellers->isNotEmpty()) {
                         ComplaintMessage::create([
                             'complaint_id' => $complaint->id,
-                            'sender_id' => $sellers->random()->id,
-                            'message' => fake()->randomElement($sellerResponses),
-                            'attachments' => [],
-                            'created_at' => $complaint->created_at->copy()->addHours(rand(12, 48)),
+                            'sender_id'    => $sellers->random()->id,
+                            'message'      => fake()->randomElement($sellerResponses),
+                            'attachments'  => [],
+                            'created_at'   => $complaint->created_at->copy()->addHours(rand(12, 48)),
                         ]);
                     }
                 }
 
                 // Admin messages (if escalated or resolved)
-                if (in_array($config['status'], [ComplaintStatus::Escalated, ComplaintStatus::Resolved]) && $admins->isNotEmpty()) {
+                if (in_array($config['status'], [ComplaintStatus::Escalated, ComplaintStatus::ApprovedRefund], true) && $admins->isNotEmpty()) {
                     $numAdminMessages = rand(1, 2);
 
                     for ($j = 0; $j < $numAdminMessages; $j++) {
                         ComplaintMessage::create([
                             'complaint_id' => $complaint->id,
-                            'sender_id' => $admins->random()->id,
-                            'message' => fake()->randomElement($adminMessages),
-                            'attachments' => [],
-                            'created_at' => $complaint->created_at->copy()->addDays(rand(2, 5)),
+                            'sender_id'    => $admins->random()->id,
+                            'message'      => fake()->randomElement($adminMessages),
+                            'attachments'  => [],
+                            'created_at'   => $complaint->created_at->copy()->addDays(rand(2, 5)),
                         ]);
                     }
                 }
@@ -164,9 +160,9 @@ class DisputeSeeder extends Seeder
                     for ($k = 0; $k < $numMessages - 2; $k++) {
                         ComplaintMessage::create([
                             'complaint_id' => $complaint->id,
-                            'sender_id' => $order->buyer_id,
-                            'message' => fake()->randomElement($buyerMessages),
-                            'attachments' => fake()->optional(0.3)->passthrough([
+                            'sender_id'    => $order->buyer_id,
+                            'message'      => fake()->randomElement($buyerMessages),
+                            'attachments'  => fake()->optional(0.3)->passthrough([
                                 fake()->imageUrl(800, 600, 'evidence'),
                             ]),
                             'created_at' => $complaint->created_at->copy()->addDays(rand(3, 7)),

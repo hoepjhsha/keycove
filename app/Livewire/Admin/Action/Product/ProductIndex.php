@@ -116,7 +116,7 @@ class ProductIndex extends Component
         $categoriesGrouped = $categories->mapWithKeys(function ($parent) {
             return [
                 $parent->id => [
-                    'name' => $parent->name,
+                    'name'     => $parent->name,
                     'children' => $parent->children,
                 ],
             ];
@@ -140,11 +140,11 @@ class ProductIndex extends Component
 
         if ($product) {
             $colorClass = match ($product->status) {
-                GeneralStatus::Active => 'bg-green-500/10 text-green-500',
+                GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
                 GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                GeneralStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
-                GeneralStatus::Deleted => 'bg-red-500/10 text-red-500',
-                default => 'bg-primary-500/10 text-primary-500',
+                GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+                GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                default                 => 'bg-primary-500/10 text-primary-500',
             };
 
             $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$product->status->label().'</span>';
@@ -157,20 +157,20 @@ class ProductIndex extends Component
             }
 
             $this->viewData = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'slug' => $product->slug,
-                'image_url' => $imageUrl,
-                'publisher' => $product->publisher ?? '--N/A--',
-                'developer' => $product->developer ?? '--N/A--',
-                'release_date' => $product->release_date ? $product->release_date->format('d/m/Y') : '--N/A--',
-                'description' => $product->description ?? '--N/A--',
+                'id'                 => $product->id,
+                'name'               => $product->name,
+                'slug'               => $product->slug,
+                'image_url'          => $imageUrl,
+                'publisher'          => $product->publisher ?? '--N/A--',
+                'developer'          => $product->developer ?? '--N/A--',
+                'release_date'       => $product->release_date ? $product->release_date->format('d/m/Y') : '--N/A--',
+                'description'        => $product->description ?? '--N/A--',
                 'system_requirement' => $product->system_requirement ?? [],
-                'categories' => $categories,
-                'status_label' => $statusLabel,
-                'created_at' => $product->created_at->format('d/m/Y H:i:s'),
-                'updated_at' => $product->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at' => $product->deleted_at?->format('d/m/Y H:i:s'),
+                'categories'         => $categories,
+                'status_label'       => $statusLabel,
+                'created_at'         => $product->created_at->format('d/m/Y H:i:s'),
+                'updated_at'         => $product->updated_at->format('d/m/Y H:i:s'),
+                'deleted_at'         => $product->deleted_at?->format('d/m/Y H:i:s'),
             ];
 
             $this->showViewModal = true;

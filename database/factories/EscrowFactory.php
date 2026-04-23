@@ -7,6 +7,8 @@ namespace Database\Factories;
 use App\Enums\EscrowStatus;
 use App\Models\Escrow;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Seller;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,21 +26,39 @@ class EscrowFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => Order::factory(),
-            'amount' => fake()->randomFloat(2, 9.99, 299.99),
-            'release_date' => fake()->dateTimeBetween('+3 days', '+14 days'),
-            'status' => EscrowStatus::Holding,
+            'order_item_id' => OrderItem::factory(),
+            'seller_id'     => Seller::factory(),
+            'amount'        => fake()->randomFloat(2, 9.99, 299.99),
+            'release_date'  => fake()->dateTimeBetween('+3 days', '+14 days'),
+            'status'        => EscrowStatus::Holding,
         ];
     }
 
     public function forOrder(?Order $order = null): static
     {
         return $this->state(function (array $attributes) use ($order) {
-            $orderEntity = $order ?? Order::factory()->create();
+            $orderEntity = $order ?? Order::factory()->has(OrderItem::factory(), 'items')->create();
+            $orderItem = $orderEntity->items()->first() ?? OrderItem::factory()->forOrder($orderEntity)->create();
+            $sellerId = $orderItem->listing?->seller_id ?? $orderItem->listing()->value('seller_id');
 
             return [
-                'order_id' => $orderEntity->id,
-                'amount' => $orderEntity->total_price,
+                'order_item_id' => $orderItem->id,
+                'seller_id'     => $sellerId,
+                'amount'        => $orderItem->subtotal,
+            ];
+        });
+    }
+
+    public function forOrderItem(?OrderItem $orderItem = null): static
+    {
+        return $this->state(function (array $attributes) use ($orderItem) {
+            $orderItemEntity = $orderItem ?? OrderItem::factory()->create();
+            $sellerId = $orderItemEntity->listing?->seller_id ?? $orderItemEntity->listing()->value('seller_id');
+
+            return [
+                'order_item_id' => $orderItemEntity->id,
+                'seller_id'     => $sellerId,
+                'amount'        => $orderItemEntity->subtotal,
             ];
         });
     }
@@ -53,7 +73,7 @@ class EscrowFactory extends Factory
     public function released(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => EscrowStatus::Released,
+            'status'       => EscrowStatus::Released,
             'release_date' => fake()->dateTimeBetween('-7 days', 'now'),
         ]);
     }

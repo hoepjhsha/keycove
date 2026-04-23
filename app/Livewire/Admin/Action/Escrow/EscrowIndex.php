@@ -37,15 +37,15 @@ class EscrowIndex extends Component
     #[On('viewEscrowDetail')]
     public function viewEscrow($rowId): void
     {
-        $escrow = Escrow::with(['order', 'order.buyer', 'seller'])->find($rowId);
+        $escrow = Escrow::with(['orderItem.order.buyer', 'seller'])->find($rowId);
 
         if ($escrow) {
             $statusColorClass = match ($escrow->status) {
-                EscrowStatus::Holding => 'bg-blue-500/10 text-blue-500',
+                EscrowStatus::Holding  => 'bg-blue-500/10 text-blue-500',
                 EscrowStatus::Released => 'bg-green-500/10 text-green-500',
                 EscrowStatus::Refunded => 'bg-red-500/10 text-red-500',
-                EscrowStatus::Frozen => 'bg-purple-500/10 text-purple-500',
-                default => 'bg-gray-500/10 text-gray-500',
+                EscrowStatus::Frozen   => 'bg-purple-500/10 text-purple-500',
+                default                => 'bg-gray-500/10 text-gray-500',
             };
 
             $statusLabel = method_exists($escrow->status, 'label')
@@ -54,16 +54,16 @@ class EscrowIndex extends Component
             $statusBadge = '<span class="'.$statusColorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$statusLabel.'</span>';
 
             $this->viewData = [
-                'id' => $escrow->id,
-                'order_code' => $escrow->order?->order_code ?? '-',
-                'buyer_username' => $escrow->order?->buyer?->username ?? '-',
-                'buyer_email' => $escrow->order?->buyer?->email ?? '-',
+                'id'               => $escrow->id,
+                'order_code'       => $escrow->orderItem?->order?->order_code ?? '-',
+                'buyer_username'   => $escrow->orderItem?->order?->buyer?->username ?? '-',
+                'buyer_email'      => $escrow->orderItem?->order?->buyer?->email ?? '-',
                 'seller_shop_name' => $escrow->seller?->shop_name ?? '-',
-                'amount' => number_format((float) $escrow->amount, 2).' VND',
-                'status_badge' => $statusBadge,
-                'release_date' => $escrow->release_date?->format('d/m/Y H:i:s') ?? '-',
-                'created_at' => $escrow->created_at->format('d/m/Y H:i:s'),
-                'updated_at' => $escrow->updated_at->format('d/m/Y H:i:s'),
+                'amount'           => number_format((float) $escrow->amount, 2).' VND',
+                'status_badge'     => $statusBadge,
+                'release_date'     => $escrow->release_date?->format('d/m/Y H:i:s') ?? '-',
+                'created_at'       => $escrow->created_at->format('d/m/Y H:i:s'),
+                'updated_at'       => $escrow->updated_at->format('d/m/Y H:i:s'),
             ];
 
             $this->showViewModal = true;

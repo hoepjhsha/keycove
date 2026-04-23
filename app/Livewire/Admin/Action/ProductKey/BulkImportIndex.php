@@ -52,15 +52,15 @@ class BulkImportIndex extends Component
             $this->progressPercentage = 100;
         } catch (\Throwable $e) {
             $this->importResult = [
-                'totalRows' => 0,
+                'totalRows'    => 0,
                 'successCount' => 0,
                 'failureCount' => 0,
-                'errors' => [
+                'errors'       => [
                     [
                         'rowNumber' => 0,
-                        'field' => 'import',
-                        'message' => 'Import failed: '.$e->getMessage(),
-                        'rowData' => [],
+                        'field'     => 'import',
+                        'message'   => 'Import failed: '.$e->getMessage(),
+                        'rowData'   => [],
                     ],
                 ],
                 'hasErrors' => true,

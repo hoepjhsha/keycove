@@ -55,10 +55,10 @@ return [
         'flatpickr' => [
             'locales' => [
                 'en' => [
-                    'locale' => 'en',
+                    'locale'     => 'en',
                     'dateFormat' => 'd/m/Y H:i',
                     'enableTime' => true,
-                    'time_24hr' => true,
+                    'time_24hr'  => true,
                 ],
             ],
         ],
@@ -118,9 +118,9 @@ return [
 
     'filter_attributes' => [
         'input_text' => InputText::class,
-        'boolean' => Boolean::class,
-        'number' => Number::class,
-        'select' => Select::class,
+        'boolean'    => Boolean::class,
+        'number'     => Number::class,
+        'select'     => Select::class,
     ],
 
     /*
@@ -146,14 +146,14 @@ return [
     */
 
     'exportable' => [
-        'default' => 'openspout_v4',
+        'default'      => 'openspout_v4',
         'openspout_v5' => [
             'xlsx' => ExportToXLS::class,
-            'csv' => ExportToCsv::class,
+            'csv'  => ExportToCsv::class,
         ],
         'openspout_v4' => [
             'xlsx' => PowerComponents\LivewirePowerGrid\Components\Exports\OpenSpout\v4\ExportToXLS::class,
-            'csv' => PowerComponents\LivewirePowerGrid\Components\Exports\OpenSpout\v4\ExportToCsv::class,
+            'csv'  => PowerComponents\LivewirePowerGrid\Components\Exports\OpenSpout\v4\ExportToCsv::class,
         ],
     ],
 

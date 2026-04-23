@@ -37,9 +37,9 @@ class SettingFactory extends Factory
         $setting = fake()->randomElement($settings);
 
         return [
-            'user_id' => User::factory(),
-            'key' => $setting['key'],
-            'value' => $setting['value'],
+            'user_id'     => User::factory(),
+            'key'         => $setting['key'],
+            'value'       => $setting['value'],
             'description' => $setting['description'],
         ];
     }
@@ -56,8 +56,8 @@ class SettingFactory extends Factory
     public function theme(string $theme = 'dark'): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'theme',
-            'value' => $theme,
+            'key'         => 'theme',
+            'value'       => $theme,
             'description' => 'User interface theme preference',
         ]);
     }
@@ -65,8 +65,8 @@ class SettingFactory extends Factory
     public function language(string $lang = 'en'): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'language',
-            'value' => $lang,
+            'key'         => 'language',
+            'value'       => $lang,
             'description' => 'Preferred language for the interface',
         ]);
     }
@@ -74,8 +74,8 @@ class SettingFactory extends Factory
     public function notifications(bool $enabled = true): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'notifications_email',
-            'value' => $enabled ? 'true' : 'false',
+            'key'         => 'notifications_email',
+            'value'       => $enabled ? 'true' : 'false',
             'description' => 'Enable email notifications',
         ]);
     }

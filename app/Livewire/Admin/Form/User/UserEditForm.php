@@ -127,9 +127,9 @@ class UserEditForm extends Form
 
         $data = [
             'username' => $this->username,
-            'email' => $this->email,
-            'role' => $targetRole,
-            'status' => UserStatus::from($this->status),
+            'email'    => $this->email,
+            'role'     => $targetRole,
+            'status'   => UserStatus::from($this->status),
         ];
 
         if (! empty($this->password)) {

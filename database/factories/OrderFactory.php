@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,10 +26,9 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'buyer_id' => User::factory(),
-            'order_code' => $this->generateOrderCode(),
-            'total_price' => fake()->randomFloat(2, 9.99, 299.99),
-            'status' => OrderStatus::Processing,
+            'buyer_id'       => User::factory(),
+            'order_code'     => $this->generateOrderCode(),
+            'total_price'    => fake()->randomFloat(2, 9.99, 299.99),
             'payment_method' => fake()->randomElement([PaymentMethod::VNPay, PaymentMethod::Stripe]),
         ];
     }
@@ -52,51 +52,37 @@ class OrderFactory extends Factory
 
     public function pendingPayment(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::PendingPayment,
-        ]);
+        return $this->withItems(status: OrderStatus::PendingPayment);
     }
 
     public function processing(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Processing,
-        ]);
+        return $this->withItems(status: OrderStatus::Processing);
     }
 
     public function delivered(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Delivered,
-        ]);
+        return $this->withItems(status: OrderStatus::Delivered);
     }
 
     public function disputing(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Disputing,
-        ]);
+        return $this->withItems(status: OrderStatus::Disputing);
     }
 
     public function completed(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Completed,
-        ]);
+        return $this->withItems(status: OrderStatus::Completed);
     }
 
     public function cancelled(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Cancelled,
-        ]);
+        return $this->withItems(status: OrderStatus::Cancelled);
     }
 
     public function refunded(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => OrderStatus::Refunded,
-        ]);
+        return $this->withItems(status: OrderStatus::Refunded);
     }
 
     public function vnpay(): static
@@ -111,5 +97,24 @@ class OrderFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'payment_method' => PaymentMethod::Stripe,
         ]);
+    }
+
+    public function withItems(int $count = 1, ?OrderStatus $status = null): static
+    {
+        $itemFactory = OrderItem::factory()->count($count);
+
+        if ($status !== null) {
+            $itemFactory = $itemFactory->state(fn (array $attributes) => [
+                'status' => $status,
+            ]);
+        }
+
+        return $this
+            ->has($itemFactory, 'items')
+            ->afterCreating(function (Order $order): void {
+                $order->update([
+                    'total_price' => $order->items()->sum('subtotal'),
+                ]);
+            });
     }
 }

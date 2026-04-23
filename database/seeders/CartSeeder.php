@@ -51,9 +51,9 @@ class CartSeeder extends Seeder
 
             foreach ($selectedListings as $listing) {
                 CartItem::firstOrCreate([
-                    'cart_id' => $cart->id,
+                    'cart_id'    => $cart->id,
                     'listing_id' => $listing->id,
-                    'quantity' => random_int(1, 2),
+                    'quantity'   => random_int(1, 2),
                 ]);
             }
         }

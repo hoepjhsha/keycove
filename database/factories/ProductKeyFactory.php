@@ -25,9 +25,9 @@ class ProductKeyFactory extends Factory
     public function definition(): array
     {
         return [
-            'listing_id' => ProductListing::factory(),
-            'key_code' => $this->generateKeyCode(),
-            'status' => ProductKeyStatus::Available,
+            'listing_id'    => ProductListing::factory(),
+            'key_code'      => $this->generateKeyCode(),
+            'status'        => ProductKeyStatus::Available,
             'order_item_id' => null,
         ];
     }
@@ -58,7 +58,7 @@ class ProductKeyFactory extends Factory
     public function available(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ProductKeyStatus::Available,
+            'status'        => ProductKeyStatus::Available,
             'order_item_id' => null,
         ]);
     }

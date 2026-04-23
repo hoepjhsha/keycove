@@ -20,7 +20,7 @@ class SellerKycProcessForm extends Form
     public function rules(): array
     {
         return [
-            'kyc_status' => ['required', new Enum(KycStatus::class)],
+            'kyc_status'          => ['required', new Enum(KycStatus::class)],
             'kyc_rejected_reason' => ['required_if:kyc_status,'.KycStatus::Rejected->value, 'nullable', 'string', 'max:1000'],
         ];
     }

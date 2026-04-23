@@ -84,12 +84,12 @@ final class ProductVariantsTable extends PowerGridComponent
     protected function getStatusLabel(ProductVariantStatus $status): string
     {
         $colorClass = match ($status) {
-            ProductVariantStatus::Draft => 'bg-gray-500/10 text-gray-500',
-            ProductVariantStatus::Active => 'bg-green-500/10 text-green-500',
-            ProductVariantStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
+            ProductVariantStatus::Draft        => 'bg-gray-500/10 text-gray-500',
+            ProductVariantStatus::Active       => 'bg-green-500/10 text-green-500',
+            ProductVariantStatus::Hidden       => 'bg-yellow-500/10 text-yellow-500',
             ProductVariantStatus::Discontinued => 'bg-red-500/10 text-red-500',
-            ProductVariantStatus::Deleted => 'bg-red-500/10 text-red-500',
-            default => 'bg-slate-500/10 text-slate-500',
+            ProductVariantStatus::Deleted      => 'bg-red-500/10 text-red-500',
+            default                            => 'bg-slate-500/10 text-slate-500',
         };
 
         $labelText = $status->label();
@@ -136,7 +136,7 @@ final class ProductVariantsTable extends PowerGridComponent
             Filter::inputText('edition')->operators(['contains']),
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(ProductVariantStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => $status->label(),
                 ]))
                 ->optionValue('id')
@@ -222,10 +222,10 @@ final class ProductVariantsTable extends PowerGridComponent
     public function toggleVariantStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the status of this variant?',
+            'title'  => 'Change Status?',
+            'text'   => 'Are you sure you want to change the status of this variant?',
             'method' => 'performToggleVariantStatus',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -235,10 +235,10 @@ final class ProductVariantsTable extends PowerGridComponent
         $variant = ProductVariant::findOrFail($id);
 
         $newStatus = match ($variant->status) {
-            ProductVariantStatus::Draft => ProductVariantStatus::Active,
+            ProductVariantStatus::Draft  => ProductVariantStatus::Active,
             ProductVariantStatus::Active => ProductVariantStatus::Hidden,
             ProductVariantStatus::Hidden => ProductVariantStatus::Draft,
-            default => ProductVariantStatus::Draft,
+            default                      => ProductVariantStatus::Draft,
         };
 
         $variant->status = $newStatus;
@@ -251,10 +251,10 @@ final class ProductVariantsTable extends PowerGridComponent
     public function deleteVariant($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Variant?',
-            'text' => 'Are you sure you want to delete this variant? This action cannot be undone.',
+            'title'  => 'Delete Variant?',
+            'text'   => 'Are you sure you want to delete this variant? This action cannot be undone.',
             'method' => 'performDeleteVariant',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -284,10 +284,10 @@ final class ProductVariantsTable extends PowerGridComponent
     public function restoreVariant($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore Variant?',
-            'text' => 'Are you sure you want to restore this variant?',
+            'title'  => 'Restore Variant?',
+            'text'   => 'Are you sure you want to restore this variant?',
             'method' => 'performRestoreVariant',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -312,9 +312,9 @@ final class ProductVariantsTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete '.count($this->checkboxValues).' selected variants?',
+            'title'  => 'Delete '.count($this->checkboxValues).' selected variants?',
             'method' => 'performBulkDeleteVariant',
-            'id' => null,
+            'id'     => null,
         ]);
     }
 

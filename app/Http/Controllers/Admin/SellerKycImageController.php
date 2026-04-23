@@ -32,11 +32,11 @@ class SellerKycImageController
         }
 
         Log::info('Admin accessed KYC image', [
-            'admin_id' => auth()->guard('admin')->id(),
+            'admin_id'    => auth()->guard('admin')->id(),
             'admin_email' => auth()->guard('admin')->user()?->email,
-            'seller_id' => $seller->id,
-            'image_type' => $type,
-            'path' => $path,
+            'seller_id'   => $seller->id,
+            'image_type'  => $type,
+            'path'        => $path,
         ]);
 
         $fileContent = Storage::disk($disk)->get($path);

@@ -62,11 +62,11 @@ final class RegionTable extends PowerGridComponent
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    GeneralStatus::Active => 'bg-green-500/10 text-green-500',
+                    GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
                     GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                    GeneralStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
-                    GeneralStatus::Deleted => 'bg-red-500/10 text-red-500',
-                    default => 'bg-primary-500/10 text-primary-500',
+                    GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+                    GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                    default                 => 'bg-primary-500/10 text-primary-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -120,7 +120,7 @@ final class RegionTable extends PowerGridComponent
 
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(GeneralStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => $status->label(),
                 ]))
                 ->optionValue('id')
@@ -211,10 +211,10 @@ final class RegionTable extends PowerGridComponent
     public function toggleStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the status of this region?',
+            'title'  => 'Change Status?',
+            'text'   => 'Are you sure you want to change the status of this region?',
             'method' => 'performToggleStatus',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -224,7 +224,7 @@ final class RegionTable extends PowerGridComponent
         $region = Region::findOrFail($id);
         $region->status = match ($region->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
-            default => GeneralStatus::Inactive,
+            default                 => GeneralStatus::Inactive,
         };
         $region->save();
 
@@ -235,10 +235,10 @@ final class RegionTable extends PowerGridComponent
     public function deleteRegion($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Region?',
-            'text' => 'Are you sure you want to delete this region? This action cannot be undone.',
+            'title'  => 'Delete Region?',
+            'text'   => 'Are you sure you want to delete this region? This action cannot be undone.',
             'method' => 'performDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -261,10 +261,10 @@ final class RegionTable extends PowerGridComponent
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore Region?',
-            'text' => 'Are you sure you want to restore this region? This action cannot be undone.',
+            'title'  => 'Restore Region?',
+            'text'   => 'Are you sure you want to restore this region? This action cannot be undone.',
             'method' => 'performRevertDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -291,9 +291,9 @@ final class RegionTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
             'method' => 'performBulkDelete',
-            'id' => null,
+            'id'     => null,
         ]);
     }
 

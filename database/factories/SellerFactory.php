@@ -36,14 +36,14 @@ class SellerFactory extends Factory
         Storage::disk($disk)->put($backImage, file_get_contents('https://placehold.co/800x500/EEE/31343C/png?text=Back+ID+Card'));
 
         return [
-            'user_id' => User::factory()->seller(),
-            'shop_name' => $shopName,
-            'cccd_number' => fake()->numerify('############'),
+            'user_id'          => User::factory()->seller(),
+            'shop_name'        => $shopName,
+            'cccd_number'      => fake()->numerify('############'),
             'cccd_front_image' => $frontImage,
-            'cccd_back_image' => $backImage,
-            'kyc_status' => KycStatus::Approved,
-            'created_at' => fake()->dateTimeBetween('-1 month', 'now'),
-            'updated_at' => fake()->dateTimeBetween('-1 month', 'now'),
+            'cccd_back_image'  => $backImage,
+            'kyc_status'       => KycStatus::Approved,
+            'created_at'       => fake()->dateTimeBetween('-1 month', 'now'),
+            'updated_at'       => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }
 

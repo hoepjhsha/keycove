@@ -28,7 +28,7 @@ class Seller extends Model
     protected function casts(): array
     {
         return [
-            'kyc_status' => KycStatus::class,
+            'kyc_status'  => KycStatus::class,
             'cccd_number' => 'encrypted',
         ];
     }

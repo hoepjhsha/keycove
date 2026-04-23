@@ -101,32 +101,32 @@ class UserIndex extends Component
 
         if ($user) {
             $colorClass = match ($user->status) {
-                UserStatus::Active => 'bg-green-500/10 text-green-500',
+                UserStatus::Active   => 'bg-green-500/10 text-green-500',
                 UserStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                UserStatus::Blocked => 'bg-yellow-500/10 text-yellow-500',
-                UserStatus::Deleted => 'bg-red-500/10 text-red-500',
-                default => 'bg-primary-500/10 text-primary-500',
+                UserStatus::Blocked  => 'bg-yellow-500/10 text-yellow-500',
+                UserStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                default              => 'bg-primary-500/10 text-primary-500',
             };
 
             $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$user->status->label().'</span>';
 
             $roleClass = match ($user->role) {
-                UserRole::User => 'bg-blue-500/10 text-blue-500',
-                UserRole::Seller => 'bg-indigo-500/10 text-indigo-500',
-                UserRole::Admin => 'bg-purple-500/10 text-purple-500',
+                UserRole::User       => 'bg-blue-500/10 text-blue-500',
+                UserRole::Seller     => 'bg-indigo-500/10 text-indigo-500',
+                UserRole::Admin      => 'bg-purple-500/10 text-purple-500',
                 UserRole::SuperAdmin => 'bg-emerald-500/10 text-emerald-500',
             };
             $roleLabel = '<span class="'.$roleClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$user->role->label().'</span>';
 
             $this->viewData = [
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'role_label' => $roleLabel,
+                'id'           => $user->id,
+                'username'     => $user->username,
+                'email'        => $user->email,
+                'role_label'   => $roleLabel,
                 'status_label' => $statusLabel,
-                'created_at' => $user->created_at->format('d/m/Y H:i:s'),
-                'updated_at' => $user->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at' => $user->deleted_at?->format('d/m/Y H:i:s'),
+                'created_at'   => $user->created_at->format('d/m/Y H:i:s'),
+                'updated_at'   => $user->updated_at->format('d/m/Y H:i:s'),
+                'deleted_at'   => $user->deleted_at?->format('d/m/Y H:i:s'),
             ];
 
             $this->showViewModal = true;

@@ -47,9 +47,9 @@ class SellerKycIndex extends Component
         if ($seller) {
             $colorClass = match ($seller->kyc_status) {
                 KycStatus::Approved => 'bg-green-500/10 text-green-500',
-                KycStatus::Pending => 'bg-yellow-500/10 text-yellow-500',
+                KycStatus::Pending  => 'bg-yellow-500/10 text-yellow-500',
                 KycStatus::Rejected => 'bg-red-500/10 text-red-500',
-                default => 'bg-primary-500/10 text-primary-500',
+                default             => 'bg-primary-500/10 text-primary-500',
             };
 
             $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$seller->kyc_status->label().'</span>';
@@ -63,17 +63,17 @@ class SellerKycIndex extends Component
             };
 
             $this->viewData = [
-                'id' => $seller->id,
-                'user_name' => $seller->user?->username ?? 'Unknown',
-                'user_email' => $seller->user?->email ?? 'Unknown',
-                'shop_name' => $seller->shop_name,
-                'cccd_number' => $seller->cccd_number,
-                'cccd_front_image' => $getImgUrl($seller->cccd_front_image, 'front', $seller->id),
-                'cccd_back_image' => $getImgUrl($seller->cccd_back_image, 'back', $seller->id),
-                'status_label' => $statusLabel,
+                'id'                  => $seller->id,
+                'user_name'           => $seller->user?->username ?? 'Unknown',
+                'user_email'          => $seller->user?->email ?? 'Unknown',
+                'shop_name'           => $seller->shop_name,
+                'cccd_number'         => $seller->cccd_number,
+                'cccd_front_image'    => $getImgUrl($seller->cccd_front_image, 'front', $seller->id),
+                'cccd_back_image'     => $getImgUrl($seller->cccd_back_image, 'back', $seller->id),
+                'status_label'        => $statusLabel,
                 'kyc_rejected_reason' => $seller->kyc_rejected_reason,
-                'created_at' => $seller->created_at ? $seller->created_at->format('d/m/Y H:i:s') : 'N/A',
-                'updated_at' => $seller->updated_at ? $seller->updated_at->format('d/m/Y H:i:s') : 'N/A',
+                'created_at'          => $seller->created_at ? $seller->created_at->format('d/m/Y H:i:s') : 'N/A',
+                'updated_at'          => $seller->updated_at ? $seller->updated_at->format('d/m/Y H:i:s') : 'N/A',
             ];
 
             $this->showViewModal = true;

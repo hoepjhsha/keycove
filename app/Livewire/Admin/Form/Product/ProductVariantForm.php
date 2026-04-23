@@ -50,12 +50,12 @@ class ProductVariantForm extends Form
         $this->validate();
 
         return ProductVariant::create([
-            'product_id' => $this->product_id,
-            'region_id' => $this->region_id,
+            'product_id'  => $this->product_id,
+            'region_id'   => $this->region_id,
             'platform_id' => $this->platform_id,
-            'os_id' => $this->os_id,
-            'edition' => $this->edition,
-            'status' => $this->status,
+            'os_id'       => $this->os_id,
+            'edition'     => $this->edition,
+            'status'      => $this->status,
         ]);
     }
 
@@ -70,11 +70,11 @@ class ProductVariantForm extends Form
         }
 
         return $this->variant->update([
-            'region_id' => $this->region_id,
+            'region_id'   => $this->region_id,
             'platform_id' => $this->platform_id,
-            'os_id' => $this->os_id,
-            'edition' => $this->edition,
-            'status' => $this->status,
+            'os_id'       => $this->os_id,
+            'edition'     => $this->edition,
+            'status'      => $this->status,
         ]);
     }
 

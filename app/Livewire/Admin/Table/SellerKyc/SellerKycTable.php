@@ -63,9 +63,9 @@ final class SellerKycTable extends PowerGridComponent
 
                 $colorClass = match ($status) {
                     KycStatus::Approved => 'bg-green-500/10 text-green-500',
-                    KycStatus::Pending => 'bg-yellow-500/10 text-yellow-500',
+                    KycStatus::Pending  => 'bg-yellow-500/10 text-yellow-500',
                     KycStatus::Rejected => 'bg-red-500/10 text-red-500',
-                    default => 'bg-primary-500/10 text-primary-500',
+                    default             => 'bg-primary-500/10 text-primary-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -106,7 +106,7 @@ final class SellerKycTable extends PowerGridComponent
 
             Filter::multiSelect('kyc_status', 'kyc_status')
                 ->dataSource(collect(KycStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => $status->label(),
                 ]))
                 ->optionValue('id')

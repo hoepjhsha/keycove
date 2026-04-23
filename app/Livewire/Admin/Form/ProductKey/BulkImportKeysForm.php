@@ -22,9 +22,9 @@ class BulkImportKeysForm extends Form
     {
         return [
             'file.required' => 'Please select a file to upload',
-            'file.file' => 'Please upload a valid file',
-            'file.mimes' => 'File must be CSV or XLSX format',
-            'file.max' => 'File size must not exceed 10MB',
+            'file.file'     => 'Please upload a valid file',
+            'file.mimes'    => 'File must be CSV or XLSX format',
+            'file.max'      => 'File size must not exceed 10MB',
         ];
     }
 

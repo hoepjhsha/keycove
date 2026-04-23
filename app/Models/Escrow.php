@@ -24,9 +24,9 @@ class Escrow extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount'       => 'decimal:2',
             'release_date' => 'datetime',
-            'status' => EscrowStatus::class,
+            'status'       => EscrowStatus::class,
         ];
     }
 

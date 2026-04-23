@@ -49,8 +49,8 @@ class CategoryCreateForm extends Form
         }
 
         return Category::create([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'parent_id' => $this->parentId,
         ]);
     }

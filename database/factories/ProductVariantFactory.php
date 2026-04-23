@@ -44,12 +44,12 @@ class ProductVariantFactory extends Factory
         ];
 
         return [
-            'product_id' => Product::factory(),
-            'region_id' => Region::factory(),
+            'product_id'  => Product::factory(),
+            'region_id'   => Region::factory(),
             'platform_id' => Platform::factory(),
-            'os_id' => OperatingSystem::factory(),
-            'edition' => fake()->randomElement($editions),
-            'status' => ProductVariantStatus::Active,
+            'os_id'       => OperatingSystem::factory(),
+            'edition'     => fake()->randomElement($editions),
+            'status'      => ProductVariantStatus::Active,
         ];
     }
 

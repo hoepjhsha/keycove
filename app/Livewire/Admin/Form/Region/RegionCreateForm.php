@@ -56,8 +56,8 @@ class RegionCreateForm extends Form
         }
 
         return Region::create([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'parent_id' => $this->parentId,
             'flag_code' => $this->flag_code,
         ]);

@@ -23,8 +23,8 @@ class ImportProcessor
                 foreach ($validRows as $row) {
                     ProductKey::create([
                         'listing_id' => (int) $row['listing_id'],
-                        'key_code' => $row['key_code'],
-                        'status' => $this->parseStatus($row['status'] ?? null),
+                        'key_code'   => $row['key_code'],
+                        'status'     => $this->parseStatus($row['status'] ?? null),
                     ]);
                     $successCount++;
                 }

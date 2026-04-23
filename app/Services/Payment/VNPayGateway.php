@@ -36,18 +36,18 @@ class VNPayGateway implements PaymentGatewayInterface
         $expire = date('YmdHis', strtotime('+15 minutes', strtotime($startTime)));
 
         $inputData = [
-            'vnp_Version' => '2.1.0',
-            'vnp_TmnCode' => $this->tmnCode,
-            'vnp_Amount' => $vnp_Amount * 100,
-            'vnp_Command' => 'pay',
+            'vnp_Version'    => '2.1.0',
+            'vnp_TmnCode'    => $this->tmnCode,
+            'vnp_Amount'     => $vnp_Amount * 100,
+            'vnp_Command'    => 'pay',
             'vnp_CreateDate' => date('YmdHis'),
-            'vnp_CurrCode' => 'VND',
-            'vnp_IpAddr' => $vnp_IpAddr,
-            'vnp_Locale' => $vnp_Locale,
-            'vnp_OrderInfo' => $data['order_info'] ?? 'Thanh toan GD: '.$vnp_TxnRef,
-            'vnp_OrderType' => $data['order_type'] ?? 'other',
-            'vnp_ReturnUrl' => $this->returnUrl,
-            'vnp_TxnRef' => $vnp_TxnRef,
+            'vnp_CurrCode'   => 'VND',
+            'vnp_IpAddr'     => $vnp_IpAddr,
+            'vnp_Locale'     => $vnp_Locale,
+            'vnp_OrderInfo'  => $data['order_info'] ?? 'Thanh toan GD: '.$vnp_TxnRef,
+            'vnp_OrderType'  => $data['order_type'] ?? 'other',
+            'vnp_ReturnUrl'  => $this->returnUrl,
+            'vnp_TxnRef'     => $vnp_TxnRef,
             'vnp_ExpireDate' => $expire,
         ];
 
@@ -108,15 +108,15 @@ class VNPayGateway implements PaymentGatewayInterface
         $isSuccess = ($secureHash === $vnp_SecureHash && ($inputData['vnp_ResponseCode'] ?? '') == '00');
 
         return [
-            'success' => $isSuccess,
+            'success'            => $isSuccess,
             'is_valid_signature' => $secureHash === $vnp_SecureHash,
-            'transaction_no' => $inputData['vnp_TransactionNo'] ?? null,
-            'amount' => ($inputData['vnp_Amount'] ?? 0) / 100,
-            'order_id' => $inputData['vnp_TxnRef'] ?? null,
-            'response_code' => $inputData['vnp_ResponseCode'] ?? null,
-            'bank_code' => $inputData['vnp_BankCode'] ?? null,
-            'order_info' => $inputData['vnp_OrderInfo'] ?? null,
-            'pay_date' => $inputData['vnp_PayDate'] ?? null,
+            'transaction_no'     => $inputData['vnp_TransactionNo'] ?? null,
+            'amount'             => ($inputData['vnp_Amount'] ?? 0) / 100,
+            'order_id'           => $inputData['vnp_TxnRef'] ?? null,
+            'response_code'      => $inputData['vnp_ResponseCode'] ?? null,
+            'bank_code'          => $inputData['vnp_BankCode'] ?? null,
+            'order_info'         => $inputData['vnp_OrderInfo'] ?? null,
+            'pay_date'           => $inputData['vnp_PayDate'] ?? null,
         ];
     }
 

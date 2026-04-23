@@ -23,7 +23,7 @@ return [
     ],
 
     'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
+        'key'    => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
@@ -31,7 +31,7 @@ return [
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+            'channel'              => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
 
@@ -39,18 +39,18 @@ return [
         'default' => 'vnpay',
 
         'vnpay' => [
-            'tmn_code' => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
+            'tmn_code'    => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
             'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
-            'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
-            'return_url' => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+            'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+            'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
         ],
     ],
 
     'vnpay' => [
-        'tmn_code' => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
+        'tmn_code'    => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
         'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
-        'url' => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
-        'return_url' => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+        'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+        'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
     ],
 
 ];

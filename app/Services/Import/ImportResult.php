@@ -20,14 +20,14 @@ class ImportResult
     public function toArray(): array
     {
         return [
-            'totalRows' => $this->totalRows,
+            'totalRows'    => $this->totalRows,
             'successCount' => $this->successCount,
             'failureCount' => $this->failureCount,
-            'errors' => array_map(fn ($error) => [
+            'errors'       => array_map(fn ($error) => [
                 'rowNumber' => $error->rowNumber,
-                'field' => $error->field,
-                'message' => $error->message,
-                'rowData' => $error->rowData,
+                'field'     => $error->field,
+                'message'   => $error->message,
+                'rowData'   => $error->rowData,
             ], $this->errors),
             'hasErrors' => $this->hasErrors,
         ];
@@ -39,12 +39,12 @@ class ImportResult
     public function getErrorReport(): array
     {
         return array_map(fn ($error) => [
-            'Row' => $error->rowNumber,
-            'Field' => $error->field,
-            'Error' => $error->message,
+            'Row'        => $error->rowNumber,
+            'Field'      => $error->field,
+            'Error'      => $error->message,
             'Listing ID' => $error->rowData['listing_id'] ?? '',
-            'Key Code' => $error->rowData['key_code'] ?? '',
-            'Status' => $error->rowData['status'] ?? '',
+            'Key Code'   => $error->rowData['key_code'] ?? '',
+            'Status'     => $error->rowData['status'] ?? '',
         ], $this->errors);
     }
 }

@@ -41,8 +41,8 @@ class SystemConfigFactory extends Factory
         $config = fake()->randomElement($configs);
 
         return [
-            'key' => $config['key'],
-            'value' => $config['value'],
+            'key'         => $config['key'],
+            'value'       => $config['value'],
             'description' => $config['description'],
         ];
     }
@@ -50,8 +50,8 @@ class SystemConfigFactory extends Factory
     public function maintenanceMode(bool $enabled = false): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'maintenance_mode',
-            'value' => $enabled ? 'true' : 'false',
+            'key'         => 'maintenance_mode',
+            'value'       => $enabled ? 'true' : 'false',
             'description' => 'Enable/disable maintenance mode',
         ]);
     }
@@ -59,8 +59,8 @@ class SystemConfigFactory extends Factory
     public function commissionRate(float $rate = 5.0): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'commission_rate',
-            'value' => (string) $rate,
+            'key'         => 'commission_rate',
+            'value'       => (string) $rate,
             'description' => 'Platform commission rate in percentage',
         ]);
     }
@@ -68,8 +68,8 @@ class SystemConfigFactory extends Factory
     public function escrowDays(int $days = 7): static
     {
         return $this->state(fn (array $attributes) => [
-            'key' => 'escrow_release_days',
-            'value' => (string) $days,
+            'key'         => 'escrow_release_days',
+            'value'       => (string) $days,
             'description' => 'Days before escrow is automatically released',
         ]);
     }

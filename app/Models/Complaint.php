@@ -29,8 +29,8 @@ class Complaint extends Model
     protected function casts(): array
     {
         return [
-            'evidence' => 'array',
-            'status' => ComplaintStatus::class,
+            'evidence'    => 'array',
+            'status'      => ComplaintStatus::class,
             'resolved_at' => 'datetime',
         ];
     }

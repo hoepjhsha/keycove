@@ -50,9 +50,9 @@ class CategoryFactory extends Factory
 
         return [
             'parent_id' => null,
-            'name' => $name,
-            'slug' => Str::slug($name).random_int(1, 100),
-            'status' => GeneralStatus::Active,
+            'name'      => $name,
+            'slug'      => Str::slug($name).random_int(1, 100),
+            'status'    => GeneralStatus::Active,
         ];
     }
 
@@ -125,7 +125,7 @@ class CategoryFactory extends Factory
                 $created = Category::firstOrCreate(
                     ['slug' => $cat['slug']],
                     [
-                        'name' => $cat['name'],
+                        'name'   => $cat['name'],
                         'status' => GeneralStatus::Active,
                     ]
                 );
@@ -139,9 +139,9 @@ class CategoryFactory extends Factory
                 Category::firstOrCreate(
                     ['slug' => $cat['slug']],
                     [
-                        'name' => $cat['name'],
+                        'name'      => $cat['name'],
                         'parent_id' => $parentMap[$cat['parent_name']],
-                        'status' => GeneralStatus::Active,
+                        'status'    => GeneralStatus::Active,
                     ]
                 );
             }

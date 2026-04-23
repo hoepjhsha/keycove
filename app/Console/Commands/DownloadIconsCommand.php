@@ -13,32 +13,32 @@ use Illuminate\Support\Facades\Storage;
 class DownloadIconsCommand extends Command
 {
     private array $platforms = [
-        'steam' => 'https://cdn.simpleicons.org/steam/black',
-        'epic-games' => 'https://cdn.simpleicons.org/epicgames/black',
-        'gog' => 'https://cdn.simpleicons.org/gog.com/black',
-        'ea-app' => 'https://cdn.simpleicons.org/ea/black',
+        'steam'           => 'https://cdn.simpleicons.org/steam/black',
+        'epic-games'      => 'https://cdn.simpleicons.org/epicgames/black',
+        'gog'             => 'https://cdn.simpleicons.org/gog.com/black',
+        'ea-app'          => 'https://cdn.simpleicons.org/ea/black',
         'ubisoft-connect' => 'https://cdn.simpleicons.org/ubisoft/black',
-        'battle-net' => 'https://cdn.simpleicons.org/battledotnet/black',
-        'xbox' => 'https://cdn-icons-png.flaticon.com/512/1/1321.png',
-        'playstation' => 'https://cdn.simpleicons.org/playstation/black',
-        'nintendo' => 'https://cdn-icons-png.flaticon.com/128/871/871377.png',
-        'humble' => 'https://cdn.simpleicons.org/humblebundle/black',
-        'gmg' => 'https://static.rakuten.com/img/store/13501/13501-GreenManGaming-square-fullcolor.png',
-        'rockstar' => 'https://cdn.simpleicons.org/rockstargames/black',
-        'microsoft' => 'https://cdn-icons-png.flaticon.com/128/732/732221.png',
-        'itch' => 'https://cdn.simpleicons.org/itch.io/black',
+        'battle-net'      => 'https://cdn.simpleicons.org/battledotnet/black',
+        'xbox'            => 'https://cdn-icons-png.flaticon.com/512/1/1321.png',
+        'playstation'     => 'https://cdn.simpleicons.org/playstation/black',
+        'nintendo'        => 'https://cdn-icons-png.flaticon.com/128/871/871377.png',
+        'humble'          => 'https://cdn.simpleicons.org/humblebundle/black',
+        'gmg'             => 'https://static.rakuten.com/img/store/13501/13501-GreenManGaming-square-fullcolor.png',
+        'rockstar'        => 'https://cdn.simpleicons.org/rockstargames/black',
+        'microsoft'       => 'https://cdn-icons-png.flaticon.com/128/732/732221.png',
+        'itch'            => 'https://cdn.simpleicons.org/itch.io/black',
     ];
 
     private array $operatingSystems = [
         'windows10' => 'https://cdn-icons-png.flaticon.com/128/732/732225.png',
         'windows11' => 'https://cdn-icons-png.flaticon.com/128/2952/2952245.png',
-        'windows7' => 'https://cdn-icons-png.flaticon.com/128/232/232411.png',
-        'windows8' => 'https://cdn-icons-png.flaticon.com/128/882/882702.png',
-        'macos' => 'https://cdn.simpleicons.org/apple/black',
-        'ubuntu' => 'https://cdn.simpleicons.org/ubuntu/black',
-        'linux' => 'https://cdn.simpleicons.org/linux/black',
-        'steamos' => 'https://cdn.simpleicons.org/steam/black',
-        'chromeos' => 'https://cdn.simpleicons.org/googlechrome/black',
+        'windows7'  => 'https://cdn-icons-png.flaticon.com/128/232/232411.png',
+        'windows8'  => 'https://cdn-icons-png.flaticon.com/128/882/882702.png',
+        'macos'     => 'https://cdn.simpleicons.org/apple/black',
+        'ubuntu'    => 'https://cdn.simpleicons.org/ubuntu/black',
+        'linux'     => 'https://cdn.simpleicons.org/linux/black',
+        'steamos'   => 'https://cdn.simpleicons.org/steam/black',
+        'chromeos'  => 'https://cdn.simpleicons.org/googlechrome/black',
     ];
 
     public function handle(): int
@@ -78,9 +78,9 @@ class DownloadIconsCommand extends Command
     {
         $ch = curl_init();
         curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
+            CURLOPT_URL            => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 5,
+            CURLOPT_TIMEOUT        => 5,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => true,
         ]);

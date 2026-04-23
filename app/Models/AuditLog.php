@@ -29,7 +29,7 @@ class AuditLog extends Model
         return [
             'old_values' => 'array',
             'new_values' => 'array',
-            'event' => AuditEvent::class,
+            'event'      => AuditEvent::class,
             'created_at' => 'timestamp',
         ];
     }

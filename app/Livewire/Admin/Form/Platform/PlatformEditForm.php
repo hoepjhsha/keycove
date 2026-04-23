@@ -96,11 +96,11 @@ class PlatformEditForm extends Form
         }
 
         return $this->platform->update([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'icon_path' => $iconPath,
-            'base_url' => $this->base_url,
-            'status' => $this->status,
+            'base_url'  => $this->base_url,
+            'status'    => $this->status,
         ]);
     }
 }

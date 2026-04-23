@@ -36,10 +36,10 @@ class EscrowExtendHoldingForm extends Form
             }
 
             $newReleaseDate = match ($unit) {
-                's' => $escrow->release_date->copy()->addSeconds($value),
-                'm' => $escrow->release_date->copy()->addMinutes($value),
-                'h' => $escrow->release_date->copy()->addHours($value),
-                'd' => $escrow->release_date->copy()->addDays($value),
+                's'     => $escrow->release_date->copy()->addSeconds($value),
+                'm'     => $escrow->release_date->copy()->addMinutes($value),
+                'h'     => $escrow->release_date->copy()->addHours($value),
+                'd'     => $escrow->release_date->copy()->addDays($value),
                 default => $escrow->release_date,
             };
 
@@ -51,21 +51,21 @@ class EscrowExtendHoldingForm extends Form
 
             $oldValues = [
                 'release_date' => $escrow->release_date->toDateTimeString(),
-                'updated_at' => $escrow->updated_at->toDateTimeString(),
+                'updated_at'   => $escrow->updated_at->toDateTimeString(),
             ];
 
             $escrow->release_date = $newReleaseDate;
             $escrow->save();
 
             AuditLog::create([
-                'user_id' => Auth::id(),
+                'user_id'        => Auth::id(),
                 'auditable_type' => Escrow::class,
-                'auditable_id' => $escrow->id,
-                'event' => AuditEvent::EscrowExtended,
-                'old_values' => array_merge($oldValues, ['input_duration' => $this->duration]),
-                'new_values' => [
+                'auditable_id'   => $escrow->id,
+                'event'          => AuditEvent::EscrowExtended,
+                'old_values'     => array_merge($oldValues, ['input_duration' => $this->duration]),
+                'new_values'     => [
                     'release_date' => $escrow->release_date->toDateTimeString(),
-                    'updated_at' => $escrow->updated_at->toDateTimeString(),
+                    'updated_at'   => $escrow->updated_at->toDateTimeString(),
                 ],
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),

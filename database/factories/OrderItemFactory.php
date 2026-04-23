@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductListing;
@@ -28,12 +29,13 @@ class OrderItemFactory extends Factory
         $subtotal = $quantity * $unitPrice;
 
         return [
-            'order_id' => Order::factory(),
-            'listing_id' => ProductListing::factory(),
+            'order_id'              => Order::factory(),
+            'listing_id'            => ProductListing::factory(),
             'product_name_snapshot' => fake()->words(3, true).' - '.fake()->randomElement(['Standard Edition', 'Deluxe Edition', 'Ultimate Edition']),
-            'quantity' => $quantity,
-            'unit_price' => $unitPrice,
-            'subtotal' => $subtotal,
+            'quantity'              => $quantity,
+            'unit_price'            => $unitPrice,
+            'subtotal'              => $subtotal,
+            'status'                => OrderStatus::Processing,
         ];
     }
 
@@ -54,7 +56,7 @@ class OrderItemFactory extends Factory
             return [
                 'listing_id' => $productListing->id,
                 'unit_price' => $productListing->price,
-                'subtotal' => $attributes['quantity'] * $productListing->price,
+                'subtotal'   => $attributes['quantity'] * $productListing->price,
             ];
         });
     }

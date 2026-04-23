@@ -36,10 +36,10 @@ class SettingSeeder extends Seeder
                 Setting::firstOrCreate(
                     [
                         'user_id' => $user->id,
-                        'key' => $template['key'],
+                        'key'     => $template['key'],
                     ],
                     [
-                        'value' => fake()->randomElement($template['values']),
+                        'value'       => fake()->randomElement($template['values']),
                         'description' => 'User preference for '.$template['key'],
                     ]
                 );
