@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
             [
                 'username' => 'hoepjhsha',
                 'password' => Hash::make('hoep'),
-                'role' => UserRole::SuperAdmin,
-                'status' => UserStatus::Active,
+                'role'     => UserRole::SuperAdmin,
+                'status'   => UserStatus::Active,
             ]
         );
 

@@ -54,7 +54,7 @@ class RegisterForm extends Form
 
         return User::create([
             'username' => $this->username,
-            'email' => $this->email,
+            'email'    => $this->email,
             'password' => Hash::make($this->password),
         ]);
     }

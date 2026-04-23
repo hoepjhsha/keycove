@@ -83,11 +83,11 @@ class RegionEditForm extends Form
         }
 
         return $this->region->update([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'parent_id' => $this->parentId,
             'flag_code' => $this->flag_code,
-            'status' => $this->status,
+            'status'    => $this->status,
         ]);
     }
 }

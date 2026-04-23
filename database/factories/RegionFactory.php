@@ -50,10 +50,10 @@ class RegionFactory extends Factory
 
         return [
             'parent_id' => null,
-            'name' => $country['name'],
-            'slug' => Str::slug($country['name']),
+            'name'      => $country['name'],
+            'slug'      => Str::slug($country['name']),
             'flag_code' => $country['code'],
-            'status' => GeneralStatus::Active,
+            'status'    => GeneralStatus::Active,
         ];
     }
 
@@ -64,7 +64,7 @@ class RegionFactory extends Factory
 
             return [
                 'parent_id' => $parentRegion->id,
-                'name' => fake()->state(),
+                'name'      => fake()->state(),
             ];
         });
     }
@@ -81,7 +81,7 @@ class RegionFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'parent_id' => Region::factory()->country()->create()->id,
-                'name' => fake()->state(),
+                'name'      => fake()->state(),
             ];
         });
     }

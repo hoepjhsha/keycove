@@ -35,9 +35,9 @@ class ReviewResponseFactory extends Factory
         ];
 
         return [
-            'review_id' => Review::factory(),
+            'review_id'  => Review::factory(),
             'replier_id' => User::factory()->seller(),
-            'content' => fake()->randomElement($responses),
+            'content'    => fake()->randomElement($responses),
         ];
     }
 

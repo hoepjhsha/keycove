@@ -49,9 +49,9 @@ class ProductListingForm extends Form
 
         return ProductListing::create([
             'variant_id' => $this->variant_id,
-            'seller_id' => $this->seller_id,
-            'price' => $this->price,
-            'status' => $this->status,
+            'seller_id'  => $this->seller_id,
+            'price'      => $this->price,
+            'status'     => $this->status,
         ]);
     }
 
@@ -61,8 +61,8 @@ class ProductListingForm extends Form
 
         return $this->listing->update([
             'seller_id' => $this->seller_id,
-            'price' => $this->price,
-            'status' => $this->status,
+            'price'     => $this->price,
+            'status'    => $this->status,
         ]);
     }
 

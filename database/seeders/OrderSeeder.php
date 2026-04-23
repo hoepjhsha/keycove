@@ -37,7 +37,7 @@ class OrderSeeder extends Seeder
     protected function seedOrders(): void
     {
         $buyers = User::where('role', UserRole::User)->get();
-        $activeListings = ProductListing::with(['variant', 'seller'])
+        $activeListings = ProductListing::with(['variant.product', 'seller'])
             ->where('status', ProductListingStatus::Active)
             ->get();
 
@@ -45,7 +45,6 @@ class OrderSeeder extends Seeder
             return;
         }
 
-        // Order distribution: 45 completed, 10 processing, 8 delivered, 5 disputing, 7 cancelled, 5 refunded
         $orderConfigs = [
             ['status' => OrderStatus::Completed, 'count' => 45, 'hasEscrow' => true, 'escrowStatus' => EscrowStatus::Released],
             ['status' => OrderStatus::Processing, 'count' => 10, 'hasEscrow' => true, 'escrowStatus' => EscrowStatus::Holding],
@@ -55,48 +54,29 @@ class OrderSeeder extends Seeder
             ['status' => OrderStatus::Refunded, 'count' => 5, 'hasEscrow' => true, 'escrowStatus' => EscrowStatus::Refunded],
         ];
 
-        $dayCounter = 0;
+        $maxItemsPerOrder = min(3, $activeListings->count());
 
         foreach ($orderConfigs as $config) {
             for ($i = 0; $i < $config['count']; $i++) {
                 $buyer = $buyers->random();
-                $numItems = random_int(1, 3);
-                $selectedListings = $activeListings->random($numItems);
+                $numItems = random_int(1, $maxItemsPerOrder);
+                $selectedListings = collect($activeListings->random($numItems));
 
-                // Create order
                 $orderDate = Carbon::now()->subDays(random_int(1, 60))->subMinutes(random_int(0, 1440));
                 $paymentMethod = fake()->randomElement([PaymentMethod::VNPay, PaymentMethod::Stripe]);
 
-                $order = Order::create([
-                    'buyer_id' => $buyer->id,
-                    'order_code' => 'ORD-'.$orderDate->format('Ymd').'-'.strtoupper(Str::random(5)),
-                    'total_price' => 0, // Will be calculated after items
-                    'status' => $config['status'],
-                    'payment_method' => $paymentMethod,
-                    'created_at' => $orderDate,
-                    'updated_at' => $orderDate,
-                ]);
+                $order = $this->createOrder($buyer, $orderDate, $paymentMethod);
 
                 $totalPrice = 0;
 
-                // Create order items
                 foreach ($selectedListings as $listing) {
                     $quantity = random_int(1, 2);
-                    $subtotal = $listing->price * $quantity;
+                    $subtotal = round(((float) $listing->price) * $quantity, 2);
                     $totalPrice += $subtotal;
 
-                    $orderItem = OrderItem::create([
-                        'order_id' => $order->id,
-                        'listing_id' => $listing->id,
-                        'product_name_snapshot' => $listing->variant?->product?->name ?? 'Unknown Product',
-                        'quantity' => $quantity,
-                        'unit_price' => $listing->price,
-                        'subtotal' => $subtotal,
-                        'created_at' => $orderDate,
-                    ]);
+                    $orderItem = $this->createOrderItem($order, $listing, $config['status'], $orderDate, $quantity, $subtotal);
 
-                    // Link keys to order item if order is completed/delivered/disputing
-                    if (in_array($config['status'], [OrderStatus::Completed, OrderStatus::Delivered, OrderStatus::Disputing])) {
+                    if (in_array($config['status'], [OrderStatus::Completed, OrderStatus::Delivered, OrderStatus::Disputing, OrderStatus::Refunded], true)) {
                         $availableKeys = ProductKey::where('listing_id', $listing->id)
                             ->where('status', ProductKeyStatus::Available)
                             ->limit($quantity)
@@ -105,131 +85,171 @@ class OrderSeeder extends Seeder
                         foreach ($availableKeys as $key) {
                             $key->update([
                                 'order_item_id' => $orderItem->id,
-                                'status' => $config['status'] === OrderStatus::Disputing
+                                'status'        => $config['status'] === OrderStatus::Disputing
                                     ? ProductKeyStatus::Pending
                                     : ProductKeyStatus::Sold,
                             ]);
                         }
                     }
+
+                    if ($config['hasEscrow']) {
+                        $this->createEscrow($orderItem, $listing->seller_id, $config['escrowStatus'], $orderDate, $subtotal);
+                    }
                 }
 
-                // Update order total
                 $order->update(['total_price' => round($totalPrice, 2)]);
 
-                // Create escrow if needed
-                if ($config['hasEscrow']) {
-                    $escrowDate = $orderDate;
-                    $escrowStatus = $config['escrowStatus'];
-
-                    $releaseDate = match ($escrowStatus) {
-                        EscrowStatus::Holding => Carbon::now()->addDays(random_int(1, 7)),
-                        EscrowStatus::Released => $orderDate->copy()->addDays(random_int(1, 3)),
-                        EscrowStatus::Refunded => $orderDate->copy()->addDays(random_int(1, 5)),
-                    };
-
-                    Escrow::create([
-                        'order_id' => $order->id,
-                        'amount' => $order->total_price,
-                        'release_date' => $releaseDate,
-                        'status' => $escrowStatus,
-                        'created_at' => $escrowDate,
-                        'updated_at' => $escrowDate,
-                    ]);
-                }
-
-                // Create payment transaction
-                Transaction::create([
-                    'order_id' => $order->id,
-                    'wallet_id' => null,
-                    'type' => TransactionType::Pay,
-                    'payment_info' => $this->generatePaymentInfo($paymentMethod),
-                    'amount' => $order->total_price,
-                    'status' => $config['status'] === OrderStatus::Cancelled
-                        ? TransactionStatus::Cancelled
-                        : TransactionStatus::Completed,
-                    'created_at' => $orderDate,
-                ]);
-
-                $dayCounter++;
+                $this->createTransaction($order, $paymentMethod, $config['status'], $orderDate);
             }
         }
 
-        // Create some withdrawal transactions for sellers
         $this->seedWithdrawTransactions();
     }
 
     protected function seedWithdrawTransactions(): void
     {
-        $wallets = Wallet::with('seller')->get();
+        $wallets = Wallet::with('seller.user')->get();
 
         foreach ($wallets as $wallet) {
-            $numWithdrawals = random_int(2, 5);
+            if (Withdraw::where('wallet_id', $wallet->id)->exists()) {
+                continue;
+            }
 
-            for ($i = 0; $i < $numWithdrawals; $i++) {
-                $withdrawDate = Carbon::now()->subDays(random_int(1, 45));
-                $amount = fake()->randomFloat(2, 100, 5000);
-                $status = fake()->randomElement([
-                    WithdrawStatus::Completed,
-                    WithdrawStatus::Completed,
-                    WithdrawStatus::Completed,
-                    WithdrawStatus::Processing,
-                    WithdrawStatus::Pending,
-                ]);
+            $withdrawDate = Carbon::now()->subDays(random_int(1, 45));
+            $amount = fake()->randomFloat(2, 100, 5000);
+            $status = fake()->randomElement([
+                WithdrawStatus::Completed,
+                WithdrawStatus::Completed,
+                WithdrawStatus::Completed,
+                WithdrawStatus::Processing,
+                WithdrawStatus::Pending,
+            ]);
 
-                // Check if wallet already has a withdraw (1:1 relationship)
-                $existingWithdraw = Withdraw::where('wallet_id', $wallet->id)->first();
-
-                if ($existingWithdraw) {
-                    continue;
-                }
-
-                $withdraw = Withdraw::create([
-                    'wallet_id' => $wallet->id,
-                    'amount' => $amount,
-                    'status' => $status,
+            Withdraw::factory()
+                ->forWallet($wallet)
+                ->state([
+                    'amount'     => $amount,
+                    'status'     => $status,
                     'created_at' => $withdrawDate,
                     'updated_at' => $withdrawDate,
-                ]);
+                ])
+                ->create();
 
-                Transaction::create([
-                    'order_id' => null,
-                    'wallet_id' => $wallet->id,
-                    'type' => TransactionType::Withdraw,
+            Transaction::factory()
+                ->forWallet($wallet)
+                ->state([
                     'payment_info' => [
-                        'bank_name' => fake()->randomElement(['Vietcombank', 'Techcombank', 'BIDV', 'ACB', 'Sacombank', 'MB Bank']),
+                        'bank_name'      => fake()->randomElement(['Vietcombank', 'Techcombank', 'BIDV', 'ACB', 'Sacombank', 'MB Bank']),
                         'account_number' => fake()->numerify('##########'),
                         'account_holder' => $wallet->seller->user->username ?? 'Unknown',
-                        'note' => 'Withdrawal from KeyCove',
+                        'note'           => 'Withdrawal from KeyCove',
                     ],
                     'amount' => $amount,
                     'status' => match ($status) {
                         WithdrawStatus::Completed => TransactionStatus::Completed,
-                        default => TransactionStatus::Pending,
+                        default                   => TransactionStatus::Pending,
                     },
                     'created_at' => $withdrawDate,
-                ]);
-            }
+                    'updated_at' => $withdrawDate,
+                ])
+                ->create();
         }
+    }
+
+    protected function createOrder(User $buyer, Carbon $orderDate, PaymentMethod $paymentMethod): Order
+    {
+        return Order::factory()
+            ->forBuyer($buyer)
+            ->state([
+                'order_code'     => 'ORD-'.$orderDate->format('Ymd').'-'.strtoupper(Str::random(5)),
+                'total_price'    => 0,
+                'payment_method' => $paymentMethod,
+                'created_at'     => $orderDate,
+                'updated_at'     => $orderDate,
+            ])
+            ->create();
+    }
+
+    protected function createOrderItem(
+        Order $order,
+        ProductListing $listing,
+        OrderStatus $status,
+        Carbon $orderDate,
+        int $quantity,
+        float $subtotal,
+    ): OrderItem {
+        return OrderItem::factory()
+            ->forOrder($order)
+            ->state([
+                'listing_id'            => $listing->id,
+                'product_name_snapshot' => $listing->variant?->product?->name ?? 'Unknown Product',
+                'quantity'              => $quantity,
+                'unit_price'            => $listing->price,
+                'subtotal'              => $subtotal,
+                'status'                => $status,
+                'created_at'            => $orderDate,
+                'updated_at'            => $orderDate,
+            ])
+            ->create();
+    }
+
+    protected function createEscrow(OrderItem $orderItem, int $sellerId, EscrowStatus $status, Carbon $orderDate, float $amount): void
+    {
+        $releaseDate = match ($status) {
+            EscrowStatus::Holding  => Carbon::now()->addDays(random_int(1, 7)),
+            EscrowStatus::Released => $orderDate->copy()->addDays(random_int(1, 3)),
+            EscrowStatus::Refunded => $orderDate->copy()->addDays(random_int(1, 5)),
+        };
+
+        Escrow::factory()
+            ->forOrderItem($orderItem)
+            ->state([
+                'seller_id'    => $sellerId,
+                'amount'       => $amount,
+                'release_date' => $releaseDate,
+                'status'       => $status,
+                'created_at'   => $orderDate,
+                'updated_at'   => $orderDate,
+            ])
+            ->create();
+    }
+
+    protected function createTransaction(Order $order, PaymentMethod $paymentMethod, OrderStatus $status, Carbon $orderDate): void
+    {
+        Transaction::factory()
+            ->forOrder($order)
+            ->state([
+                'wallet_id'    => null,
+                'type'         => TransactionType::Pay,
+                'payment_info' => $this->generatePaymentInfo($paymentMethod),
+                'amount'       => $order->total_price,
+                'status'       => $status === OrderStatus::Cancelled
+                    ? TransactionStatus::Cancelled
+                    : TransactionStatus::Completed,
+                'created_at' => $orderDate,
+                'updated_at' => $orderDate,
+            ])
+            ->create();
     }
 
     protected function generatePaymentInfo(PaymentMethod $method): array
     {
         if ($method === PaymentMethod::VNPay) {
             return [
-                'method' => 'VNPay',
+                'method'         => 'VNPay',
                 'transaction_id' => 'VNP'.fake()->numerify('##############'),
-                'bank_code' => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV', 'MB', 'ACB']),
-                'card_type' => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD', 'JCB']),
-                'response_code' => '00',
+                'bank_code'      => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV', 'MB', 'ACB']),
+                'card_type'      => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD', 'JCB']),
+                'response_code'  => '00',
             ];
         }
 
         return [
-            'method' => 'Stripe',
-            'transaction_id' => 'pi_'.fake()->bothify('????####################'),
+            'method'            => 'Stripe',
+            'transaction_id'    => 'pi_'.fake()->bothify('????####################'),
             'payment_method_id' => 'pm_'.fake()->bothify('????####################'),
-            'card_brand' => fake()->randomElement(['visa', 'mastercard', 'amex']),
-            'last4' => fake()->numerify('####'),
+            'card_brand'        => fake()->randomElement(['visa', 'mastercard', 'amex']),
+            'last4'             => fake()->numerify('####'),
         ];
     }
 }

@@ -30,9 +30,9 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'release_date' => 'date',
+            'release_date'       => 'date',
             'system_requirement' => 'array',
-            'status' => GeneralStatus::class,
+            'status'             => GeneralStatus::class,
         ];
     }
 

@@ -25,8 +25,8 @@ class WithdrawFactory extends Factory
     {
         return [
             'wallet_id' => Wallet::factory(),
-            'amount' => fake()->randomFloat(2, 50, 5000),
-            'status' => WithdrawStatus::Pending,
+            'amount'    => fake()->randomFloat(2, 50, 5000),
+            'status'    => WithdrawStatus::Pending,
         ];
     }
 

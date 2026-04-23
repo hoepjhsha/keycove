@@ -173,29 +173,29 @@ class ProductFactory extends Factory
         $gameName = fake()->randomElement($gameNames);
 
         return [
-            'name' => $gameName,
-            'slug' => Str::slug($gameName),
+            'name'                 => $gameName,
+            'slug'                 => Str::slug($gameName),
             'image_thumbnail_path' => 'products/thumbnails/'.Str::slug($gameName).'.jpg',
-            'publisher' => fake()->randomElement($publishers),
-            'developer' => fake()->randomElement($developers),
-            'release_date' => fake()->dateTimeBetween('-10 years', '+6 months'),
-            'description' => fake()->paragraphs(3, true),
-            'system_requirement' => [
-                'os' => fake()->randomElement(['Windows 10 64-bit', 'Windows 11', 'macOS 11 Big Sur']),
+            'publisher'            => fake()->randomElement($publishers),
+            'developer'            => fake()->randomElement($developers),
+            'release_date'         => fake()->dateTimeBetween('-10 years', '+6 months'),
+            'description'          => fake()->paragraphs(3, true),
+            'system_requirement'   => [
+                'os'        => fake()->randomElement(['Windows 10 64-bit', 'Windows 11', 'macOS 11 Big Sur']),
                 'processor' => fake()->randomElement([
                     'Intel Core i5-8400 or AMD Ryzen 5 2600',
                     'Intel Core i7-9700K or AMD Ryzen 7 3700X',
                     'Intel Core i5-10400 or AMD Ryzen 5 3600',
                 ]),
-                'memory' => fake()->randomElement(['8 GB RAM', '12 GB RAM', '16 GB RAM', '32 GB RAM']),
+                'memory'   => fake()->randomElement(['8 GB RAM', '12 GB RAM', '16 GB RAM', '32 GB RAM']),
                 'graphics' => fake()->randomElement([
                     'NVIDIA GeForce GTX 1060 6GB or AMD Radeon RX 580 8GB',
                     'NVIDIA GeForce RTX 2060 or AMD Radeon RX 5700',
                     'NVIDIA GeForce RTX 3060 Ti or AMD Radeon RX 6700 XT',
                     'NVIDIA GeForce RTX 4070 or AMD Radeon RX 7800 XT',
                 ]),
-                'directx' => fake()->randomElement(['Version 11', 'Version 12']),
-                'storage' => fake()->randomElement(['50 GB', '70 GB', '100 GB', '150 GB']).' available space',
+                'directx'    => fake()->randomElement(['Version 11', 'Version 12']),
+                'storage'    => fake()->randomElement(['50 GB', '70 GB', '100 GB', '150 GB']).' available space',
                 'additional' => fake()->optional()->randomElement([
                     'SSD recommended',
                     'Internet connection required',

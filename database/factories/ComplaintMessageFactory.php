@@ -36,9 +36,9 @@ class ComplaintMessageFactory extends Factory
 
         return [
             'complaint_id' => Complaint::factory(),
-            'sender_id' => User::factory(),
-            'message' => fake()->randomElement($messages),
-            'attachments' => fake()->optional(0.4)->passthrough([
+            'sender_id'    => User::factory(),
+            'message'      => fake()->randomElement($messages),
+            'attachments'  => fake()->optional(0.4)->passthrough([
                 fake()->imageUrl(800, 600, 'screenshot'),
             ]),
         ];

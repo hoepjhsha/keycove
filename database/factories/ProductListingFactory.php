@@ -26,9 +26,9 @@ class ProductListingFactory extends Factory
     {
         return [
             'variant_id' => ProductVariant::factory(),
-            'seller_id' => Seller::factory(),
-            'price' => fake()->randomFloat(2, 9.99, 59.99),
-            'status' => ProductListingStatus::Active,
+            'seller_id'  => Seller::factory(),
+            'price'      => fake()->randomFloat(2, 9.99, 59.99),
+            'status'     => ProductListingStatus::Active,
         ];
     }
 

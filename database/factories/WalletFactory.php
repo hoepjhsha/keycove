@@ -24,8 +24,8 @@ class WalletFactory extends Factory
     {
         return [
             'seller_id' => Seller::factory(),
-            'balance' => fake()->randomFloat(2, 0, 10000),
-            'holding' => fake()->randomFloat(2, 0, 500),
+            'balance'   => fake()->randomFloat(2, 0, 10000),
+            'holding'   => fake()->randomFloat(2, 0, 500),
         ];
     }
 

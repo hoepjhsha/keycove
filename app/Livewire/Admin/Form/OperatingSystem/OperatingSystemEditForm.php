@@ -89,10 +89,10 @@ class OperatingSystemEditForm extends Form
         }
 
         return $this->operatingSystem->update([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'icon_path' => $iconPath,
-            'status' => $this->status,
+            'status'    => $this->status,
         ]);
     }
 }

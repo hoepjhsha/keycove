@@ -72,14 +72,13 @@ class AttributeSeeder extends Seeder
 
         $createdRegions = [];
 
-        // First pass: create parent regions
         foreach ($regions as $regionData) {
             if ($regionData['parent'] === null) {
                 $region = Region::firstOrCreate(
                     ['flag_code' => $regionData['code']],
                     [
-                        'name' => $regionData['name'],
-                        'slug' => Str::slug($regionData['name']),
+                        'name'   => $regionData['name'],
+                        'slug'   => Str::slug($regionData['name']),
                         'status' => GeneralStatus::Active,
                     ]
                 );
@@ -87,16 +86,15 @@ class AttributeSeeder extends Seeder
             }
         }
 
-        // Second pass: create child regions with parent relationships
         foreach ($regions as $regionData) {
             if ($regionData['parent'] !== null && isset($createdRegions[$regionData['parent']])) {
                 Region::firstOrCreate(
                     ['flag_code' => $regionData['code']],
                     [
                         'parent_id' => $createdRegions[$regionData['parent']]->id,
-                        'name' => $regionData['name'],
-                        'slug' => Str::slug($regionData['name']),
-                        'status' => GeneralStatus::Active,
+                        'name'      => $regionData['name'],
+                        'slug'      => Str::slug($regionData['name']),
+                        'status'    => GeneralStatus::Active,
                     ]
                 );
             }
@@ -126,10 +124,10 @@ class AttributeSeeder extends Seeder
             Platform::firstOrCreate(
                 ['slug' => Str::slug($platformData['name'])],
                 [
-                    'name' => $platformData['name'],
+                    'name'      => $platformData['name'],
                     'icon_path' => $platformData['icon'],
-                    'base_url' => $platformData['url'],
-                    'status' => GeneralStatus::Active,
+                    'base_url'  => $platformData['url'],
+                    'status'    => GeneralStatus::Active,
                 ]
             );
         }
@@ -156,9 +154,9 @@ class AttributeSeeder extends Seeder
             OperatingSystem::firstOrCreate(
                 ['slug' => Str::slug($osData['name'])],
                 [
-                    'name' => $osData['name'],
+                    'name'      => $osData['name'],
                     'icon_path' => $osData['icon'],
-                    'status' => GeneralStatus::Active,
+                    'status'    => GeneralStatus::Active,
                 ]
             );
         }

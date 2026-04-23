@@ -157,15 +157,15 @@ class ProductEditForm extends Form
             ->all();
 
         $updated = $this->product->update([
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'publisher' => $this->publisher,
-            'developer' => $this->developer,
-            'release_date' => $this->release_date,
-            'description' => $this->description,
-            'status' => $this->status,
+            'name'                 => $this->name,
+            'slug'                 => $this->slug,
+            'publisher'            => $this->publisher,
+            'developer'            => $this->developer,
+            'release_date'         => $this->release_date,
+            'description'          => $this->description,
+            'status'               => $this->status,
             'image_thumbnail_path' => $imagePath,
-            'system_requirement' => ! empty($requirements) ? $requirements : null,
+            'system_requirement'   => ! empty($requirements) ? $requirements : null,
         ]);
 
         if ($updated && ! empty($this->categories)) {

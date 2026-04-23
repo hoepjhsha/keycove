@@ -61,11 +61,11 @@ final class CategoryTable extends PowerGridComponent
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    GeneralStatus::Active => 'bg-green-500/10 text-green-500',
+                    GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
                     GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                    GeneralStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
-                    GeneralStatus::Deleted => 'bg-red-500/10 text-red-500',
-                    default => 'bg-primary-500/10 text-primary-500',
+                    GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+                    GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                    default                 => 'bg-primary-500/10 text-primary-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -115,7 +115,7 @@ final class CategoryTable extends PowerGridComponent
 
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(GeneralStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => $status->label(),
                 ]))
                 ->optionValue('id')
@@ -206,10 +206,10 @@ final class CategoryTable extends PowerGridComponent
     public function toggleStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the status of this category?',
+            'title'  => 'Change Status?',
+            'text'   => 'Are you sure you want to change the status of this category?',
             'method' => 'performToggleStatus',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -219,7 +219,7 @@ final class CategoryTable extends PowerGridComponent
         $category = Category::findOrFail($id);
         $category->status = match ($category->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
-            default => GeneralStatus::Inactive,
+            default                 => GeneralStatus::Inactive,
         };
         $category->save();
 
@@ -230,10 +230,10 @@ final class CategoryTable extends PowerGridComponent
     public function deleteCategory($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Category?',
-            'text' => 'Are you sure you want to delete this category? This action cannot be undone.',
+            'title'  => 'Delete Category?',
+            'text'   => 'Are you sure you want to delete this category? This action cannot be undone.',
             'method' => 'performDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -259,10 +259,10 @@ final class CategoryTable extends PowerGridComponent
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore Category?',
-            'text' => 'Are you sure you want to restore this category? This action cannot be undone.',
+            'title'  => 'Restore Category?',
+            'text'   => 'Are you sure you want to restore this category? This action cannot be undone.',
             'method' => 'performRevertDelete',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -289,9 +289,9 @@ final class CategoryTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
             'method' => 'performBulkDelete',
-            'id' => null,
+            'id'     => null,
         ]);
     }
 

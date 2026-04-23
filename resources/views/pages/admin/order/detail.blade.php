@@ -105,6 +105,7 @@
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Product Name</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Shop Name</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Seller</th>
+                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
                                     <th class="px-4 py-3 text-center font-medium text-slate-600 dark:text-slate-400">Quantity</th>
                                     <th class="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">Unit Price</th>
                                     <th class="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">Subtotal</th>
@@ -123,6 +124,23 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-slate-900 dark:text-white">{{ $item->listing?->seller?->user?->username ?? '-' }}</td>
+                                        <td class="px-4 py-3 text-slate-900 dark:text-white">
+                                            @php
+                                                $itemStatus = $item->status;
+                                                $itemLabel = method_exists($itemStatus, 'label') ? $itemStatus->label() : $itemStatus->name;
+                                                $itemColorClass = match ($itemStatus) {
+                                                    \App\Enums\OrderStatus::PendingPayment => 'bg-yellow-500/10 text-yellow-500',
+                                                    \App\Enums\OrderStatus::Processing => 'bg-blue-500/10 text-blue-500',
+                                                    \App\Enums\OrderStatus::Delivered => 'bg-purple-500/10 text-purple-500',
+                                                    \App\Enums\OrderStatus::Disputing => 'bg-orange-500/10 text-orange-500',
+                                                    \App\Enums\OrderStatus::Completed => 'bg-green-500/10 text-green-500',
+                                                    \App\Enums\OrderStatus::Cancelled => 'bg-red-500/10 text-red-500',
+                                                    \App\Enums\OrderStatus::Refunded => 'bg-red-500/10 text-red-500',
+                                                    default => 'bg-gray-500/10 text-gray-500',
+                                                };
+                                            @endphp
+                                            <span class="{{ $itemColorClass }} text-[11px] font-medium px-2.5 py-0.5 rounded-full">{{ $itemLabel }}</span>
+                                        </td>
                                         <td class="px-4 py-3 text-slate-900 dark:text-white text-center">{{ $item->quantity }}</td>
                                         <td class="px-4 py-3 text-slate-900 dark:text-white text-right">{{ number_format((float) $item->unit_price, 2) }} VND</td>
                                         <td class="px-4 py-3 text-slate-900 dark:text-white text-right font-semibold">{{ number_format((float) $item->subtotal, 2) }} VND</td>
@@ -131,7 +149,7 @@
                             </tbody>
                             <tfoot class="bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-300 dark:border-slate-700">
                                 <tr>
-                                    <td colspan="6" class="px-4 py-3 text-right font-semibold text-slate-600 dark:text-slate-400">Total:</td>
+                                    <td colspan="7" class="px-4 py-3 text-right font-semibold text-slate-600 dark:text-slate-400">Total:</td>
                                     <td class="px-4 py-3 text-right font-bold text-slate-900 dark:text-white text-lg">{{ number_format((float) $order->total_price, 2) }} VND</td>
                                 </tr>
                             </tfoot>

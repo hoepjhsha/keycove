@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('buyer_id')->constrained('users')->restrictOnDelete();
             $table->string('order_code', 255)->unique();
             $table->decimal('total_price', 15, 2);
-            $table->tinyInteger('status')->default(0);
             $table->tinyInteger('payment_method');
             $table->timestamps();
         });

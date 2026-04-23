@@ -25,7 +25,7 @@ class ProductListing extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
+            'price'  => 'decimal:2',
             'status' => ProductListingStatus::class,
         ];
     }
@@ -53,5 +53,10 @@ class ProductListing extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'listing_id');
+    }
+
+    public function isFromAdmin(): bool
+    {
+        return is_null($this->seller_id);
     }
 }

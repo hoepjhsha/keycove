@@ -41,14 +41,14 @@ class PaymentController extends Controller
         $result = $this->paymentManager->driver('vnpay')->handleReturn($request->all());
 
         return view('payments.return', [
-            'success' => $result['success'],
-            'txnRef' => $result['order_id'],
-            'amount' => $result['amount'],
-            'orderInfo' => $result['order_info'],
-            'responseCode' => $result['response_code'],
+            'success'       => $result['success'],
+            'txnRef'        => $result['order_id'],
+            'amount'        => $result['amount'],
+            'orderInfo'     => $result['order_info'],
+            'responseCode'  => $result['response_code'],
             'transactionNo' => $result['transaction_no'],
-            'bankCode' => $result['bank_code'],
-            'payDate' => $result['pay_date'],
+            'bankCode'      => $result['bank_code'],
+            'payDate'       => $result['pay_date'],
         ]);
     }
 

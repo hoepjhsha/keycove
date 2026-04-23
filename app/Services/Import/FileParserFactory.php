@@ -14,8 +14,8 @@ class FileParserFactory
     public function make(string $extension): FileParserInterface
     {
         return match ($extension) {
-            'csv' => new CsvParser,
-            'xlsx' => new XlsxParser,
+            'csv'   => new CsvParser,
+            'xlsx'  => new XlsxParser,
             default => throw new InvalidArgumentException("Unsupported file type: {$extension}"),
         };
     }

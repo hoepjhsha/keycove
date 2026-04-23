@@ -43,8 +43,9 @@ final class EscrowTable extends PowerGridComponent
     public function datasource(): Builder
     {
         return Escrow::query()
-            ->with(['order', 'order.buyer', 'seller'])
-            ->join('orders', 'escrows.order_id', '=', 'orders.id')
+            ->with(['orderItem.order.buyer', 'seller'])
+            ->join('order_items', 'escrows.order_item_id', '=', 'order_items.id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->leftJoin('users', 'orders.buyer_id', '=', 'users.id')
             ->leftJoin('sellers', 'escrows.seller_id', '=', 'sellers.id')
             ->select('escrows.*');
@@ -53,8 +54,8 @@ final class EscrowTable extends PowerGridComponent
     public function relationSearch(): array
     {
         return [
-            'orders' => ['order_code'],
-            'users' => ['username', 'email'],
+            'orders'  => ['order_code'],
+            'users'   => ['username', 'email'],
             'sellers' => ['shop_name'],
         ];
     }
@@ -63,29 +64,21 @@ final class EscrowTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('order_code', fn (Escrow $model) => $model->order->order_code ?? '-')
-            ->add('buyer', fn (Escrow $model) => $model->order->buyer->username ?? '-')
+            ->add('order_code', fn (Escrow $model) => $model->orderItem?->order?->order_code ?? '-')
+            ->add('buyer', fn (Escrow $model) => $model->orderItem?->order?->buyer?->username ?? '-')
             ->add('seller', fn (Escrow $model) => $model?->seller?->shop_name ?? '-')
-            ->add('amount', function (Escrow $model) {
-                $amountValue = $model->amount;
-
-                if (empty($amountValue)) {
-                    return '0.00 VND';
-                }
-
-                return $amountValue.' VND';
-            })
+            ->add('amount_formatted', fn (Escrow $model) => number_format((float) $model->amount, 2).' VND')
             ->add('release_date_formatted', fn (Escrow $model) => Carbon::parse($model->release_date)->format('d/m/Y H:i:s'))
             ->add('status_label', function (Escrow $model) {
                 $status = $model->status;
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    EscrowStatus::Holding => 'bg-blue-500/10 text-blue-500',
+                    EscrowStatus::Holding  => 'bg-blue-500/10 text-blue-500',
                     EscrowStatus::Released => 'bg-green-500/10 text-green-500',
                     EscrowStatus::Refunded => 'bg-red-500/10 text-red-500',
-                    EscrowStatus::Frozen => 'bg-purple-500/10 text-purple-500',
-                    default => 'bg-gray-500/10 text-gray-500',
+                    EscrowStatus::Frozen   => 'bg-purple-500/10 text-purple-500',
+                    default                => 'bg-gray-500/10 text-gray-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -102,7 +95,7 @@ final class EscrowTable extends PowerGridComponent
             Column::make('Order Code', 'order_code', 'order.order_code'),
             Column::make('Buyer', 'buyer', 'buyer.id'),
             Column::make('Seller', 'seller', 'seller.id'),
-            Column::make('Amount', 'amount')
+            Column::make('Amount', 'amount_formatted', 'amount')
                 ->sortable()
                 ->bodyAttribute('text-right'),
 
@@ -137,7 +130,7 @@ final class EscrowTable extends PowerGridComponent
 
             Filter::multiSelect('status', 'escrows.status')
                 ->dataSource(collect(EscrowStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => method_exists($status, 'label') ? $status->label() : $status->name,
                 ]))
                 ->optionValue('id')
@@ -222,10 +215,10 @@ final class EscrowTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Release Escrow?',
-            'text' => 'Are you sure you want to release this escrow amount to the seller? This action cannot be undone.',
+            'title'  => 'Release Escrow?',
+            'text'   => 'Are you sure you want to release this escrow amount to the seller? This action cannot be undone.',
             'method' => 'performReleaseEscrow',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -241,7 +234,7 @@ final class EscrowTable extends PowerGridComponent
                 }
 
                 $oldValues = [
-                    'status' => $escrow->status->name,
+                    'status'     => $escrow->status->name,
                     'updated_at' => $escrow->updated_at->toDateTimeString(),
                 ];
 
@@ -249,20 +242,20 @@ final class EscrowTable extends PowerGridComponent
                 $escrow->save();
 
                 $newValues = [
-                    'status' => $escrow->status->name,
+                    'status'     => $escrow->status->name,
                     'updated_at' => $escrow->updated_at->toDateTimeString(),
                 ];
 
                 AuditLog::create([
-                    'user_id' => Auth::id(),
+                    'user_id'        => Auth::id(),
                     'auditable_type' => Escrow::class,
-                    'auditable_id' => $escrow->id,
-                    'event' => AuditEvent::EscrowReleased,
-                    'old_values' => $oldValues,
-                    'new_values' => $newValues,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                    'created_at' => now(),
+                    'auditable_id'   => $escrow->id,
+                    'event'          => AuditEvent::EscrowReleased,
+                    'old_values'     => $oldValues,
+                    'new_values'     => $newValues,
+                    'ip_address'     => request()->ip(),
+                    'user_agent'     => request()->userAgent(),
+                    'created_at'     => now(),
                 ]);
             });
 
@@ -290,10 +283,10 @@ final class EscrowTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Freeze Escrow?',
-            'text' => 'Are you sure you want to freeze this escrow? The holding timer will be paused. This action can be undone by extending the holding time.',
+            'title'  => 'Freeze Escrow?',
+            'text'   => 'Are you sure you want to freeze this escrow? The holding timer will be paused. This action can be undone by extending the holding time.',
             'method' => 'performFreezeEscrow',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -309,7 +302,7 @@ final class EscrowTable extends PowerGridComponent
                 }
 
                 $oldValues = [
-                    'status' => $escrow->status->name,
+                    'status'     => $escrow->status->name,
                     'updated_at' => $escrow->updated_at->toDateTimeString(),
                 ];
 
@@ -317,20 +310,20 @@ final class EscrowTable extends PowerGridComponent
                 $escrow->save();
 
                 $newValues = [
-                    'status' => $escrow->status->name,
+                    'status'     => $escrow->status->name,
                     'updated_at' => $escrow->updated_at->toDateTimeString(),
                 ];
 
                 AuditLog::create([
-                    'user_id' => Auth::id(),
+                    'user_id'        => Auth::id(),
                     'auditable_type' => Escrow::class,
-                    'auditable_id' => $escrow->id,
-                    'event' => AuditEvent::EscrowFrozen,
-                    'old_values' => $oldValues,
-                    'new_values' => $newValues,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                    'created_at' => now(),
+                    'auditable_id'   => $escrow->id,
+                    'event'          => AuditEvent::EscrowFrozen,
+                    'old_values'     => $oldValues,
+                    'new_values'     => $newValues,
+                    'ip_address'     => request()->ip(),
+                    'user_agent'     => request()->userAgent(),
+                    'created_at'     => now(),
                 ]);
             });
 

@@ -24,4 +24,11 @@ interface PaymentGatewayInterface
      * @param  array  $requestData  Variables returned via GET/POST
      */
     public function handleIpn(array $requestData): array;
+
+    /**
+     * Process a refund request.
+     *
+     * @param  array  $data  Refund payload.
+     */
+    public function refund(array $data): array;
 }

@@ -34,12 +34,12 @@ class TransactionFactory extends Factory
             : $this->generateWithdrawInfo();
 
         return [
-            'order_id' => $type === TransactionType::Pay ? Order::factory() : null,
-            'wallet_id' => $type === TransactionType::Withdraw ? Wallet::factory() : null,
-            'type' => $type,
+            'order_id'     => $type === TransactionType::Pay ? Order::factory() : null,
+            'wallet_id'    => $type === TransactionType::Withdraw ? Wallet::factory() : null,
+            'type'         => $type,
             'payment_info' => $paymentInfo,
-            'amount' => $amount,
-            'status' => TransactionStatus::Completed,
+            'amount'       => $amount,
+            'status'       => TransactionStatus::Completed,
         ];
     }
 
@@ -49,30 +49,30 @@ class TransactionFactory extends Factory
 
         if ($method === PaymentMethod::VNPay) {
             return [
-                'method' => 'VNPay',
+                'method'         => 'VNPay',
                 'transaction_id' => 'VNP'.fake()->numerify('##############'),
-                'bank_code' => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV']),
-                'card_type' => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD']),
-                'response_code' => '00',
+                'bank_code'      => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV']),
+                'card_type'      => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD']),
+                'response_code'  => '00',
             ];
         }
 
         return [
-            'method' => 'Stripe',
-            'transaction_id' => 'pi_'.fake()->bothify('????####################'),
+            'method'            => 'Stripe',
+            'transaction_id'    => 'pi_'.fake()->bothify('????####################'),
             'payment_method_id' => 'pm_'.fake()->bothify('????####################'),
-            'card_brand' => fake()->randomElement(['visa', 'mastercard', 'amex']),
-            'last4' => fake()->numerify('####'),
+            'card_brand'        => fake()->randomElement(['visa', 'mastercard', 'amex']),
+            'last4'             => fake()->numerify('####'),
         ];
     }
 
     protected function generateWithdrawInfo(): array
     {
         return [
-            'bank_name' => fake()->randomElement(['Vietcombank', 'Techcombank', 'BIDV', 'ACB', 'Sacombank']),
+            'bank_name'      => fake()->randomElement(['Vietcombank', 'Techcombank', 'BIDV', 'ACB', 'Sacombank']),
             'account_number' => fake()->numerify('##########'),
             'account_holder' => fake()->name(),
-            'note' => 'Withdrawal request',
+            'note'           => 'Withdrawal request',
         ];
     }
 
@@ -82,10 +82,10 @@ class TransactionFactory extends Factory
             $orderEntity = $order ?? Order::factory()->create();
 
             return [
-                'order_id' => $orderEntity->id,
-                'wallet_id' => null,
-                'type' => TransactionType::Pay,
-                'amount' => $orderEntity->total_price,
+                'order_id'     => $orderEntity->id,
+                'wallet_id'    => null,
+                'type'         => TransactionType::Pay,
+                'amount'       => $orderEntity->total_price,
                 'payment_info' => $this->generatePaymentInfo(),
             ];
         });
@@ -95,9 +95,9 @@ class TransactionFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($wallet) {
             return [
-                'order_id' => null,
-                'wallet_id' => $wallet?->id ?? Wallet::factory()->create()->id,
-                'type' => TransactionType::Withdraw,
+                'order_id'     => null,
+                'wallet_id'    => $wallet?->id ?? Wallet::factory()->create()->id,
+                'type'         => TransactionType::Withdraw,
                 'payment_info' => $this->generateWithdrawInfo(),
             ];
         });
@@ -134,7 +134,7 @@ class TransactionFactory extends Factory
     public function vnpay(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => TransactionType::Pay,
+            'type'         => TransactionType::Pay,
             'payment_info' => array_merge($this->generatePaymentInfo(), ['method' => 'VNPay']),
         ]);
     }
@@ -142,7 +142,7 @@ class TransactionFactory extends Factory
     public function stripe(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => TransactionType::Pay,
+            'type'         => TransactionType::Pay,
             'payment_info' => array_merge($this->generatePaymentInfo(), ['method' => 'Stripe']),
         ]);
     }

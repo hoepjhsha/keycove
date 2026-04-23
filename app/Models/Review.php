@@ -25,7 +25,7 @@ class Review extends Model
     {
         return [
             'rating' => 'integer',
-            'media' => 'array',
+            'media'  => 'array',
         ];
     }
 

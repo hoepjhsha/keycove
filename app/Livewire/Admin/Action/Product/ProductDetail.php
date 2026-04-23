@@ -264,10 +264,10 @@ class ProductDetail extends Component
     public function deleteKey(int $keyId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Key?',
-            'text' => 'Are you sure you want to delete this key?',
+            'title'  => 'Delete Key?',
+            'text'   => 'Are you sure you want to delete this key?',
             'method' => 'performDeleteKey',
-            'id' => $keyId,
+            'id'     => $keyId,
         ]);
     }
 
@@ -286,10 +286,10 @@ class ProductDetail extends Component
     public function deleteVariant(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Variant?',
-            'text' => 'Are you sure you want to delete this variant?',
+            'title'  => 'Delete Variant?',
+            'text'   => 'Are you sure you want to delete this variant?',
             'method' => 'performDeleteVariant',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -391,10 +391,10 @@ class ProductDetail extends Component
     public function deleteListing(int $listingId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Listing?',
-            'text' => 'Are you sure you want to delete this listing?',
+            'title'  => 'Delete Listing?',
+            'text'   => 'Are you sure you want to delete this listing?',
             'method' => 'performDeleteListing',
-            'id' => $listingId,
+            'id'     => $listingId,
         ]);
     }
 

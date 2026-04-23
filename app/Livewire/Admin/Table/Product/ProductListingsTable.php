@@ -79,14 +79,14 @@ final class ProductListingsTable extends PowerGridComponent
     protected function getStatusLabel(ProductListingStatus $status): string
     {
         $colorClass = match ($status) {
-            ProductListingStatus::Draft => 'bg-gray-500/10 text-gray-500',
-            ProductListingStatus::Pending => 'bg-blue-500/10 text-blue-500',
-            ProductListingStatus::Active => 'bg-green-500/10 text-green-500',
-            ProductListingStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
+            ProductListingStatus::Draft    => 'bg-gray-500/10 text-gray-500',
+            ProductListingStatus::Pending  => 'bg-blue-500/10 text-blue-500',
+            ProductListingStatus::Active   => 'bg-green-500/10 text-green-500',
+            ProductListingStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
             ProductListingStatus::Rejected => 'bg-red-500/10 text-red-500',
-            ProductListingStatus::Closed => 'bg-orange-500/10 text-orange-500',
-            ProductListingStatus::Deleted => 'bg-red-500/10 text-red-500',
-            default => 'bg-slate-500/10 text-slate-500',
+            ProductListingStatus::Closed   => 'bg-orange-500/10 text-orange-500',
+            ProductListingStatus::Deleted  => 'bg-red-500/10 text-red-500',
+            default                        => 'bg-slate-500/10 text-slate-500',
         };
 
         $labelText = $status->label();
@@ -126,7 +126,7 @@ final class ProductListingsTable extends PowerGridComponent
             Filter::inputText('seller_name')->operators(['contains']),
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(ProductListingStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => $status->label(),
                 ]))
                 ->optionValue('id')
@@ -212,10 +212,10 @@ final class ProductListingsTable extends PowerGridComponent
     public function toggleListingStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Change Status?',
-            'text' => 'Are you sure you want to change the status of this listing?',
+            'title'  => 'Change Status?',
+            'text'   => 'Are you sure you want to change the status of this listing?',
             'method' => 'performToggleListingStatus',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -225,11 +225,11 @@ final class ProductListingsTable extends PowerGridComponent
         $listing = ProductListing::findOrFail($id);
 
         $newStatus = match ($listing->status) {
-            ProductListingStatus::Draft => ProductListingStatus::Active,
-            ProductListingStatus::Active => ProductListingStatus::Hidden,
-            ProductListingStatus::Hidden => ProductListingStatus::Draft,
+            ProductListingStatus::Draft   => ProductListingStatus::Active,
+            ProductListingStatus::Active  => ProductListingStatus::Hidden,
+            ProductListingStatus::Hidden  => ProductListingStatus::Draft,
             ProductListingStatus::Pending => ProductListingStatus::Active,
-            default => ProductListingStatus::Draft,
+            default                       => ProductListingStatus::Draft,
         };
 
         $listing->status = $newStatus;
@@ -242,10 +242,10 @@ final class ProductListingsTable extends PowerGridComponent
     public function deleteListing($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete Listing?',
-            'text' => 'Are you sure you want to delete this listing? This action cannot be undone.',
+            'title'  => 'Delete Listing?',
+            'text'   => 'Are you sure you want to delete this listing? This action cannot be undone.',
             'method' => 'performDeleteListing',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -277,10 +277,10 @@ final class ProductListingsTable extends PowerGridComponent
     public function restoreListing($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title' => 'Restore Listing?',
-            'text' => 'Are you sure you want to restore this listing?',
+            'title'  => 'Restore Listing?',
+            'text'   => 'Are you sure you want to restore this listing?',
             'method' => 'performRestoreListing',
-            'id' => $rowId,
+            'id'     => $rowId,
         ]);
     }
 
@@ -305,9 +305,9 @@ final class ProductListingsTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Delete '.count($this->checkboxValues).' selected listings?',
+            'title'  => 'Delete '.count($this->checkboxValues).' selected listings?',
             'method' => 'performBulkDeleteListing',
-            'id' => null,
+            'id'     => null,
         ]);
     }
 

@@ -110,24 +110,24 @@ class OperatingSystemIndex extends Component
 
         if ($operatingSystem) {
             $colorClass = match ($operatingSystem->status) {
-                GeneralStatus::Active => 'bg-green-500/10 text-green-500',
+                GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
                 GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                GeneralStatus::Hidden => 'bg-yellow-500/10 text-yellow-500',
-                GeneralStatus::Deleted => 'bg-red-500/10 text-red-500',
-                default => 'bg-primary-500/10 text-primary-500',
+                GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+                GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+                default                 => 'bg-primary-500/10 text-primary-500',
             };
 
             $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$operatingSystem->status->label().'</span>';
 
             $this->viewData = [
-                'id' => $operatingSystem->id,
-                'name' => $operatingSystem->name,
-                'slug' => $operatingSystem->slug,
-                'icon_path' => $operatingSystem->icon_path,
+                'id'           => $operatingSystem->id,
+                'name'         => $operatingSystem->name,
+                'slug'         => $operatingSystem->slug,
+                'icon_path'    => $operatingSystem->icon_path,
                 'status_label' => $statusLabel,
-                'created_at' => $operatingSystem->created_at->format('d/m/Y H:i:s'),
-                'updated_at' => $operatingSystem->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at' => $operatingSystem->deleted_at?->format('d/m/Y H:i:s'),
+                'created_at'   => $operatingSystem->created_at->format('d/m/Y H:i:s'),
+                'updated_at'   => $operatingSystem->updated_at->format('d/m/Y H:i:s'),
+                'deleted_at'   => $operatingSystem->deleted_at?->format('d/m/Y H:i:s'),
             ];
 
             $this->showViewModal = true;

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('last_name', 50);
             $table->string('avatar', 255)->nullable();
-            $table->string('dob', 10)->nullable();
+            $table->date('dob')->nullable();
             $table->tinyInteger('gender')->default(0);
             $table->string('phone_number', 15)->nullable();
             $table->text('bio')->nullable();

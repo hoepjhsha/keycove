@@ -75,11 +75,11 @@ class UserCreateForm extends Form
         }
 
         $user = User::create([
-            'username' => $this->username,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'role' => $targetRole,
-            'status' => UserStatus::from($this->status),
+            'username'          => $this->username,
+            'email'             => $this->email,
+            'password'          => Hash::make($this->password),
+            'role'              => $targetRole,
+            'status'            => UserStatus::from($this->status),
             'email_verified_at' => now(), // Assume admin created users are verified
         ]);
 

@@ -18,22 +18,31 @@ class Complaint extends Model
 
     protected $fillable = [
         'order_item_id',
+        'resolved_by',
         'reason',
         'evidence',
         'status',
+        'resolution_note',
+        'resolved_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'evidence' => 'array',
-            'status' => ComplaintStatus::class,
+            'evidence'    => 'array',
+            'status'      => ComplaintStatus::class,
+            'resolved_at' => 'datetime',
         ];
     }
 
     public function orderItem(): BelongsTo
     {
         return $this->belongsTo(OrderItem::class);
+    }
+
+    public function resolvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 
     public function messages(): HasMany

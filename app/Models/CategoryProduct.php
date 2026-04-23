@@ -24,7 +24,7 @@ class CategoryProduct extends Pivot
     {
         return [
             'is_featured' => 'boolean',
-            'sort_order' => 'integer',
+            'sort_order'  => 'integer',
         ];
     }
 

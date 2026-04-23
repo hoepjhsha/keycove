@@ -38,8 +38,8 @@ class ComplaintFactory extends Factory
 
         return [
             'order_item_id' => OrderItem::factory(),
-            'reason' => fake()->randomElement($reasons),
-            'evidence' => fake()->optional(0.7)->passthrough([
+            'reason'        => fake()->randomElement($reasons),
+            'evidence'      => fake()->optional(0.7)->passthrough([
                 fake()->imageUrl(800, 600, 'evidence'),
                 'Screenshot showing error message during activation',
                 'Email correspondence with seller showing no response',
@@ -81,7 +81,7 @@ class ComplaintFactory extends Factory
     public function resolved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ComplaintStatus::Resolved,
+            'status' => ComplaintStatus::ApprovedRefund,
         ]);
     }
 

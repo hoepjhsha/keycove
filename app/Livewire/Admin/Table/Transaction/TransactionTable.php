@@ -59,32 +59,24 @@ final class TransactionTable extends PowerGridComponent
 
                 $colorClass = match ($type) {
                     TransactionType::Withdraw => 'bg-indigo-500/10 text-indigo-500',
-                    TransactionType::Pay => 'bg-blue-500/10 text-blue-500',
-                    TransactionType::Refund => 'bg-red-500/10 text-red-500',
-                    default => 'bg-gray-500/10 text-gray-500',
+                    TransactionType::Pay      => 'bg-blue-500/10 text-blue-500',
+                    TransactionType::Refund   => 'bg-red-500/10 text-red-500',
+                    default                   => 'bg-gray-500/10 text-gray-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
             })
-            ->add('amount', function (Transaction $model) {
-                $amountValue = $model->amount;
-
-                if (empty($amountValue)) {
-                    return '0.00 VND';
-                }
-
-                return $amountValue.' VND';
-            })
+            ->add('amount_formatted', fn (Transaction $model) => number_format((float) $model->amount, 2).' VND')
             ->add('status_label', function (Transaction $model) {
                 $status = $model->status;
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    TransactionStatus::Pending => 'bg-yellow-500/10 text-yellow-500',
+                    TransactionStatus::Pending   => 'bg-yellow-500/10 text-yellow-500',
                     TransactionStatus::Completed => 'bg-green-500/10 text-green-500',
-                    TransactionStatus::Failed => 'bg-red-500/10 text-red-500',
+                    TransactionStatus::Failed    => 'bg-red-500/10 text-red-500',
                     TransactionStatus::Cancelled => 'bg-gray-500/10 text-gray-500',
-                    default => 'bg-primary-500/10 text-primary-500',
+                    default                      => 'bg-primary-500/10 text-primary-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
@@ -98,7 +90,7 @@ final class TransactionTable extends PowerGridComponent
             Column::make('#', 'id')->index(),
             Column::make('Order Code', 'order_code', 'order_id')->sortable()->searchable(),
             Column::make('Type', 'type_label', 'type')->sortable(),
-            Column::make('Amount', 'amount')->sortable()->bodyAttribute('text-right'),
+            Column::make('Amount', 'amount_formatted', 'amount')->sortable()->bodyAttribute('text-right'),
             Column::make('Status', 'status_label', 'status')->sortable(),
             Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action'),
@@ -112,7 +104,7 @@ final class TransactionTable extends PowerGridComponent
 
             Filter::multiSelect('status', 'transactions.status')
                 ->dataSource(collect(TransactionStatus::cases())->map(fn ($status) => [
-                    'id' => $status->value,
+                    'id'   => $status->value,
                     'name' => method_exists($status, 'label') ? $status->label() : $status->name,
                 ]))
                 ->optionValue('id')
@@ -124,7 +116,7 @@ final class TransactionTable extends PowerGridComponent
 
             Filter::multiSelect('type', 'transactions.type')
                 ->dataSource(collect(TransactionType::cases())->map(fn ($type) => [
-                    'id' => $type->value,
+                    'id'   => $type->value,
                     'name' => method_exists($type, 'label') ? $type->label() : $type->name,
                 ]))
                 ->optionValue('id')

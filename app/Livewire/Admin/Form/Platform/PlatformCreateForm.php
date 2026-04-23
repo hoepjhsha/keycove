@@ -69,10 +69,10 @@ class PlatformCreateForm extends Form
         }
 
         return Platform::create([
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'name'      => $this->name,
+            'slug'      => $this->slug,
             'icon_path' => $iconPath,
-            'base_url' => $this->base_url,
+            'base_url'  => $this->base_url,
         ]);
     }
 }

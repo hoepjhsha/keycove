@@ -68,10 +68,10 @@ class BulkImportService
             );
         } catch (Throwable $e) {
             Log::error('Bulk import failed', [
-                'user_id' => auth()->id(),
+                'user_id'   => auth()->id(),
                 'file_path' => $filePath,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error'     => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
             ]);
 
             return new ImportResult(
