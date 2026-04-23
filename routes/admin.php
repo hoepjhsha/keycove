@@ -14,6 +14,7 @@ use App\Livewire\Admin\Action\Product\ProductIndex;
 use App\Livewire\Admin\Action\ProductKey\BulkImportIndex;
 use App\Livewire\Admin\Action\Region\RegionIndex;
 use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
+use App\Livewire\Admin\Action\SystemConfig\SystemConfigIndex;
 use App\Livewire\Admin\Action\Transaction\TransactionIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
 use App\Livewire\Admin\Auth\Action\Login;
@@ -40,6 +41,12 @@ Route::middleware('auth:admin')
         Route::get('/dashboard', function () {
             return view('pages.landing.admin-dashboard');
         })->name('dashboard.index');
+
+        Route::prefix('/system-settings')
+            ->name('system_settings.')
+            ->group(function () {
+                Route::get('/', SystemConfigIndex::class)->name('index');
+            });
 
         Route::prefix('/categories')
             ->name('categories.')
