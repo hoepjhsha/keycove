@@ -22,5 +22,6 @@ enum ComplaintStatus: int
     case Open = 0;
     case InProcess = 1;
     case Escalated = 2;
-    case Resolved = 3;
+    case ApprovedRefund = 3;
+    case RejectedRelease = 4;
 }

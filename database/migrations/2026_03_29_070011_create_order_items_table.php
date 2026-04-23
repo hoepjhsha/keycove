@@ -21,7 +21,8 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('unit_price', 15, 2);
             $table->decimal('subtotal', 15, 2);
-            $table->timestamp('created_at');
+            $table->tinyInteger('status')->default(0);
+            $table->timestamps();
         });
     }
 

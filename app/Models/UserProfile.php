@@ -29,6 +29,7 @@ class UserProfile extends Model
     protected function casts(): array
     {
         return [
+            'dob' => '',
             'gender' => Gender::class,
         ];
     }

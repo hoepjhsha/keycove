@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('review_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('review_id')->unique()->constrained()->cascadeOnDelete();
+            $table->foreignId('review_id')->constrained()->cascadeOnDelete();
             $table->foreignId('replier_id')->constrained('users')->restrictOnDelete();
             $table->text('content');
             $table->timestamp('created_at');

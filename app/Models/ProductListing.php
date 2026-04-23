@@ -54,4 +54,9 @@ class ProductListing extends Model
     {
         return $this->hasMany(OrderItem::class, 'listing_id');
     }
+
+    public function isFromAdmin(): bool
+    {
+        return is_null($this->seller_id);
+    }
 }

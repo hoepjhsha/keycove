@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,15 +19,13 @@ class Order extends Model
         'buyer_id',
         'order_code',
         'total_price',
-        'status',
         'payment_method',
     ];
 
     protected function casts(): array
     {
         return [
-            //            'total_price' => 'decimal:2',
-            'status' => OrderStatus::class,
+            'total_price' => 'decimal:2',
             'payment_method' => PaymentMethod::class,
         ];
     }

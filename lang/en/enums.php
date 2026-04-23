@@ -101,7 +101,8 @@ return [
         'Open' => 'Open',
         'InProcess' => 'In Process',
         'Escalated' => 'Escalated',
-        'Resolved' => 'Resolved',
+        'ApprovedRefund' => 'Approved - Refund',
+        'RejectedRelease' => 'Rejected - Release',
     ],
 
     'escrow_status' => [

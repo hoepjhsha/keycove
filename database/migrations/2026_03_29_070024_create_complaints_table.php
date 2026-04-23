@@ -16,9 +16,12 @@ return new class extends Migration
         Schema::create('complaints', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_item_id')->unique()->constrained()->cascadeOnDelete();
+            $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('reason');
             $table->json('evidence')->nullable();
             $table->tinyInteger('status')->default(0);
+            $table->text('resolution_note')->nullable();
+            $table->timestamp('resolved_at')->nullable();
             $table->timestamp('created_at');
         });
     }
