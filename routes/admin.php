@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Auth\Logout;
 use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
+use App\Livewire\Admin\Action\Complaint\ComplaintIndex;
 use App\Livewire\Admin\Action\Escrow\EscrowIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Order\OrderDetail;
@@ -101,6 +102,12 @@ Route::middleware('auth:admin')
             ->group(function () {
                 Route::get('/', OrderIndex::class)->name('index');
                 Route::get('/{id}', OrderDetail::class)->name('detail');
+            });
+
+        Route::prefix('/complaints')
+            ->name('complaints.')
+            ->group(function () {
+                Route::get('/', ComplaintIndex::class)->name('index');
             });
 
         Route::prefix('/escrows')

@@ -43,6 +43,7 @@ return [
             'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
             'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
             'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+            'refund_url'  => env('VNPAY_REFUND_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
         ],
     ],
 
@@ -51,6 +52,7 @@ return [
         'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
         'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
         'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+        'refund_url'  => env('VNPAY_REFUND_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
     ],
 
 ];
