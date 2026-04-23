@@ -155,7 +155,7 @@
         <div class="pt-6 mt-6 border-t border-gray-200 dark:border-gray-800">
             <ul class="space-y-1">
                 <li>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
+                    <a href="{{ route('admin.system_settings.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.system_settings.*') ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors">
                         <i class="fa-solid fa-gear text-lg w-5 text-center shrink-0"></i>
                         System Settings
                     </a>
