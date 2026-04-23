@@ -141,7 +141,12 @@
                 <a href="{{ route('admin.complaints.index') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.complaints.*') ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-scale-balanced text-lg w-5 text-center shrink-0"></i>
-                        Dispute Center
+                        <span class="flex items-center gap-3">
+                            Dispute Center
+                            @if(($openComplaintCount ?? 0) > 0)
+                                <span class="flex h-2 w-2 rounded-full bg-red-500" title="{{ $openComplaintCount }} open complaint(s)"></span>
+                            @endif
+                        </span>
                     </div>
                 </a>
             </li>
