@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('withdraws', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->unique()->constrained()->restrictOnDelete();
+            $table->foreignId('wallet_id')->constrained()->restrictOnDelete();
             $table->decimal('amount', 15, 2);
             $table->tinyInteger('status')->default(0);
             $table->timestamps();

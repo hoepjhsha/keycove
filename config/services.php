@@ -39,20 +39,15 @@ return [
         'default' => 'vnpay',
 
         'vnpay' => [
-            'tmn_code'    => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
-            'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
-            'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
-            'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
-            'refund_url'  => env('VNPAY_REFUND_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
+            'tmn_code'      => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
+            'hash_secret'   => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
+            'url'           => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+            'api_url'       => env('VNPAY_API_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
+            'return_url'    => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+            'refund_mock'   => env('VNPAY_REFUND_MOCK', false),
+            'withdraw_mock' => env('VNPAY_WITHDRAW_MOCK', false),
+            'version'       => env('VNPAY_API_VERSION', ''),
         ],
-    ],
-
-    'vnpay' => [
-        'tmn_code'    => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
-        'hash_secret' => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
-        'url'         => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
-        'return_url'  => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
-        'refund_url'  => env('VNPAY_REFUND_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
     ],
 
 ];

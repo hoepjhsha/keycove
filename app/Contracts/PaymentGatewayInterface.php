@@ -31,4 +31,9 @@ interface PaymentGatewayInterface
      * @param  array  $data  Refund payload.
      */
     public function refund(array $data): array;
+
+    /**
+     * Process a withdrawal request.
+     */
+    public function withdraw(array $data): array;
 }
