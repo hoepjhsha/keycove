@@ -16,6 +16,7 @@ class ProductKey extends Model
     protected $fillable = [
         'listing_id',
         'key_code',
+        'key_hash',
         'status',
         'order_item_id',
     ];
@@ -23,7 +24,8 @@ class ProductKey extends Model
     protected function casts(): array
     {
         return [
-            'status' => ProductKeyStatus::class,
+            'key_code' => 'encrypted',
+            'status'   => ProductKeyStatus::class,
         ];
     }
 

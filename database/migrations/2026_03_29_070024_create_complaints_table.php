@@ -22,7 +22,7 @@ return new class extends Migration
             $table->tinyInteger('status')->default(0);
             $table->text('resolution_note')->nullable();
             $table->timestamp('resolved_at')->nullable();
-            $table->timestamp('created_at');
+            $table->timestamps();
         });
     }
 

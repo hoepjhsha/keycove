@@ -18,7 +18,11 @@ return new class extends Migration
             $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
             $table->string('shop_name', 255);
             $table->string('cccd_number', 255);
+            $table->string('cccd_front_image')->nullable();
+            $table->string('cccd_back_image')->nullable();
             $table->tinyInteger('kyc_status')->default(0);
+            $table->text('kyc_rejected_reason')->nullable();
+            $table->timestamps();
         });
     }
 

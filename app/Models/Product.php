@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\GeneralStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,6 +17,8 @@ class Product extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'submitted_by_seller_id',
+        'approved_by',
         'name',
         'slug',
         'image_thumbnail_path',
@@ -61,5 +64,15 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    public function submittedBySeller(): BelongsTo
+    {
+        return $this->belongsTo(Seller::class, 'submitted_by_seller_id');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

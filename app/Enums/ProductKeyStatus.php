@@ -13,16 +13,18 @@ use App\Enums\Concerns\HasLabels;
  *
  * Cases:
  * - Available: Ready to be sold
- * - Pending: Reserved/processing
+ * - Reserved: Reserved/processing
  * - Sold: Already sold
- * - Revoked: Revoked/invalidated
+ * - Refunded: Refunded after sale
+ * - Disabled: Disabled/invalidated
  */
 enum ProductKeyStatus: int
 {
     use HasLabels;
 
     case Available = 0;
-    case Pending = 1;
+    case Reserved = 1;
     case Sold = 2;
-    case Revoked = 3;
+    case Refunded = 3;
+    case Disabled = 4;
 }

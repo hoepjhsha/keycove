@@ -38,7 +38,7 @@ final class TransactionTable extends PowerGridComponent
     public function datasource(): Builder
     {
         return Transaction::query()
-            ->join('orders', 'transactions.order_id', '=', 'orders.id')
+            ->leftJoin('orders', 'transactions.order_id', '=', 'orders.id')
             ->select('transactions.*', 'orders.order_code as order_code_raw')
             ->with(['order.buyer', 'wallet.seller']);
     }
@@ -58,10 +58,14 @@ final class TransactionTable extends PowerGridComponent
                 $labelText = method_exists($type, 'label') ? $type->label() : $type->name;
 
                 $colorClass = match ($type) {
-                    TransactionType::Withdraw => 'bg-indigo-500/10 text-indigo-500',
-                    TransactionType::Pay      => 'bg-blue-500/10 text-blue-500',
-                    TransactionType::Refund   => 'bg-red-500/10 text-red-500',
-                    default                   => 'bg-gray-500/10 text-gray-500',
+                    TransactionType::PaymentReceived => 'bg-blue-500/10 text-blue-500',
+                    TransactionType::EscrowHold,
+                    TransactionType::EscrowRelease => 'bg-emerald-500/10 text-emerald-500',
+                    TransactionType::Withdraw,
+                    TransactionType::WithdrawReserve,
+                    TransactionType::WithdrawRelease => 'bg-indigo-500/10 text-indigo-500',
+                    TransactionType::Refund          => 'bg-red-500/10 text-red-500',
+                    default                          => 'bg-gray-500/10 text-gray-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';

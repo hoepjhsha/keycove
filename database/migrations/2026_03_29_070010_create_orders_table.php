@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('order_code', 255)->unique();
             $table->decimal('total_price', 15, 2);
             $table->tinyInteger('payment_method');
+            $table->tinyInteger('payment_status')->default(0);
             $table->timestamps();
         });
     }

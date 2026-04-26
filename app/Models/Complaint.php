@@ -14,8 +14,6 @@ class Complaint extends Model
 {
     use HasFactory;
 
-    const null UPDATED_AT = null;
-
     protected $fillable = [
         'order_item_id',
         'resolved_by',

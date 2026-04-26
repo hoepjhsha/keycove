@@ -19,14 +19,16 @@ class ProductListing extends Model
         'variant_id',
         'seller_id',
         'price',
+        'stock_count',
         'status',
     ];
 
     protected function casts(): array
     {
         return [
-            'price'  => 'decimal:2',
-            'status' => ProductListingStatus::class,
+            'price'       => 'decimal:2',
+            'stock_count' => 'integer',
+            'status'      => ProductListingStatus::class,
         ];
     }
 
@@ -53,10 +55,5 @@ class ProductListing extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'listing_id');
-    }
-
-    public function isFromAdmin(): bool
-    {
-        return is_null($this->seller_id);
     }
 }

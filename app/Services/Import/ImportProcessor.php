@@ -24,6 +24,7 @@ class ImportProcessor
                     ProductKey::create([
                         'listing_id' => (int) $row['listing_id'],
                         'key_code'   => $row['key_code'],
+                        'key_hash'   => hash('sha256', (string) $row['key_code']),
                         'status'     => $this->parseStatus($row['status'] ?? null),
                     ]);
                     $successCount++;

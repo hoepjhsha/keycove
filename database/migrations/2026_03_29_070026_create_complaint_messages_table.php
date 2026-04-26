@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('sender_id')->constrained('users')->restrictOnDelete();
             $table->text('message');
             $table->json('attachments')->nullable();
-            $table->timestamp('created_at');
+            $table->timestamps();
         });
     }
 

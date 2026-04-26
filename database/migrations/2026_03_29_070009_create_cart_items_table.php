@@ -17,7 +17,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cart_id')->constrained()->cascadeOnDelete();
             $table->foreignId('listing_id')->constrained('product_listings')->restrictOnDelete();
-            $table->integer('quantity');
+            $table->unsignedInteger('quantity');
+            $table->timestamps();
+
+            $table->unique(['cart_id', 'listing_id']);
         });
     }
 

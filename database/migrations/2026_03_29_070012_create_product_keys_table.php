@@ -16,12 +16,14 @@ return new class extends Migration
         Schema::create('product_keys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('listing_id')->constrained('product_listings')->cascadeOnDelete();
-            $table->string('key_code', 255);
+            $table->text('key_code');
+            $table->string('key_hash', 64);
             $table->tinyInteger('status')->default(0);
             $table->unsignedBigInteger('order_item_id')->nullable();
             $table->timestamps();
 
             $table->foreign('order_item_id')->references('id')->on('order_items')->nullOnDelete();
+            $table->unique(['listing_id', 'key_hash']);
         });
     }
 

@@ -25,10 +25,11 @@ class ProductListingFactory extends Factory
     public function definition(): array
     {
         return [
-            'variant_id' => ProductVariant::factory(),
-            'seller_id'  => Seller::factory(),
-            'price'      => fake()->randomFloat(2, 9.99, 59.99),
-            'status'     => ProductListingStatus::Active,
+            'variant_id'  => ProductVariant::factory(),
+            'seller_id'   => Seller::factory(),
+            'price'       => fake()->randomFloat(2, 9.99, 59.99),
+            'stock_count' => fake()->numberBetween(0, 100),
+            'status'      => ProductListingStatus::Active,
         ];
     }
 

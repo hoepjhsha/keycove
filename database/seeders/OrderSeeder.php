@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Enums\EscrowStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
+use App\Enums\TransactionBalanceType;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Enums\UserRole;
@@ -86,7 +88,7 @@ class OrderSeeder extends Seeder
                             $key->update([
                                 'order_item_id' => $orderItem->id,
                                 'status'        => $config['status'] === OrderStatus::Disputing
-                                    ? ProductKeyStatus::Pending
+                                    ? ProductKeyStatus::Reserved
                                     : ProductKeyStatus::Sold,
                             ]);
                         }
@@ -97,7 +99,12 @@ class OrderSeeder extends Seeder
                     }
                 }
 
-                $order->update(['total_price' => round($totalPrice, 2)]);
+                $order->update([
+                    'total_price'    => round($totalPrice, 2),
+                    'payment_status' => $config['status'] === OrderStatus::Cancelled
+                        ? PaymentStatus::Cancelled
+                        : PaymentStatus::Completed,
+                ]);
 
                 $this->createTransaction($order, $paymentMethod, $config['status'], $orderDate);
             }
@@ -164,6 +171,7 @@ class OrderSeeder extends Seeder
                 'order_code'     => 'ORD-'.$orderDate->format('Ymd').'-'.strtoupper(Str::random(5)),
                 'total_price'    => 0,
                 'payment_method' => $paymentMethod,
+                'payment_status' => PaymentStatus::Pending,
                 'created_at'     => $orderDate,
                 'updated_at'     => $orderDate,
             ])
@@ -178,17 +186,29 @@ class OrderSeeder extends Seeder
         int $quantity,
         float $subtotal,
     ): OrderItem {
+        $platformFee = round($subtotal * 0.1, 2);
+
         return OrderItem::factory()
             ->forOrder($order)
             ->state([
                 'listing_id'            => $listing->id,
+                'seller_id'             => $listing->seller_id,
                 'product_name_snapshot' => $listing->variant?->product?->name ?? 'Unknown Product',
-                'quantity'              => $quantity,
-                'unit_price'            => $listing->price,
-                'subtotal'              => $subtotal,
-                'status'                => $status,
-                'created_at'            => $orderDate,
-                'updated_at'            => $orderDate,
+                'variant_snapshot'      => [
+                    'variant_id' => $listing->variant_id,
+                    'region'     => $listing->variant?->region?->name,
+                    'platform'   => $listing->variant?->platform?->name,
+                    'os'         => $listing->variant?->operatingSystem?->name,
+                    'edition'    => $listing->variant?->edition,
+                ],
+                'quantity'      => $quantity,
+                'unit_price'    => $listing->price,
+                'subtotal'      => $subtotal,
+                'platform_fee'  => $platformFee,
+                'seller_amount' => round($subtotal - $platformFee, 2),
+                'status'        => $status,
+                'created_at'    => $orderDate,
+                'updated_at'    => $orderDate,
             ])
             ->create();
     }
@@ -219,11 +239,13 @@ class OrderSeeder extends Seeder
         Transaction::factory()
             ->forOrder($order)
             ->state([
-                'wallet_id'    => null,
-                'type'         => TransactionType::Pay,
+                'type'         => TransactionType::PaymentReceived,
+                'balance_type' => TransactionBalanceType::Available,
                 'payment_info' => $this->generatePaymentInfo($paymentMethod),
-                'amount'       => $order->total_price,
-                'status'       => $status === OrderStatus::Cancelled
+                'amount'       => $status === OrderStatus::Cancelled
+                    ? 0
+                    : $order->total_price,
+                'status' => $status === OrderStatus::Cancelled
                     ? TransactionStatus::Cancelled
                     : TransactionStatus::Completed,
                 'created_at' => $orderDate,

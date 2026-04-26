@@ -15,7 +15,9 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('seller_id')->unique()->constrained()->cascadeOnDelete();
+            $table->foreignId('seller_id')->nullable()->unique()->constrained()->nullOnDelete();
+            $table->tinyInteger('type')->default(0);
+            $table->string('code')->nullable()->unique();
             $table->decimal('balance', 15, 2)->default(0);
             $table->decimal('holding', 15, 2)->default(0);
             $table->timestamps();
