@@ -17,18 +17,39 @@ class Withdraw extends Model
         'wallet_id',
         'amount',
         'status',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
+        'requested_by',
+        'processed_by',
+        'processed_at',
+        'reject_reason',
+        'metadata',
     ];
 
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
-            'status' => WithdrawStatus::class,
+            'amount'              => 'decimal:2',
+            'bank_account_number' => 'encrypted',
+            'status'              => WithdrawStatus::class,
+            'processed_at'        => 'datetime',
+            'metadata'            => 'array',
         ];
     }
 
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function requestedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requested_by');
+    }
+
+    public function processedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'processed_by');
     }
 }

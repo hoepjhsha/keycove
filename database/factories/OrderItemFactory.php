@@ -24,18 +24,26 @@ class OrderItemFactory extends Factory
      */
     public function definition(): array
     {
+        $listing = ProductListing::factory()->create();
         $quantity = fake()->numberBetween(1, 5);
-        $unitPrice = fake()->randomFloat(2, 9.99, 59.99);
+        $unitPrice = (float) $listing->price;
         $subtotal = $quantity * $unitPrice;
+        $platformFee = round($subtotal * 0.1, 2);
 
         return [
             'order_id'              => Order::factory(),
-            'listing_id'            => ProductListing::factory(),
+            'listing_id'            => $listing->id,
+            'seller_id'             => $listing->seller_id,
             'product_name_snapshot' => fake()->words(3, true).' - '.fake()->randomElement(['Standard Edition', 'Deluxe Edition', 'Ultimate Edition']),
-            'quantity'              => $quantity,
-            'unit_price'            => $unitPrice,
-            'subtotal'              => $subtotal,
-            'status'                => OrderStatus::Processing,
+            'variant_snapshot'      => [
+                'variant_id' => $listing->variant_id,
+            ],
+            'quantity'      => $quantity,
+            'unit_price'    => $unitPrice,
+            'subtotal'      => $subtotal,
+            'platform_fee'  => $platformFee,
+            'seller_amount' => round($subtotal - $platformFee, 2),
+            'status'        => OrderStatus::Processing,
         ];
     }
 
@@ -54,9 +62,12 @@ class OrderItemFactory extends Factory
             $productListing = $listing ?? ProductListing::factory()->create();
 
             return [
-                'listing_id' => $productListing->id,
-                'unit_price' => $productListing->price,
-                'subtotal'   => $attributes['quantity'] * $productListing->price,
+                'listing_id'    => $productListing->id,
+                'seller_id'     => $productListing->seller_id,
+                'unit_price'    => $productListing->price,
+                'subtotal'      => $attributes['quantity'] * $productListing->price,
+                'platform_fee'  => round(($attributes['quantity'] * (float) $productListing->price) * 0.1, 2),
+                'seller_amount' => round(($attributes['quantity'] * (float) $productListing->price) * 0.9, 2),
             ];
         });
     }

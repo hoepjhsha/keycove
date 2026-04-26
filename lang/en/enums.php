@@ -51,11 +51,20 @@ return [
         'Stripe' => 'Stripe',
     ],
 
+    'payment_status' => [
+        'Pending'   => 'Pending',
+        'Completed' => 'Completed',
+        'Failed'    => 'Failed',
+        'Cancelled' => 'Cancelled',
+        'Refunded'  => 'Refunded',
+    ],
+
     'product_key_status' => [
         'Available' => 'Available',
-        'Pending'   => 'Pending',
+        'Reserved'  => 'Reserved',
         'Sold'      => 'Sold',
-        'Revoked'   => 'Revoked',
+        'Refunded'  => 'Refunded',
+        'Disabled'  => 'Disabled',
     ],
 
     'product_listing_status' => [
@@ -81,18 +90,36 @@ return [
         'Completed' => 'Completed',
         'Failed'    => 'Failed',
         'Cancelled' => 'Cancelled',
+        'Voided'    => 'Voided',
     ],
 
     'transaction_type' => [
-        'Withdraw' => 'Withdraw',
-        'Pay'      => 'Pay',
-        'Refund'   => 'Refund',
+        'PaymentReceived' => 'Payment Received',
+        'EscrowHold'      => 'Escrow Hold',
+        'EscrowRelease'   => 'Escrow Release',
+        'Refund'          => 'Refund',
+        'WithdrawReserve' => 'Withdraw Reserve',
+        'Withdraw'        => 'Withdraw',
+        'WithdrawRelease' => 'Withdraw Release',
+        'Adjustment'      => 'Adjustment',
+    ],
+
+    'transaction_balance_type' => [
+        'Available'       => 'Available',
+        'Holding'         => 'Holding',
+        'WithdrawPending' => 'Withdraw Pending',
+    ],
+
+    'wallet_type' => [
+        'Seller'   => 'Seller',
+        'Internal' => 'Internal',
     ],
 
     'withdraw_status' => [
         'Pending'    => 'Pending',
         'Processing' => 'Processing',
         'Completed'  => 'Completed',
+        'Rejected'   => 'Rejected',
         'Cancelled'  => 'Cancelled',
         'Failed'     => 'Failed',
     ],

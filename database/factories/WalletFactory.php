@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\WalletType;
 use App\Models\Seller;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,6 +25,7 @@ class WalletFactory extends Factory
     {
         return [
             'seller_id' => Seller::factory(),
+            'type'      => WalletType::Seller,
             'balance'   => fake()->randomFloat(2, 0, 10000),
             'holding'   => fake()->randomFloat(2, 0, 500),
         ];
@@ -59,6 +61,14 @@ class WalletFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'balance' => fake()->randomFloat(2, 50000, 100000),
             'holding' => fake()->randomFloat(2, 1000, 5000),
+        ]);
+    }
+
+    public function internal(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'seller_id' => null,
+            'type'      => WalletType::Internal,
         ]);
     }
 }

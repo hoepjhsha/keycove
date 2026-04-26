@@ -17,10 +17,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('listing_id')->constrained('product_listings')->restrictOnDelete();
+            $table->foreignId('seller_id')->constrained()->restrictOnDelete();
             $table->string('product_name_snapshot', 255);
-            $table->integer('quantity');
+            $table->json('variant_snapshot')->nullable();
+            $table->unsignedInteger('quantity');
             $table->decimal('unit_price', 15, 2);
             $table->decimal('subtotal', 15, 2);
+            $table->decimal('platform_fee', 15, 2)->default(0);
+            $table->decimal('seller_amount', 15, 2)->default(0);
             $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });

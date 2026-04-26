@@ -15,12 +15,16 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('wallet_id')->constrained()->restrictOnDelete();
             $table->foreignId('order_id')->nullable()->constrained()->restrictOnDelete();
-            $table->foreignId('wallet_id')->nullable()->constrained()->restrictOnDelete();
+            $table->nullableMorphs('source');
             $table->tinyInteger('type');
+            $table->tinyInteger('balance_type')->default(0);
             $table->json('payment_info')->nullable();
             $table->decimal('amount', 15, 2);
             $table->tinyInteger('status')->default(0);
+            $table->string('idempotency_key')->nullable()->unique();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

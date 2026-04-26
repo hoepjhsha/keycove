@@ -18,6 +18,14 @@ return new class extends Migration
             $table->foreignId('wallet_id')->constrained()->restrictOnDelete();
             $table->decimal('amount', 15, 2);
             $table->tinyInteger('status')->default(0);
+            $table->string('bank_name', 255);
+            $table->string('bank_account_number', 255);
+            $table->string('bank_account_name', 255);
+            $table->foreignId('requested_by')->constrained('users')->restrictOnDelete();
+            $table->foreignId('processed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('processed_at')->nullable();
+            $table->text('reject_reason')->nullable();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

@@ -70,7 +70,7 @@ class ImportValidator
                 continue;
             }
 
-            if (in_array($row['key_code'], $existingKeyCodes, true)) {
+            if (in_array(hash('sha256', (string) $row['key_code']), $existingKeyCodes, true)) {
                 $errors[] = new ValidationError($rowNumber, 'key_code', "Key code '{$row['key_code']}' already exists", $row);
             }
 
@@ -111,13 +111,16 @@ class ImportValidator
      */
     private function getExistingKeyCodes(array $data): array
     {
-        $keyCodes = array_filter(array_unique(array_column($data, 'key_code')));
+        $keyHashes = array_map(
+            fn (mixed $keyCode): string => hash('sha256', (string) $keyCode),
+            array_filter(array_unique(array_column($data, 'key_code')))
+        );
         $listingIds = array_filter(array_unique(array_column($data, 'listing_id')));
 
         return $this->keyRepository->getModel()
             ->whereIn('listing_id', $listingIds)
-            ->whereIn('key_code', $keyCodes)
-            ->pluck('key_code')
+            ->whereIn('key_hash', $keyHashes)
+            ->pluck('key_hash')
             ->toArray();
     }
 }

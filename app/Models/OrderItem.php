@@ -18,20 +18,27 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'listing_id',
+        'seller_id',
         'product_name_snapshot',
+        'variant_snapshot',
         'quantity',
         'unit_price',
         'subtotal',
+        'platform_fee',
+        'seller_amount',
         'status',
     ];
 
     protected function casts(): array
     {
         return [
-            'quantity'   => 'integer',
-            'unit_price' => 'decimal:2',
-            'subtotal'   => 'decimal:2',
-            'status'     => OrderStatus::class,
+            'variant_snapshot' => 'array',
+            'quantity'         => 'integer',
+            'unit_price'       => 'decimal:2',
+            'subtotal'         => 'decimal:2',
+            'platform_fee'     => 'decimal:2',
+            'seller_amount'    => 'decimal:2',
+            'status'           => OrderStatus::class,
         ];
     }
 
@@ -43,6 +50,11 @@ class OrderItem extends Model
     public function listing(): BelongsTo
     {
         return $this->belongsTo(ProductListing::class, 'listing_id');
+    }
+
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(Seller::class);
     }
 
     public function keys(): HasMany

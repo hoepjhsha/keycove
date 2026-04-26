@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\WithdrawStatus;
+use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,9 +25,17 @@ class WithdrawFactory extends Factory
     public function definition(): array
     {
         return [
-            'wallet_id' => Wallet::factory(),
-            'amount'    => fake()->randomFloat(2, 50, 5000),
-            'status'    => WithdrawStatus::Pending,
+            'wallet_id'           => Wallet::factory(),
+            'amount'              => fake()->randomFloat(2, 50, 5000),
+            'status'              => WithdrawStatus::Pending,
+            'bank_name'           => fake()->randomElement(['Vietcombank', 'Techcombank', 'BIDV', 'ACB', 'Sacombank']),
+            'bank_account_number' => fake()->numerify('##########'),
+            'bank_account_name'   => fake()->name(),
+            'requested_by'        => User::factory(),
+            'processed_by'        => null,
+            'processed_at'        => null,
+            'reject_reason'       => null,
+            'metadata'            => null,
         ];
     }
 

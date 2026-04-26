@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,7 @@ class Order extends Model
         'order_code',
         'total_price',
         'payment_method',
+        'payment_status',
     ];
 
     protected function casts(): array
@@ -31,6 +33,7 @@ class Order extends Model
         return [
             'total_price'    => 'decimal:2',
             'payment_method' => PaymentMethod::class,
+            'payment_status' => PaymentStatus::class,
         ];
     }
 
@@ -57,6 +60,16 @@ class Order extends Model
     public function transaction(): HasOne
     {
         return $this->hasOne(Transaction::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function paymentTransactions(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
     }
 
     protected function status(): Attribute

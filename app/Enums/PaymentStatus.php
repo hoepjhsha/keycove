@@ -6,18 +6,7 @@ namespace App\Enums;
 
 use App\Enums\Concerns\HasLabels;
 
-/**
- * TransactionStatus enum.
- *
- * Status of a payment or wallet transaction.
- *
- * Cases:
- * - Pending
- * - Completed
- * - Failed
- * - Cancelled
- */
-enum TransactionStatus: int
+enum PaymentStatus: int
 {
     use HasLabels;
 
@@ -25,5 +14,5 @@ enum TransactionStatus: int
     case Completed = 1;
     case Failed = 2;
     case Cancelled = 3;
-    case Voided = 4;
+    case Refunded = 4;
 }

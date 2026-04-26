@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('variant_id')->constrained('product_variants')->cascadeOnDelete();
             $table->foreignId('seller_id')->constrained()->restrictOnDelete();
             $table->decimal('price', 15, 2);
+            $table->unsignedInteger('stock_count')->default(0);
             $table->tinyInteger('status')->default(0);
             $table->timestamps();
             $table->softDeletes();

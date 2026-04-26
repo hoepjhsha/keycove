@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -30,6 +31,7 @@ class OrderFactory extends Factory
             'order_code'     => $this->generateOrderCode(),
             'total_price'    => fake()->randomFloat(2, 9.99, 299.99),
             'payment_method' => fake()->randomElement([PaymentMethod::VNPay, PaymentMethod::Stripe]),
+            'payment_status' => PaymentStatus::Pending,
         ];
     }
 

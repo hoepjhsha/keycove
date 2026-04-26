@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\WalletType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wallet extends Model
@@ -16,6 +17,7 @@ class Wallet extends Model
 
     protected $fillable = [
         'seller_id',
+        'type',
         'code',
         'balance',
         'holding',
@@ -24,6 +26,7 @@ class Wallet extends Model
     protected function casts(): array
     {
         return [
+            'type'    => WalletType::class,
             'balance' => 'decimal:2',
             'holding' => 'decimal:2',
         ];
@@ -34,13 +37,13 @@ class Wallet extends Model
         return $this->belongsTo(Seller::class);
     }
 
-    public function withdraw(): HasOne
+    public function withdraws(): HasMany
     {
-        return $this->hasOne(Withdraw::class);
+        return $this->hasMany(Withdraw::class);
     }
 
-    public function transaction(): HasOne
+    public function transactions(): HasMany
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasMany(Transaction::class);
     }
 }

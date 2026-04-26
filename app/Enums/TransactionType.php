@@ -10,16 +10,17 @@ use App\Enums\Concerns\HasLabels;
  * TransactionType enum.
  *
  * Type of transaction.
- *
- * Cases:
- * - Withdraw: Money withdrawn from wallet
- * - Pay: Payment for order
  */
 enum TransactionType: int
 {
     use HasLabels;
 
-    case Withdraw = 0;
-    case Pay = 1;
-    case Refund = 2;
+    case PaymentReceived = 0;
+    case EscrowHold = 1;
+    case EscrowRelease = 2;
+    case Refund = 3;
+    case WithdrawReserve = 4;
+    case Withdraw = 5;
+    case WithdrawRelease = 6;
+    case Adjustment = 7;
 }

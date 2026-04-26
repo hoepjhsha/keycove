@@ -27,10 +27,14 @@ class TransactionIndex extends Component
             // Format Transaction Type
             $typeLabel = method_exists($transaction->type, 'label') ? $transaction->type->label() : $transaction->type->name;
             $typeClass = match ($transaction->type) {
-                TransactionType::Withdraw => 'bg-indigo-500/10 text-indigo-500',
-                TransactionType::Pay      => 'bg-blue-500/10 text-blue-500',
-                TransactionType::Refund   => 'bg-red-500/10 text-red-500',
-                default                   => 'bg-gray-500/10 text-gray-500',
+                TransactionType::PaymentReceived => 'bg-blue-500/10 text-blue-500',
+                TransactionType::EscrowHold,
+                TransactionType::EscrowRelease => 'bg-emerald-500/10 text-emerald-500',
+                TransactionType::Withdraw,
+                TransactionType::WithdrawReserve,
+                TransactionType::WithdrawRelease => 'bg-indigo-500/10 text-indigo-500',
+                TransactionType::Refund          => 'bg-red-500/10 text-red-500',
+                default                          => 'bg-gray-500/10 text-gray-500',
             };
             $typeHtml = '<span class="'.$typeClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$typeLabel.'</span>';
 

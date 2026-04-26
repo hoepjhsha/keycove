@@ -144,10 +144,11 @@ class ProductSeeder extends Seeder
             ]);
 
             $listing = ProductListing::create([
-                'variant_id' => $variant->id,
-                'seller_id'  => $seller->id,
-                'price'      => $price,
-                'status'     => $status,
+                'variant_id'  => $variant->id,
+                'seller_id'   => $seller->id,
+                'price'       => $price,
+                'stock_count' => 0,
+                'status'      => $status,
             ]);
 
             $this->createKeys($listing, $status);
@@ -166,16 +167,23 @@ class ProductSeeder extends Seeder
                 ProductKeyStatus::Available,
                 ProductKeyStatus::Available,
                 ProductKeyStatus::Sold,
-                ProductKeyStatus::Pending,
+                ProductKeyStatus::Reserved,
             ]);
+
+            $keyCode = $this->generateKeyCode();
 
             ProductKey::create([
                 'listing_id'    => $listing->id,
-                'key_code'      => $this->generateKeyCode(),
+                'key_code'      => $keyCode,
+                'key_hash'      => hash('sha256', $keyCode),
                 'status'        => $keyStatus,
                 'order_item_id' => null,
             ]);
         }
+
+        $listing->update([
+            'stock_count' => $listing->keys()->where('status', ProductKeyStatus::Available)->count(),
+        ]);
     }
 
     protected function generateKeyCode(): string

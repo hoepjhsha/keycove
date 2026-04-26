@@ -24,9 +24,12 @@ class ProductKeyFactory extends Factory
      */
     public function definition(): array
     {
+        $keyCode = $this->generateKeyCode();
+
         return [
             'listing_id'    => ProductListing::factory(),
-            'key_code'      => $this->generateKeyCode(),
+            'key_code'      => $keyCode,
+            'key_hash'      => hash('sha256', $keyCode),
             'status'        => ProductKeyStatus::Available,
             'order_item_id' => null,
         ];
@@ -63,10 +66,10 @@ class ProductKeyFactory extends Factory
         ]);
     }
 
-    public function pending(): static
+    public function reserved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ProductKeyStatus::Pending,
+            'status' => ProductKeyStatus::Reserved,
         ]);
     }
 
@@ -77,10 +80,17 @@ class ProductKeyFactory extends Factory
         ]);
     }
 
-    public function revoked(): static
+    public function refunded(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ProductKeyStatus::Revoked,
+            'status' => ProductKeyStatus::Refunded,
+        ]);
+    }
+
+    public function disabled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ProductKeyStatus::Disabled,
         ]);
     }
 }

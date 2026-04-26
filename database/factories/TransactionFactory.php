@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\PaymentMethod;
+use App\Enums\TransactionBalanceType;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Models\Order;
@@ -26,19 +27,20 @@ class TransactionFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement([TransactionType::Pay, TransactionType::Withdraw]);
+        $type = fake()->randomElement([TransactionType::PaymentReceived, TransactionType::Withdraw]);
         $amount = fake()->randomFloat(2, 9.99, 999.99);
 
-        $paymentInfo = $type === TransactionType::Pay
+        $paymentInfo = $type === TransactionType::PaymentReceived
             ? $this->generatePaymentInfo()
             : $this->generateWithdrawInfo();
 
         return [
-            'order_id'     => $type === TransactionType::Pay ? Order::factory() : null,
-            'wallet_id'    => $type === TransactionType::Withdraw ? Wallet::factory() : null,
+            'wallet_id'    => Wallet::factory(),
+            'order_id'     => $type === TransactionType::PaymentReceived ? Order::factory() : null,
             'type'         => $type,
+            'balance_type' => TransactionBalanceType::Available,
             'payment_info' => $paymentInfo,
-            'amount'       => $amount,
+            'amount'       => $type === TransactionType::Withdraw ? -$amount : $amount,
             'status'       => TransactionStatus::Completed,
         ];
     }
@@ -83,8 +85,9 @@ class TransactionFactory extends Factory
 
             return [
                 'order_id'     => $orderEntity->id,
-                'wallet_id'    => null,
-                'type'         => TransactionType::Pay,
+                'wallet_id'    => Wallet::factory()->internal()->create()->id,
+                'type'         => TransactionType::PaymentReceived,
+                'balance_type' => TransactionBalanceType::Available,
                 'amount'       => $orderEntity->total_price,
                 'payment_info' => $this->generatePaymentInfo(),
             ];
@@ -98,6 +101,8 @@ class TransactionFactory extends Factory
                 'order_id'     => null,
                 'wallet_id'    => $wallet?->id ?? Wallet::factory()->create()->id,
                 'type'         => TransactionType::Withdraw,
+                'balance_type' => TransactionBalanceType::Available,
+                'amount'       => -fake()->randomFloat(2, 50, 5000),
                 'payment_info' => $this->generateWithdrawInfo(),
             ];
         });
@@ -134,7 +139,7 @@ class TransactionFactory extends Factory
     public function vnpay(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type'         => TransactionType::Pay,
+            'type'         => TransactionType::PaymentReceived,
             'payment_info' => array_merge($this->generatePaymentInfo(), ['method' => 'VNPay']),
         ]);
     }
@@ -142,7 +147,7 @@ class TransactionFactory extends Factory
     public function stripe(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type'         => TransactionType::Pay,
+            'type'         => TransactionType::PaymentReceived,
             'payment_info' => array_merge($this->generatePaymentInfo(), ['method' => 'Stripe']),
         ]);
     }

@@ -418,9 +418,9 @@
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
                                                     Available
                                                 </span>
-                                            @elseif($key->status === \App\Enums\ProductKeyStatus::Pending)
+                                            @elseif($key->status === \App\Enums\ProductKeyStatus::Reserved)
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500">
-                                                    Pending
+                                                    Reserved
                                                 </span>
                                             @elseif($key->status === \App\Enums\ProductKeyStatus::Sold)
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-500">
@@ -428,7 +428,7 @@
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
-                                                    Revoked
+                                                    {{ $key->status->label() }}
                                                 </span>
                                             @endif
                                         </td>
