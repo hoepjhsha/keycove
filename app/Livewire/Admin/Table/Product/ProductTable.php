@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Table\Product;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Action\Product\ProductIndex;
 use App\Models\Product;
+use App\Models\Seller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -85,7 +86,7 @@ final class ProductTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Owner', 'submitted_by')
+            Column::make('Owner', 'submitted_by', 'submitted_by_seller_id')
                 ->sortable()
                 ->searchable(),
 
@@ -117,11 +118,27 @@ final class ProductTable extends PowerGridComponent
 
     public function filters(): array
     {
+        $ownerOptions = Seller::query()
+            ->with('user')
+            ->orderBy('shop_name')
+            ->get()
+            ->map(fn (Seller $seller) => [
+                'id'   => $seller->id,
+                'name' => $seller->shop_name,
+            ]);
+
         return [
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('slug')->operators(['contains']),
             Filter::inputText('publisher')->operators(['contains']),
             Filter::inputText('developer')->operators(['contains']),
+
+            Filter::multiSelect('submitted_by', 'submitted_by_seller_id')
+                ->dataSource(collect([
+                    ['id' => 0, 'name' => 'Shop Admin'],
+                ])->concat($ownerOptions))
+                ->optionValue('id')
+                ->optionLabel('name'),
 
             Filter::multiSelect('status', 'status')
                 ->dataSource(collect(GeneralStatus::cases())->map(fn ($status) => [

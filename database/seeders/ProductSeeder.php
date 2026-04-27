@@ -88,10 +88,12 @@ class ProductSeeder extends Seeder
             $productSlug = Str::slug($productData['name']);
             $submittedBySellerId = $this->resolveSubmittedBySellerId($productData, $sellers);
 
-            $product = Product::firstOrCreate(
-                ['slug' => $productSlug],
-                [
+            $product = Product::where('slug', $productSlug)->first();
+
+            if (! $product) {
+                $product = Product::create([
                     'name'                   => $productData['name'],
+                    'slug'                   => $productSlug,
                     'image_thumbnail_path'   => 'products/thumbnails/'.$productSlug.'.jpg',
                     'publisher'              => $productData['publisher'],
                     'developer'              => $productData['developer'],
@@ -101,8 +103,8 @@ class ProductSeeder extends Seeder
                     'submitted_by_seller_id' => $submittedBySellerId,
                     'approved_by'            => null,
                     'status'                 => GeneralStatus::Active,
-                ]
-            );
+                ]);
+            }
 
             if (! empty($productData['categories'])) {
                 $categoryIds = [];
@@ -133,16 +135,23 @@ class ProductSeeder extends Seeder
 
             $this->downloadProductThumbnail($productSlug, $disk);
 
+            $priceRange = ($productData['submitted_by'] ?? 'admin') === 'seller'
+                ? ($productData['price_range'] ?? [9.99, 59.99])
+                : $this->convertPriceRangeToVnd($productData['price_range'] ?? [9.99, 59.99]);
+
+            $fixedPrice = $productData['price'] ?? null;
+
             $this->createVariants(
                 $product,
                 $productData['variants'] ?? [],
-                $this->convertPriceRangeToVnd($productData['price_range'] ?? [9.99, 59.99]),
+                $priceRange,
                 $submittedBySellerId,
+                $fixedPrice,
             );
         }
     }
 
-    protected function createVariants(Product $product, array $variantConfigs, array $priceRange, ?int $submittedBySellerId): void
+    protected function createVariants(Product $product, array $variantConfigs, array $priceRange, ?int $submittedBySellerId, ?int $fixedPrice = null): void
     {
         $platforms = Platform::where('status', GeneralStatus::Active)->get();
         $regions = Region::where('status', GeneralStatus::Active)->get();
@@ -171,27 +180,28 @@ class ProductSeeder extends Seeder
             $editions = $variantConfig['editions'] ?? ['Standard'];
 
             foreach ($editions as $edition) {
-                $variant = ProductVariant::create([
+                $variant = ProductVariant::firstOrCreate([
                     'product_id'  => $product->id,
                     'region_id'   => $region->id,
                     'platform_id' => $platform->id,
                     'os_id'       => $os->id,
                     'edition'     => $edition,
-                    'status'      => ProductVariantStatus::Active,
+                ], [
+                    'status' => ProductVariantStatus::Active,
                 ]);
 
                 // Create listings for this variant
-                $this->createListings($variant, $sellers, $priceRange, $submittedBySellerId);
+                $this->createListings($variant, $sellers, $priceRange, $submittedBySellerId, $fixedPrice);
             }
         }
     }
 
-    protected function createListings(ProductVariant $variant, Collection $sellers, array $priceRange, ?int $submittedBySellerId): void
+    protected function createListings(ProductVariant $variant, Collection $sellers, array $priceRange, ?int $submittedBySellerId, ?int $fixedPrice = null): void
     {
-        $numListings = random_int(1, 3);
+        $numListings = $submittedBySellerId === null ? random_int(1, 3) : 1;
 
         for ($i = 0; $i < $numListings; $i++) {
-            $price = $this->randomVndPrice($priceRange);
+            $price = $fixedPrice ?? $priceRange[2] ?? $this->randomVndPrice($priceRange);
             $status = fake()->randomElement([
                 ProductListingStatus::Active,
                 ProductListingStatus::Active,
@@ -202,6 +212,26 @@ class ProductSeeder extends Seeder
             ]);
 
             $sellerId = $submittedBySellerId;
+
+            if ($sellerId !== null) {
+                $listing = ProductListing::updateOrCreate(
+                    [
+                        'variant_id' => $variant->id,
+                        'seller_id'  => $sellerId,
+                    ],
+                    [
+                        'price'       => $price,
+                        'stock_count' => 0,
+                        'status'      => $status,
+                    ]
+                );
+
+                if ($listing->wasRecentlyCreated) {
+                    $this->createKeys($listing, $status);
+                }
+
+                continue;
+            }
 
             $listing = ProductListing::create([
                 'variant_id'  => $variant->id,
@@ -348,13 +378,14 @@ class ProductSeeder extends Seeder
     {
         return [
             [
-                'name'         => 'Elden Ring Steam Key',
+                'name'         => 'Elden Ring',
                 'publisher'    => 'Bandai Namco',
                 'developer'    => 'FromSoftware',
                 'release_date' => '2024-01-15',
                 'description'  => 'Key kích hoạt Elden Ring bản Steam, giao ngay sau thanh toán.',
                 'categories'   => ['rpg-games', 'action-games', 'souls-like'],
-                'price_range'  => [699000, 899000],
+                'price'        => 749000,
+                'price_range'  => [699000, 799000],
                 'variants'     => [
                     ['platform' => 'Steam', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Steam Key']],
                 ],
@@ -362,13 +393,14 @@ class ProductSeeder extends Seeder
                 'submitted_by'       => 'seller',
             ],
             [
-                'name'         => 'Windows 11 Pro Retail Key',
+                'name'         => 'Windows 11 Pro',
                 'publisher'    => 'Microsoft',
                 'developer'    => 'Microsoft',
                 'release_date' => '2024-02-01',
                 'description'  => 'Key kích hoạt Windows 11 Pro, phù hợp nhu cầu cài mới máy.',
                 'categories'   => ['productivity-software'],
-                'price_range'  => [349000, 599000],
+                'price'        => 379000,
+                'price_range'  => [299000, 449000],
                 'variants'     => [
                     ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'Windows 11', 'editions' => ['Retail Key']],
                 ],
@@ -376,13 +408,14 @@ class ProductSeeder extends Seeder
                 'submitted_by'       => 'seller',
             ],
             [
-                'name'         => 'Office 2021 Professional Plus Key',
+                'name'         => 'Office 2021 Professional Plus',
                 'publisher'    => 'Microsoft',
                 'developer'    => 'Microsoft',
                 'release_date' => '2023-11-20',
                 'description'  => 'Key vĩnh viễn cho bộ Office 2021 Professional Plus.',
                 'categories'   => ['productivity-software', 'design-software'],
-                'price_range'  => [499000, 899000],
+                'price'        => 549000,
+                'price_range'  => [399000, 699000],
                 'variants'     => [
                     ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Lifetime Key']],
                 ],

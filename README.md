@@ -9,6 +9,7 @@
 - [System Architecture](#-system-architecture)
 - [Key Features](#-key-features)
 - [User Roles & Workflows](#-user-roles--workflows)
+- [Order Workflow](#-order-workflow)
 
 ---
 
@@ -56,7 +57,7 @@ KeyCove operates as a **Multi-model E-commerce Platform**:
 ### 3. Trading & Order Processing
 - **Shopping Cart:** Add, remove, and update quantities from multiple sellers simultaneously.
 - **Automated Fulfillment:** System instantly fetches the key from the secure vault and delivers it via UI/Email upon successful payment.
-- **Payment Gateways:** Integrated with VNPAY, and Stripe.
+- **Payment Gateway:** Integrated with VNPay.
 - **Order Tracking:** Detailed history of order statuses (Completed, Disputed, Refunded).
 
 ### 4. E-Wallet & Escrow System
@@ -107,3 +108,29 @@ KeyCove operates as a **Multi-model E-commerce Platform**:
 - Act as the final judge in dispute resolution.
 - Configure system settings and platform commission fees.
 - Monitor overall platform health and financial reports.
+
+## 🧾 Order Workflow
+
+Use this as the source of truth when writing prompts, seeders, tests, or admin screens around checkout.
+
+1. A buyer browses product listings and adds one or more listings to the cart.
+2. Each cart item points to a specific `listing_id` and quantity.
+3. When the buyer checks out, the system creates an `order` plus one or more `order_items`.
+4. Each `order_item` stores a snapshot of the purchased product data so history stays stable even if the product changes later.
+5. The order starts with `payment_status = Pending` and is paid through VNPay.
+6. After VNPay returns/IPN confirms success, the order payment state is updated and payment records are stored.
+7. If the listing belongs to a seller, the order item may create an escrow record and the platform commission is applied.
+8. If the listing belongs to Shop Admin, there is no escrow and no seller settlement calculation.
+9. After payment, the buyer receives the key once and can later open a complaint if the key is invalid.
+10. If a complaint is approved, the order item becomes refunded and the escrow is refunded.
+11. If a complaint is rejected, the escrow is released and the order item is completed.
+
+### Order Data Notes
+
+- `orders` is the parent payment record for the purchase.
+- `order_items` are the real source of truth for what was bought.
+- `order_items.product_name_snapshot` preserves the product name at purchase time.
+- `order_items.listing_id` and `order_items.variant_snapshot` identify the exact listing/variant that was bought.
+- `order_items.seller_id` can be `null` for Shop Admin-owned stock.
+- Seller-owned listings can have escrow; Shop Admin-owned listings do not.
+- `platform_fee` and `seller_amount` should only be meaningful for seller-owned listings.
