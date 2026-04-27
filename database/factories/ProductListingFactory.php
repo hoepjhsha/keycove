@@ -9,6 +9,7 @@ use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Seller;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<ProductListing>
@@ -24,12 +25,16 @@ class ProductListingFactory extends Factory
      */
     public function definition(): array
     {
+        $displayName = fake()->sentence(3);
+
         return [
-            'variant_id'  => ProductVariant::factory(),
-            'seller_id'   => Seller::factory(),
-            'price'       => fake()->randomFloat(2, 9.99, 59.99),
-            'stock_count' => fake()->numberBetween(0, 100),
-            'status'      => ProductListingStatus::Active,
+            'variant_id'   => ProductVariant::factory(),
+            'seller_id'    => Seller::factory(),
+            'display_name' => $displayName,
+            'slug'         => Str::slug($displayName).'-'.fake()->unique()->numberBetween(1000, 9999),
+            'price'        => fake()->randomFloat(2, 9.99, 59.99),
+            'stock_count'  => fake()->numberBetween(0, 100),
+            'status'       => ProductListingStatus::Active,
         ];
     }
 

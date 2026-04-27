@@ -16,6 +16,9 @@ class ProductListingForm extends Form
 {
     public ?ProductListing $listing = null;
 
+    #[Validate(['nullable', 'string', 'max:255'])]
+    public ?string $display_name = null;
+
     #[Validate(['required', 'int', 'exists:product_variants,id'])]
     public int $variant_id = 0;
 
@@ -31,6 +34,7 @@ class ProductListingForm extends Form
     public function setListing(ProductListing $listing): void
     {
         $this->listing = $listing;
+        $this->display_name = $listing->display_name;
         $this->variant_id = $listing->variant_id;
         $this->seller_id = $listing->seller_id;
         $this->price = (float) $listing->price;
@@ -48,10 +52,11 @@ class ProductListingForm extends Form
         }
 
         return ProductListing::create([
-            'variant_id' => $this->variant_id,
-            'seller_id'  => $this->seller_id,
-            'price'      => $this->price,
-            'status'     => $this->status,
+            'variant_id'   => $this->variant_id,
+            'seller_id'    => $this->seller_id,
+            'display_name' => filled($this->display_name) ? trim($this->display_name) : null,
+            'price'        => $this->price,
+            'status'       => $this->status,
         ]);
     }
 
@@ -60,9 +65,10 @@ class ProductListingForm extends Form
         $this->validate();
 
         return $this->listing->update([
-            'seller_id' => $this->seller_id,
-            'price'     => $this->price,
-            'status'    => $this->status,
+            'display_name' => filled($this->display_name) ? trim($this->display_name) : null,
+            'seller_id'    => $this->seller_id,
+            'price'        => $this->price,
+            'status'       => $this->status,
         ]);
     }
 
@@ -121,6 +127,7 @@ class ProductListingForm extends Form
     public function resetForm(): void
     {
         $this->listing = null;
+        $this->display_name = null;
         $this->variant_id = 0;
         $this->seller_id = null;
         $this->price = 0.00;

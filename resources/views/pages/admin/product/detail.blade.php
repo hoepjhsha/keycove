@@ -329,6 +329,14 @@
     <x-reusable.modal wire:model="showListingModal" title="{{ $editingListingId ? 'Edit Listing' : 'Create Listing' }}" max-width="lg">
         <form class="space-y-4" wire:submit="saveListing">
             <div>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Listing Title <span class="text-slate-400">(Optional)</span></label>
+                <input wire:model="listingForm.display_name" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="Shown instead of the product name when filled">
+                @error('listingForm.display_name')
+                    <small class="error text-red-500 text-xs">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div>
                 <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Seller</label>
                 <select wire:model="listingForm.seller_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
                     <option value="">Shop Admin</option>

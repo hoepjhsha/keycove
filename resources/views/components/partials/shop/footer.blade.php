@@ -1,8 +1,7 @@
-<footer class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-12 pb-8 sm:pt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8">
-            {{-- Brand & About --}}
-            <div class="space-y-6">
+<footer class="border-t border-gray-200 bg-white pt-10 pb-8 dark:border-gray-800 dark:bg-gray-900 sm:pt-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+            <div class="space-y-5">
                 <a href="/" class="flex items-center gap-2">
                     <img class="block dark:hidden max-h-10 w-auto object-contain"
                          src="{{ Vite::asset('resources/images/logo-light-horizontal.png') }}"
@@ -19,18 +18,16 @@
                 </div>
             </div>
 
-            {{-- Quick Links --}}
             <div>
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6">Quick Links</h3>
                 <ul class="space-y-4">
-                    <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Home</a></li>
-                    <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Shop All</a></li>
+                    <li><a href="{{ route('app.shop.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Home</a></li>
+                    <li><a href="{{ route('app.products.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Shop All</a></li>
                     <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">New Arrivals</a></li>
                     <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors">Special Offers</a></li>
                 </ul>
             </div>
 
-            {{-- Support --}}
             <div>
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6">Support</h3>
                 <ul class="space-y-4">
@@ -41,7 +38,6 @@
                 </ul>
             </div>
 
-            {{-- Newsletter --}}
             <div>
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6">Stay Updated</h3>
                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Subscribe to get the latest deals and new releases.</p>
@@ -55,7 +51,6 @@
             </div>
         </div>
 
-        {{-- Bottom Footer --}}
         <div class="mt-12 sm:mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p class="text-gray-500 dark:text-gray-400 text-xs">
                 &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.

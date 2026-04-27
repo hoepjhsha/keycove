@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\PaymentController;
+use App\Livewire\Shop\ProductIndex;
+use App\Livewire\Shop\ProductShow;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +18,12 @@ Route::prefix('payment')->group(function () {
 Route::get('/', function () {
     return view('pages.landing.shop');
 })->name('app.shop.index');
+
+Route::livewire('/products', ProductIndex::class)->name('app.products.index');
+
+Route::livewire('/products/{product:slug}/{listing:slug}', ProductShow::class)
+    ->scopeBindings()
+    ->name('app.products.show');
 
 Route::get('/seller/dashboard', function () {
     return view('pages.landing.seller-dashboard');
