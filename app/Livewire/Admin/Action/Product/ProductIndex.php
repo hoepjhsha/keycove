@@ -136,7 +136,7 @@ class ProductIndex extends Component
     #[On('viewProduct')]
     public function viewProduct($rowId): void
     {
-        $product = Product::with('categories')->find($rowId);
+        $product = Product::with(['categories', 'submittedBySeller.user'])->find($rowId);
 
         if ($product) {
             $colorClass = match ($product->status) {
@@ -167,6 +167,8 @@ class ProductIndex extends Component
                 'description'        => $product->description ?? '--N/A--',
                 'system_requirement' => $product->system_requirement ?? [],
                 'categories'         => $categories,
+                'submitted_by'       => $product->submittedBySeller?->shop_name ?? 'Shop Admin',
+                'submitted_by_email' => $product->submittedBySeller?->user?->email ?? 'KeyCove',
                 'status_label'       => $statusLabel,
                 'created_at'         => $product->created_at->format('d/m/Y H:i:s'),
                 'updated_at'         => $product->updated_at->format('d/m/Y H:i:s'),

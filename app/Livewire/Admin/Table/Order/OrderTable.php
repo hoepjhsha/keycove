@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Table\Order;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Livewire\Admin\Action\Order\OrderIndex;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -73,7 +74,7 @@ final class OrderTable extends PowerGridComponent
                     ->whereColumn('order_items.order_id', 'orders.id'),
                 'aggregated_status'
             )
-            ->with(['buyer', 'items']);
+            ->with(['buyer', 'items', 'paymentTransactions']);
     }
 
     public function relationSearch(): array
@@ -120,6 +121,22 @@ final class OrderTable extends PowerGridComponent
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
             })
+            ->add('payment_status_label', function (Order $model) {
+                $status = $model->payment_status;
+                $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
+
+                $colorClass = match ($status) {
+                    PaymentStatus::Pending   => 'bg-yellow-500/10 text-yellow-500',
+                    PaymentStatus::Completed => 'bg-green-500/10 text-green-500',
+                    PaymentStatus::Failed    => 'bg-red-500/10 text-red-500',
+                    PaymentStatus::Cancelled => 'bg-gray-500/10 text-gray-500',
+                    PaymentStatus::Refunded  => 'bg-orange-500/10 text-orange-500',
+                    default                  => 'bg-gray-500/10 text-gray-500',
+                };
+
+                return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
+            })
+            ->add('payment_transactions_count', fn (Order $model) => $model->paymentTransactions->count())
             ->add('created_at_formatted', fn (Order $model) => Carbon::parse($model->created_at)->format('d/m/Y H:i:s'))
             ->add('updated_at_formatted', fn (Order $model) => Carbon::parse($model->updated_at)->format('d/m/Y H:i:s'));
     }
@@ -130,12 +147,11 @@ final class OrderTable extends PowerGridComponent
             Column::make('#', 'id')->index(),
             Column::make('Order Code', 'order_code')->sortable()->searchable(),
             Column::make('Buyer', 'buyer_name', 'buyer.username')->sortable()->searchable(),
-            Column::make('Email', 'buyer_email', 'buyer.email')->sortable()->searchable(),
             Column::make('Total', 'total_price_formatted', 'total_price')->sortable()->bodyAttribute('text-right'),
             Column::make('Status', 'status_label', 'aggregated_status')->sortable(),
             Column::make('Payment', 'payment_method_label', 'payment_method')->sortable(),
+            Column::make('Payment Status', 'payment_status_label', 'payment_status')->sortable(),
             Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::make('Updated at', 'updated_at_formatted', 'updated_at')->sortable(),
             Column::action('Action'),
         ];
     }

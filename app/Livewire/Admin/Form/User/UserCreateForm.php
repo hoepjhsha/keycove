@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Form\User;
 
+use App\Enums\KycStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Cart;
+use App\Models\Seller;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Unique;
@@ -87,6 +91,27 @@ class UserCreateForm extends Form
             UserProfile::create([
                 'user_id' => $user->id,
             ]);
+
+            Cart::firstOrCreate([
+                'user_id' => $user->id,
+            ]);
+
+            if ($targetRole === UserRole::Seller) {
+                $seller = Seller::create([
+                    'user_id'          => $user->id,
+                    'shop_name'        => $user->username.' Store',
+                    'cccd_number'      => fake()->numerify('############'),
+                    'cccd_front_image' => null,
+                    'cccd_back_image'  => null,
+                    'kyc_status'       => KycStatus::Pending,
+                ]);
+
+                Wallet::create([
+                    'seller_id' => $seller->id,
+                    'balance'   => 0,
+                    'holding'   => 0,
+                ]);
+            }
         }
 
         return $user;

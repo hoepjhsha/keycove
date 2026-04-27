@@ -20,7 +20,6 @@
     <x-reusable.modal wire:model="showViewModal" title="Order Details" max-width="3xl">
         @if($viewData)
             <div class="space-y-4">
-                <!-- Order Header Info -->
                 <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
                     <dl class="divide-y divide-slate-200 dark:divide-slate-700">
                         <div class="grid grid-cols-3 gap-4 py-3">
@@ -36,17 +35,16 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white">{!! $viewData['payment_badge'] !!}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">Payment Status</dt>
+                            <dd class="col-span-2 text-slate-900 dark:text-white">{!! $viewData['payment_status_badge'] !!}</dd>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 py-3">
                             <dt class="font-medium text-slate-500 dark:text-slate-400">Total Price</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white font-semibold">{{ $viewData['total_price'] }}</dd>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4 py-3 border-b-0">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Items Count</dt>
-                            <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['items_count'] }}</dd>
                         </div>
                     </dl>
                 </div>
 
-                <!-- Buyer Info -->
                 <div class="bg-blue-50 dark:bg-slate-900/50 rounded-lg p-4 text-sm border border-blue-200 dark:border-blue-900">
                     <h5 class="font-semibold text-slate-900 dark:text-white mb-3">Buyer Information</h5>
                     <dl class="divide-y divide-blue-200 dark:divide-blue-900">
@@ -61,7 +59,6 @@
                     </dl>
                 </div>
 
-                <!-- Timestamps -->
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
                         <dt class="font-medium text-slate-500 dark:text-slate-400 mb-1">Created At</dt>

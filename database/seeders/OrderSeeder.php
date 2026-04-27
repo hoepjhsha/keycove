@@ -80,7 +80,7 @@ class OrderSeeder extends Seeder
                         $this->assignKeysToOrderItem($listing, $orderItem, $quantity, $config['status']);
                     }
 
-                    if ($config['hasEscrow']) {
+                    if ($config['hasEscrow'] && $listing->seller_id !== null) {
                         $this->createEscrow($orderItem, $listing->seller_id, $config['escrowStatus'], $orderDate, $subtotal);
                     }
                 }
@@ -175,7 +175,7 @@ class OrderSeeder extends Seeder
         int $quantity,
         float $subtotal,
     ): OrderItem {
-        $platformFee = round($subtotal * 0.1, 2);
+        $platformFee = $listing->seller_id === null ? 0 : round($subtotal * 0.1, 2);
 
         $orderItem = OrderItem::create([
             'order_id'              => $order->id,
@@ -193,7 +193,7 @@ class OrderSeeder extends Seeder
             'unit_price'    => $listing->price,
             'subtotal'      => $subtotal,
             'platform_fee'  => $platformFee,
-            'seller_amount' => round($subtotal - $platformFee, 2),
+            'seller_amount' => $listing->seller_id === null ? 0 : round($subtotal - $platformFee, 2),
             'status'        => $status,
         ]);
 
@@ -224,8 +224,12 @@ class OrderSeeder extends Seeder
 
     protected function createEscrow(OrderItem $orderItem, ?int $sellerId, EscrowStatus $status, Carbon $orderDate, float $amount): void
     {
+        if ($sellerId === null) {
+            return;
+        }
+
         $releaseDate = match ($status) {
-            EscrowStatus::Holding  => Carbon::now()->addDays(random_int(1, 7)),
+            EscrowStatus::Holding  => $orderDate->copy()->addDays(7),
             EscrowStatus::Released => $orderDate->copy()->addDays(random_int(1, 3)),
             EscrowStatus::Refunded => $orderDate->copy()->addDays(random_int(1, 5)),
         };

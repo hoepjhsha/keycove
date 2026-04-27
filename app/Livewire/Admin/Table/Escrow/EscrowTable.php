@@ -66,7 +66,7 @@ final class EscrowTable extends PowerGridComponent
             ->add('id')
             ->add('order_code', fn (Escrow $model) => $model->orderItem?->order?->order_code ?? '-')
             ->add('buyer', fn (Escrow $model) => $model->orderItem?->order?->buyer?->username ?? '-')
-            ->add('seller', fn (Escrow $model) => $model?->seller?->shop_name ?? '-')
+            ->add('seller', fn (Escrow $model) => $model?->seller?->shop_name ?? 'Shop Admin')
             ->add('amount_formatted', fn (Escrow $model) => number_format((float) $model->amount, 2).' VND')
             ->add('release_date_formatted', fn (Escrow $model) => Carbon::parse($model->release_date)->format('d/m/Y H:i:s'))
             ->add('status_label', function (Escrow $model) {
@@ -196,7 +196,7 @@ final class EscrowTable extends PowerGridComponent
                 ->hide(),
 
             Rule::button('release')
-                ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Holding && $model->status !== EscrowStatus::Frozen)
+                ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Holding)
                 ->hide(),
         ];
     }

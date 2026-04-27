@@ -233,6 +233,11 @@
                             <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Release Date</p>
                             <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['release_date'] }}</p>
                         </div>
+
+                        <div>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Submitted By</p>
+                            <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['submitted_by'] ?? 'Shop Admin' }}</p>
+                        </div>
                     </div>
                 </div>
 

@@ -106,7 +106,7 @@ class ProductVariantForm extends Form
     {
         $variant = ProductVariant::findOrFail($id);
 
-        if ($variant->listings()->where('status', '==', ProductListingStatus::Active)->exists()) {
+        if ($variant->listings()->where('status', ProductListingStatus::Active)->exists()) {
             throw ValidationException::withMessages([
                 'general' => 'Cannot delete variant with active listings.',
             ]);

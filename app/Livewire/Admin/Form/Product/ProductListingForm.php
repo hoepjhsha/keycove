@@ -19,8 +19,8 @@ class ProductListingForm extends Form
     #[Validate(['required', 'int', 'exists:product_variants,id'])]
     public int $variant_id = 0;
 
-    #[Validate(['required', 'int', 'exists:sellers,id'])]
-    public int $seller_id = 0;
+    #[Validate(['nullable', 'int', 'exists:sellers,id'])]
+    public ?int $seller_id = null;
 
     #[Validate(['required', 'numeric', 'min:0', 'max:999999999.99'])]
     public float $price = 0.00;
@@ -122,7 +122,7 @@ class ProductListingForm extends Form
     {
         $this->listing = null;
         $this->variant_id = 0;
-        $this->seller_id = 0;
+        $this->seller_id = null;
         $this->price = 0.00;
         $this->status = ProductListingStatus::Draft->value;
         $this->resetValidation();

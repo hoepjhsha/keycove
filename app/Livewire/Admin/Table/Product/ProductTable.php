@@ -40,7 +40,7 @@ final class ProductTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Product::query();
+        return Product::query()->with('submittedBySeller.user');
     }
 
     public function relationSearch(): array
@@ -53,6 +53,7 @@ final class ProductTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('name')
+            ->add('submitted_by', fn (Product $model) => $model->submittedBySeller?->shop_name ?? 'Shop Admin')
             ->add('slug')
             ->add('publisher')
             ->add('developer')
@@ -81,6 +82,10 @@ final class ProductTable extends PowerGridComponent
             Column::make('#', 'id')
                 ->index(),
             Column::make('Name', 'name')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Owner', 'submitted_by')
                 ->sortable()
                 ->searchable(),
 

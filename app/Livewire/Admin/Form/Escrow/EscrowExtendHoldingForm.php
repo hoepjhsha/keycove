@@ -43,7 +43,7 @@ class EscrowExtendHoldingForm extends Form
                 default => $escrow->release_date,
             };
 
-            $maxAllowedDate = $escrow->created_at->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
+            $maxAllowedDate = $escrow->created_at->copy()->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
 
             if ($newReleaseDate->greaterThan($maxAllowedDate)) {
                 throw EscrowException::maxExtensionLimitReached($maxAllowedDate);

@@ -15,7 +15,19 @@ class OrderDetail extends Component
 
     public function mount($id): void
     {
-        $this->order = Order::with(['buyer', 'items.listing.seller.user'])->findOrFail($id);
+        $this->order = Order::with([
+            'buyer',
+            'transaction',
+            'transaction.wallet',
+            'paymentTransactions',
+            'items.listing.variant.product',
+            'items.listing.variant.region',
+            'items.listing.variant.platform',
+            'items.listing.variant.operatingSystem',
+            'items.seller.user',
+            'items.keys',
+            'items.escrow',
+        ])->findOrFail($id);
     }
 
     public function render()

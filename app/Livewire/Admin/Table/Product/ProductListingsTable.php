@@ -66,9 +66,9 @@ final class ProductListingsTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('seller_name', fn (ProductListing $model) => $model->seller->shop_name ?? '-')
-            ->add('seller_email', fn (ProductListing $model) => $model->seller->user->email ?? '-')
-            ->add('price_formatted', fn (ProductListing $model) => '$'.number_format((float) $model->price, 2))
+            ->add('seller_name', fn (ProductListing $model) => $model->seller?->shop_name ?? 'Shop Admin')
+            ->add('seller_email', fn (ProductListing $model) => $model->seller?->user?->email ?? 'KeyCove')
+            ->add('price_formatted', fn (ProductListing $model) => number_format((float) $model->price, 2).' VND')
             ->add('price', fn (ProductListing $model) => (float) $model->price)
             ->add('status_label', fn (ProductListing $model) => $this->getStatusLabel($model->status))
             ->add('keys_count')
