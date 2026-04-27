@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Form\User;
 
+use App\Enums\KycStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Cart;
+use App\Models\Seller;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
@@ -136,6 +140,31 @@ class UserEditForm extends Form
             $data['password'] = Hash::make($this->password);
         }
 
-        return $this->user->update($data);
+        $updated = $this->user->update($data);
+
+        if ($updated) {
+            Cart::firstOrCreate([
+                'user_id' => $this->user->id,
+            ]);
+
+            if ($targetRole === UserRole::Seller && ! $this->user->seller) {
+                $seller = Seller::create([
+                    'user_id'          => $this->user->id,
+                    'shop_name'        => $this->user->username.' Store',
+                    'cccd_number'      => fake()->numerify('############'),
+                    'cccd_front_image' => null,
+                    'cccd_back_image'  => null,
+                    'kyc_status'       => KycStatus::Pending,
+                ]);
+
+                Wallet::create([
+                    'seller_id' => $seller->id,
+                    'balance'   => 0,
+                    'holding'   => 0,
+                ]);
+            }
+        }
+
+        return $updated;
     }
 }

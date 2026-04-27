@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('escrows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_item_id')->constrained('order_items')->cascadeOnDelete();
-            $table->foreignId('seller_id')->constrained('sellers')->restrictOnDelete();
+            $table->foreignId('seller_id')->nullable()->constrained('sellers')->nullOnDelete();
             $table->decimal('amount', 15, 2);
             $table->dateTime('release_date');
             $table->tinyInteger('status')->default(0);

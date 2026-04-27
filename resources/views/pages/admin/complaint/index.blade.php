@@ -47,6 +47,11 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['reason'] }}</dd>
                         </div>
 
+                        <div class="grid grid-cols-3 gap-4 py-3">
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">Escrow</dt>
+                            <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['escrow_status'] }}</dd>
+                        </div>
+
                         @if(count($viewData['evidence']) > 0)
                             <div class="grid grid-cols-3 gap-4 py-3">
                                 <dt class="font-medium text-slate-500 dark:text-slate-400">Evidence</dt>
@@ -96,6 +101,38 @@
                             </div>
                         </dl>
                     </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
+                    <h5 class="font-semibold text-slate-900 dark:text-white mb-3">Messages ({{ count($viewData['messages'] ?? []) }})</h5>
+
+                    @if(!empty($viewData['messages']))
+                        <div class="space-y-3">
+                            @foreach($viewData['messages'] as $message)
+                                <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <div class="font-medium text-slate-900 dark:text-white">{{ $message['sender_name'] }}</div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ $message['created_at'] }}</div>
+                                    </div>
+
+                                    <p class="text-slate-700 dark:text-slate-300 whitespace-pre-line">{{ $message['message'] }}</p>
+
+                                    @if(!empty($message['attachments']))
+                                        <div class="mt-3 flex flex-wrap gap-2">
+                                            @foreach($message['attachments'] as $attachment)
+                                                <a href="{{ $attachment['url'] ?? '#' }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600">
+                                                    <i class="fa-regular fa-paperclip mr-1"></i>
+                                                    {{ $attachment['label'] }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-slate-500 dark:text-slate-400">No messages found for this dispute.</p>
+                    @endif
                 </div>
 
                 @php

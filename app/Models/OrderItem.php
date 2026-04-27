@@ -67,6 +67,11 @@ class OrderItem extends Model
         return $this->hasOne(Review::class);
     }
 
+    public function escrow(): HasOne
+    {
+        return $this->hasOne(Escrow::class);
+    }
+
     public function complaint(): HasOne
     {
         return $this->hasOne(Complaint::class);

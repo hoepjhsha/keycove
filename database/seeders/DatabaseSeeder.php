@@ -35,15 +35,13 @@ class DatabaseSeeder extends Seeder
 
         // Seed in order of dependencies
         $this->call([
-            UserSeeder::class,           // Users, Profiles, Sellers, Wallets
-            AttributeSeeder::class,      // Regions, Platforms, Operating Systems
-            SystemConfigSeeder::class,   // System configurations
-            ProductSeeder::class,        // Products, Variants, Listings, Keys
-            OrderSeeder::class,          // Orders, OrderItems, Escrows, Transactions
-            ReviewSeeder::class,         // Reviews, Review Responses
-            DisputeSeeder::class,        // Complaints, Complaint Messages
-            CartSeeder::class,           // Carts, Cart Items
-            SettingSeeder::class,        // User settings
+            UserSeeder::class,
+            AttributeSeeder::class,
+            SystemConfigSeeder::class,
+            ProductSeeder::class,
+            OrderSeeder::class,
+            ReviewSeeder::class,
+            DisputeSeeder::class,
         ]);
     }
 }

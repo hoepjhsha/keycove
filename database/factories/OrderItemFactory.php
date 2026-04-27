@@ -28,7 +28,7 @@ class OrderItemFactory extends Factory
         $quantity = fake()->numberBetween(1, 5);
         $unitPrice = (float) $listing->price;
         $subtotal = $quantity * $unitPrice;
-        $platformFee = round($subtotal * 0.1, 2);
+        $platformFee = $listing->seller_id === null ? 0 : round($subtotal * 0.1, 2);
 
         return [
             'order_id'              => Order::factory(),
@@ -42,7 +42,7 @@ class OrderItemFactory extends Factory
             'unit_price'    => $unitPrice,
             'subtotal'      => $subtotal,
             'platform_fee'  => $platformFee,
-            'seller_amount' => round($subtotal - $platformFee, 2),
+            'seller_amount' => $listing->seller_id === null ? 0 : round($subtotal - $platformFee, 2),
             'status'        => OrderStatus::Processing,
         ];
     }
@@ -66,8 +66,8 @@ class OrderItemFactory extends Factory
                 'seller_id'     => $productListing->seller_id,
                 'unit_price'    => $productListing->price,
                 'subtotal'      => $attributes['quantity'] * $productListing->price,
-                'platform_fee'  => round(($attributes['quantity'] * (float) $productListing->price) * 0.1, 2),
-                'seller_amount' => round(($attributes['quantity'] * (float) $productListing->price) * 0.9, 2),
+                'platform_fee'  => $productListing->seller_id === null ? 0 : round(($attributes['quantity'] * (float) $productListing->price) * 0.1, 2),
+                'seller_amount' => $productListing->seller_id === null ? 0 : round(($attributes['quantity'] * (float) $productListing->price) * 0.9, 2),
             ];
         });
     }

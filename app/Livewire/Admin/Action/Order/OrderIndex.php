@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Action\Order;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -26,7 +27,7 @@ class OrderIndex extends Component
     #[On('openViewModal')]
     public function viewOrder($id): void
     {
-        $order = Order::with(['buyer', 'items', 'transaction'])->find($id);
+        $order = Order::with(['buyer'])->find($id);
 
         if ($order) {
             $status = $order->status;
@@ -58,18 +59,32 @@ class OrderIndex extends Component
                 : $order->payment_method->name;
             $paymentBadge = '<span class="'.$paymentColorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$paymentLabel.'</span>';
 
+            $paymentStatus = $order->payment_status;
+            $paymentStatusColorClass = match ($paymentStatus) {
+                PaymentStatus::Pending   => 'bg-yellow-500/10 text-yellow-500',
+                PaymentStatus::Completed => 'bg-green-500/10 text-green-500',
+                PaymentStatus::Failed    => 'bg-red-500/10 text-red-500',
+                PaymentStatus::Cancelled => 'bg-gray-500/10 text-gray-500',
+                PaymentStatus::Refunded  => 'bg-orange-500/10 text-orange-500',
+                default                  => 'bg-gray-500/10 text-gray-500',
+            };
+
+            $paymentStatusLabel = method_exists($paymentStatus, 'label')
+                ? $paymentStatus->label()
+                : $paymentStatus->name;
+            $paymentStatusBadge = '<span class="'.$paymentStatusColorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$paymentStatusLabel.'</span>';
+
             $this->viewData = [
-                'id'             => $order->id,
-                'order_code'     => $order->order_code,
-                'buyer_username' => $order->buyer?->username ?? '-',
-                'buyer_email'    => $order->buyer?->email ?? '-',
-                'total_price'    => number_format((float) $order->total_price, 2).' VND',
-                'status_badge'   => $statusBadge,
-                'payment_badge'  => $paymentBadge,
-                'created_at'     => $order->created_at->format('d/m/Y H:i:s'),
-                'updated_at'     => $order->updated_at->format('d/m/Y H:i:s'),
-                'items_count'    => $order->items->count(),
-                'order_url'      => route('admin.orders.detail', $order->id),
+                'order_code'           => $order->order_code,
+                'buyer_username'       => $order->buyer?->username ?? '-',
+                'buyer_email'          => $order->buyer?->email ?? '-',
+                'status_badge'         => $statusBadge,
+                'payment_badge'        => $paymentBadge,
+                'payment_status_badge' => $paymentStatusBadge,
+                'total_price'          => number_format((float) $order->total_price, 2).' VND',
+                'created_at'           => $order->created_at->format('d/m/Y H:i:s'),
+                'updated_at'           => $order->updated_at->format('d/m/Y H:i:s'),
+                'order_url'            => route('admin.orders.detail', $order->id),
             ];
 
             $this->showViewModal = true;

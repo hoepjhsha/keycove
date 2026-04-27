@@ -149,7 +149,7 @@ class ProductDetail extends Component
 
     public function mount(int $id): void
     {
-        $this->product = Product::findOrFail($id);
+        $this->product = Product::with(['categories', 'submittedBySeller.user'])->findOrFail($id);
     }
 
     #[On('openVariantModal')]

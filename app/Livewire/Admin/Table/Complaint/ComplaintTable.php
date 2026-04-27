@@ -61,7 +61,7 @@ final class ComplaintTable extends PowerGridComponent
             ->add('complaint_id', fn (Complaint $model) => '#'.$model->id)
             ->add('order_code', fn (Complaint $model) => $model->orderItem?->order?->order_code ?? '-')
             ->add('buyer_name', fn (Complaint $model) => $model->orderItem?->order?->buyer?->username ?? '-')
-            ->add('seller_name', fn (Complaint $model) => $model->orderItem?->listing?->seller?->user?->username ?? '-')
+            ->add('seller_name', fn (Complaint $model) => $model->orderItem?->listing?->seller?->user?->username ?? 'Shop Admin')
             ->add('reason')
             ->add('message_count', fn (Complaint $model) => $model->messages()->count())
             ->add('status_label', function (Complaint $model) {
@@ -69,11 +69,12 @@ final class ComplaintTable extends PowerGridComponent
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
 
                 $colorClass = match ($status) {
-                    ComplaintStatus::Open           => 'bg-blue-500/10 text-blue-500',
-                    ComplaintStatus::InProcess      => 'bg-yellow-500/10 text-yellow-500',
-                    ComplaintStatus::Escalated      => 'bg-orange-500/10 text-orange-500',
-                    ComplaintStatus::ApprovedRefund => 'bg-green-500/10 text-green-500',
-                    default                         => 'bg-gray-500/10 text-gray-500',
+                    ComplaintStatus::Open            => 'bg-blue-500/10 text-blue-500',
+                    ComplaintStatus::InProcess       => 'bg-yellow-500/10 text-yellow-500',
+                    ComplaintStatus::Escalated       => 'bg-orange-500/10 text-orange-500',
+                    ComplaintStatus::ApprovedRefund  => 'bg-green-500/10 text-green-500',
+                    ComplaintStatus::RejectedRelease => 'bg-gray-500/10 text-gray-500',
+                    default                          => 'bg-gray-500/10 text-gray-500',
                 };
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';

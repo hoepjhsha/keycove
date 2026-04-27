@@ -67,16 +67,18 @@ class ComplaintIndex extends Component
             'orderItem.order.buyer',
             'orderItem.listing.variant',
             'orderItem.listing.seller.user',
+            'orderItem.escrow',
             'messages.sender',
         ])->find($id);
 
         if ($complaint) {
             $statusColorClass = match ($complaint->status) {
-                ComplaintStatus::Open           => 'bg-blue-500/10 text-blue-500',
-                ComplaintStatus::InProcess      => 'bg-yellow-500/10 text-yellow-500',
-                ComplaintStatus::Escalated      => 'bg-orange-500/10 text-orange-500',
-                ComplaintStatus::ApprovedRefund => 'bg-green-500/10 text-green-500',
-                default                         => 'bg-gray-500/10 text-gray-500',
+                ComplaintStatus::Open            => 'bg-blue-500/10 text-blue-500',
+                ComplaintStatus::InProcess       => 'bg-yellow-500/10 text-yellow-500',
+                ComplaintStatus::Escalated       => 'bg-orange-500/10 text-orange-500',
+                ComplaintStatus::ApprovedRefund  => 'bg-green-500/10 text-green-500',
+                ComplaintStatus::RejectedRelease => 'bg-gray-500/10 text-gray-500',
+                default                          => 'bg-gray-500/10 text-gray-500',
             };
 
             $statusLabel = method_exists($complaint->status, 'label')
@@ -89,10 +91,11 @@ class ComplaintIndex extends Component
                 'order_code'      => $complaint->orderItem?->order?->order_code ?? '-',
                 'buyer_username'  => $complaint->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'     => $complaint->orderItem?->order?->buyer?->email ?? '-',
-                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? '-',
-                'seller_email'    => $complaint->orderItem?->listing?->seller?->user?->email ?? '-',
+                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? 'Shop Admin',
+                'seller_email'    => $complaint->orderItem?->listing?->seller?->user?->email ?? 'KeyCove',
                 'product_name'    => $complaint->orderItem?->product_name_snapshot ?? '-',
                 'reason'          => $complaint->reason,
+                'escrow_status'   => $complaint->orderItem?->escrow?->status?->label() ?? '-',
                 'evidence'        => $this->resolveStoredPaths($complaint->evidence),
                 'status'          => $complaint->status->value,
                 'status_badge'    => $statusBadge,
@@ -159,7 +162,7 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.order.escrow'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.escrow'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
@@ -218,7 +221,7 @@ class ComplaintIndex extends Component
                 ]);
 
                 $complaint->orderItem?->update(['status' => OrderStatus::Refunded]);
-                $complaint->orderItem?->order?->escrow?->update(['status' => EscrowStatus::Refunded]);
+                $complaint->orderItem?->escrow?->update(['status' => EscrowStatus::Refunded]);
             });
 
             $this->showViewModal = false;
@@ -250,7 +253,7 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.order.escrow'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.escrow'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
@@ -267,7 +270,7 @@ class ComplaintIndex extends Component
             ]);
 
             $complaint->orderItem?->update(['status' => OrderStatus::Completed]);
-            $complaint->orderItem?->order?->escrow?->update(['status' => EscrowStatus::Released]);
+            $complaint->orderItem?->escrow?->update(['status' => EscrowStatus::Released]);
         });
 
         $this->showViewModal = false;

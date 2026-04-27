@@ -54,6 +54,10 @@
                                 <p class="text-slate-900 dark:text-white">{{ $product->release_date?->format('d/m/Y') ?? '--N/A--' }}</p>
                             </div>
                             <div>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Submitted By</p>
+                                <p class="text-slate-900 dark:text-white">{{ $product->submittedBySeller?->shop_name ?? 'Shop Admin' }}</p>
+                            </div>
+                            <div>
                                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Status</p>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $product->status->value === 1 ? 'bg-green-500/10 text-green-500' : ($product->status->value === 2 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-gray-500/10 text-gray-500') }}">
                                     {{ $product->status->label() }}
@@ -203,8 +207,8 @@
                                                             <tbody>
                                                                 @foreach($variantListings as $listing)
                                                                     <tr class="border-b border-slate-100 dark:border-slate-700/50 {{ $listing->trashed() ? 'bg-red-50/50 dark:bg-red-950/20 opacity-75' : '' }}">
-                                                                        <td class="px-2 py-1 text-slate-700 dark:text-slate-300">{{ $listing->seller->shop_name ?? '-' }}</td>
-                                                                        <td class="px-2 py-1 text-slate-700 dark:text-slate-300">${{ number_format((float)$listing->price, 2) }}</td>
+                                        <td class="px-2 py-1 text-slate-700 dark:text-slate-300">{{ $listing->seller?->shop_name ?? 'Shop Admin' }}</td>
+                                        <td class="px-2 py-1 text-slate-700 dark:text-slate-300">{{ number_format((float) $listing->price, 2) }} VND</td>
                                                                         <td class="px-2 py-1">
                                                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $listing->status->value === 2 ? 'bg-green-500/10 text-green-500' : ($listing->status->value === 1 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-500/10 text-gray-500') }}">
                                                                                 {{ $listing->status->label() }}
@@ -325,9 +329,9 @@
     <x-reusable.modal wire:model="showListingModal" title="{{ $editingListingId ? 'Edit Listing' : 'Create Listing' }}" max-width="lg">
         <form class="space-y-4" wire:submit="saveListing">
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Seller <span class="text-red-400">*</span></label>
-                <select wire:model="listingForm.seller_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                    <option value="">-- Select Seller --</option>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Seller</label>
+                <select wire:model="listingForm.seller_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
+                    <option value="">Shop Admin</option>
                     @foreach($this->sellers as $seller)
                         <option value="{{ $seller->id }}">{{ $seller->shop_name }} ({{ $seller->user->email ?? 'N/A' }})</option>
                     @endforeach
@@ -340,7 +344,7 @@
             <div>
                 <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Price <span class="text-red-400">*</span></label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">VND</span>
                     <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-8 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
                 </div>
                 @error('listingForm.price')

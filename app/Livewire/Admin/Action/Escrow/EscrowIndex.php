@@ -58,7 +58,7 @@ class EscrowIndex extends Component
                 'order_code'       => $escrow->orderItem?->order?->order_code ?? '-',
                 'buyer_username'   => $escrow->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'      => $escrow->orderItem?->order?->buyer?->email ?? '-',
-                'seller_shop_name' => $escrow->seller?->shop_name ?? '-',
+                'seller_shop_name' => $escrow->seller?->shop_name ?? 'Shop Admin',
                 'amount'           => number_format((float) $escrow->amount, 2).' VND',
                 'status_badge'     => $statusBadge,
                 'release_date'     => $escrow->release_date?->format('d/m/Y H:i:s') ?? '-',
@@ -83,7 +83,7 @@ class EscrowIndex extends Component
             return;
         }
 
-        $maxAllowedDate = $escrow->created_at->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
+        $maxAllowedDate = $escrow->created_at->copy()->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
         if ($escrow->release_date->greaterThanOrEqualTo($maxAllowedDate)) {
             $this->dispatch('swal:error', [
                 'message' => 'This escrow has reached the maximum extension limit.',
