@@ -17,10 +17,57 @@ use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Seller;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
+    private int $usdToVndRate = 26000;
+
+    /** @var array<string, int|null> */
+    private array $steamAppIds = [
+        'cyberpunk-2077'                => 1091500,
+        'red-dead-redemption-2'         => 1174180,
+        'grand-theft-auto-v'            => 271590,
+        'elden-ring'                    => 1245620,
+        'baldur-s-gate-3'               => 1086940,
+        'hogwarts-legacy'               => 990080,
+        'god-of-war'                    => 1593500,
+        'starfield'                     => 1716740,
+        'counter-strike-2'              => 730,
+        'valorant'                      => null,
+        'rainbow-six-siege'             => 359550,
+        'ea-sports-fc-24'               => 2195250,
+        'forza-horizon-5'               => 1551360,
+        'hades'                         => 1145360,
+        'stardew-valley'                => 413150,
+        'hollow-knight'                 => 367520,
+        'microsoft-365-personal'        => null,
+        'adobe-creative-cloud-all-apps' => null,
+        'spotify-premium'               => null,
+        'netflix-premium'               => null,
+        'the-witcher-3-wild-hunt'       => 292030,
+        'diablo-iv'                     => 2344520,
+        'resident-evil-4-remake'        => 2050650,
+        'sekiro-shadows-die-twice'      => 814380,
+        'dead-space-remake'             => 1693980,
+        'minecraft'                     => 1358090,
+        'street-fighter-6'              => 1364780,
+        'tekken-8'                      => 1778820,
+    ];
+
+    /** @var array<string, string|null> */
+    private array $thumbnailFallbackUrls = [
+        'valorant'                      => 'https://athenaposters.ca/wp-content/uploads/2023/01/EXR8837-Valorant-.jpeg',
+        'microsoft-365-personal'        => 'https://cdn-dynmedia-1.microsoft.com/is/image/microsoftcorp/Microsoft-365-Personal-EN',
+        'adobe-creative-cloud-all-apps' => 'https://skunkworks.africa/cdn/shop/files/creative-cloud-all-apps.png',
+        'spotify-premium'               => 'https://media.zenfs.com/en/the_independent_577/d836ced971ac74e8607a48eb5fe0b0d8',
+        'netflix-premium'               => 'https://taphoammo.vn/wp-content/uploads/2025/05/Tai-khoan-Netflix-Premium-thumbnail.jpg',
+    ];
+
     /**
      * Run the database seeds.
      */
@@ -31,20 +78,29 @@ class ProductSeeder extends Seeder
 
     protected function seedProducts(): void
     {
-        $products = $this->getProductsData();
+        $products = array_merge($this->getProductsData(), $this->getSellerProductsData());
+        $disk = config('filesystems.public_disk', 'public');
+        $sellers = Seller::where('kyc_status', KycStatus::Approved)->get();
+
+        Storage::disk($disk)->makeDirectory('products/thumbnails');
 
         foreach ($products as $productData) {
+            $productSlug = Str::slug($productData['name']);
+            $submittedBySellerId = $this->resolveSubmittedBySellerId($productData, $sellers);
+
             $product = Product::firstOrCreate(
-                ['slug' => Str::slug($productData['name'])],
+                ['slug' => $productSlug],
                 [
-                    'name'                 => $productData['name'],
-                    'image_thumbnail_path' => 'products/thumbnails/'.Str::slug($productData['name']).'.jpg',
-                    'publisher'            => $productData['publisher'],
-                    'developer'            => $productData['developer'],
-                    'release_date'         => $productData['release_date'],
-                    'description'          => $productData['description'],
-                    'system_requirement'   => $productData['system_requirement'],
-                    'status'               => GeneralStatus::Active,
+                    'name'                   => $productData['name'],
+                    'image_thumbnail_path'   => 'products/thumbnails/'.$productSlug.'.jpg',
+                    'publisher'              => $productData['publisher'],
+                    'developer'              => $productData['developer'],
+                    'release_date'           => $productData['release_date'],
+                    'description'            => $productData['description'],
+                    'system_requirement'     => $productData['system_requirement'],
+                    'submitted_by_seller_id' => $submittedBySellerId,
+                    'approved_by'            => null,
+                    'status'                 => GeneralStatus::Active,
                 ]
             );
 
@@ -52,17 +108,17 @@ class ProductSeeder extends Seeder
                 $categoryIds = [];
 
                 foreach ($productData['categories'] as $cat) {
-                    $slug = Str::slug($cat);
+                    $categorySlug = Str::slug($cat);
 
                     $category = Category::where('slug', $cat)
-                        ->orWhere('slug', $slug)
+                        ->orWhere('slug', $categorySlug)
                         ->orWhereRaw('LOWER(name) = ?', [strtolower($cat)])
                         ->first();
 
                     if (! $category) {
                         $category = Category::create([
                             'name'   => Str::title(str_replace('-', ' ', $cat)),
-                            'slug'   => $slug,
+                            'slug'   => $categorySlug,
                             'status' => GeneralStatus::Active,
                         ]);
                     }
@@ -75,20 +131,23 @@ class ProductSeeder extends Seeder
                 }
             }
 
-            $this->createVariants($product, $productData['variants'] ?? []);
+            $this->downloadProductThumbnail($productSlug, $disk);
+
+            $this->createVariants(
+                $product,
+                $productData['variants'] ?? [],
+                $this->convertPriceRangeToVnd($productData['price_range'] ?? [9.99, 59.99]),
+                $submittedBySellerId,
+            );
         }
     }
 
-    protected function createVariants(Product $product, array $variantConfigs): void
+    protected function createVariants(Product $product, array $variantConfigs, array $priceRange, ?int $submittedBySellerId): void
     {
         $platforms = Platform::where('status', GeneralStatus::Active)->get();
-        $regions = Region::whereNull('parent_id')->where('status', GeneralStatus::Active)->get();
+        $regions = Region::where('status', GeneralStatus::Active)->get();
         $oses = OperatingSystem::where('status', GeneralStatus::Active)->get();
         $sellers = Seller::where('kyc_status', KycStatus::Approved)->get();
-
-        if ($sellers->isEmpty()) {
-            return;
-        }
 
         $defaultVariants = [
             ['platform' => 'Steam', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Standard', 'Deluxe']],
@@ -122,18 +181,17 @@ class ProductSeeder extends Seeder
                 ]);
 
                 // Create listings for this variant
-                $this->createListings($variant, $sellers, $productData['price_range'] ?? [9.99, 59.99]);
+                $this->createListings($variant, $sellers, $priceRange, $submittedBySellerId);
             }
         }
     }
 
-    protected function createListings(ProductVariant $variant, $sellers, array $priceRange): void
+    protected function createListings(ProductVariant $variant, Collection $sellers, array $priceRange, ?int $submittedBySellerId): void
     {
         $numListings = random_int(1, 3);
-        $sellers = $sellers->shuffle()->take($numListings);
 
-        foreach ($sellers as $seller) {
-            $price = fake()->randomFloat(2, $priceRange[0], $priceRange[1]);
+        for ($i = 0; $i < $numListings; $i++) {
+            $price = $this->randomVndPrice($priceRange);
             $status = fake()->randomElement([
                 ProductListingStatus::Active,
                 ProductListingStatus::Active,
@@ -143,9 +201,11 @@ class ProductSeeder extends Seeder
                 ProductListingStatus::Hidden,
             ]);
 
+            $sellerId = $submittedBySellerId;
+
             $listing = ProductListing::create([
                 'variant_id'  => $variant->id,
-                'seller_id'   => $seller->id,
+                'seller_id'   => $sellerId,
                 'price'       => $price,
                 'stock_count' => 0,
                 'status'      => $status,
@@ -194,6 +254,142 @@ class ProductSeeder extends Seeder
         }
 
         return implode('-', $segments);
+    }
+
+    protected function convertPriceRangeToVnd(array $priceRange): array
+    {
+        $min = (float) ($priceRange[0] ?? 9.99);
+        $max = (float) ($priceRange[1] ?? 59.99);
+
+        return [
+            $this->toVnd($min),
+            $this->toVnd($max),
+        ];
+    }
+
+    protected function toVnd(float $usdAmount): int
+    {
+        return (int) (round(($usdAmount * $this->usdToVndRate) / 1000) * 1000);
+    }
+
+    protected function randomVndPrice(array $priceRange): int
+    {
+        $min = (int) ($priceRange[0] ?? 260000);
+        $max = (int) ($priceRange[1] ?? 1560000);
+
+        if ($max <= $min) {
+            return $min;
+        }
+
+        return (int) (round(random_int($min, $max) / 1000) * 1000);
+    }
+
+    protected function downloadProductThumbnail(string $slug, string $disk): void
+    {
+        $targetPath = "products/thumbnails/{$slug}.jpg";
+
+        if (Storage::disk($disk)->exists($targetPath)) {
+            return;
+        }
+
+        $steamAppId = $this->steamAppIds[$slug] ?? null;
+        $url = null;
+
+        if ($steamAppId !== null) {
+            $url = "https://cdn.cloudflare.steamstatic.com/steam/apps/{$steamAppId}/library_600x900.jpg";
+        } else {
+            $url = $this->thumbnailFallbackUrls[$slug] ?? null;
+
+            if ($url === null) {
+                $url = 'https://placehold.co/600x900/0f172a/ffffff?text='.urlencode(Str::headline(str_replace('-', ' ', $slug)));
+            }
+        }
+
+        if ($url === null) {
+            return;
+        }
+
+        $response = Http::timeout(15)
+            ->retry(2, 250)
+            ->withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            ])
+            ->get($url);
+
+        if (! $response->successful() || strlen($response->body()) < 1000) {
+            Log::warning('Product thumbnail download failed', [
+                'slug' => $slug,
+                'url'  => $url,
+            ]);
+
+            return;
+        }
+
+        Storage::disk($disk)->put($targetPath, $response->body());
+    }
+
+    protected function resolveSubmittedBySellerId(array $productData, Collection $sellers): ?int
+    {
+        if (($productData['submitted_by'] ?? 'admin') === 'seller' && $sellers->isNotEmpty()) {
+            return $sellers->random()->id;
+        }
+
+        if (array_key_exists('submitted_by_seller_id', $productData)) {
+            return $productData['submitted_by_seller_id'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSellerProductsData(): array
+    {
+        return [
+            [
+                'name'         => 'Elden Ring Steam Key',
+                'publisher'    => 'Bandai Namco',
+                'developer'    => 'FromSoftware',
+                'release_date' => '2024-01-15',
+                'description'  => 'Key kích hoạt Elden Ring bản Steam, giao ngay sau thanh toán.',
+                'categories'   => ['rpg-games', 'action-games', 'souls-like'],
+                'price_range'  => [699000, 899000],
+                'variants'     => [
+                    ['platform' => 'Steam', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Steam Key']],
+                ],
+                'system_requirement' => [],
+                'submitted_by'       => 'seller',
+            ],
+            [
+                'name'         => 'Windows 11 Pro Retail Key',
+                'publisher'    => 'Microsoft',
+                'developer'    => 'Microsoft',
+                'release_date' => '2024-02-01',
+                'description'  => 'Key kích hoạt Windows 11 Pro, phù hợp nhu cầu cài mới máy.',
+                'categories'   => ['productivity-software'],
+                'price_range'  => [349000, 599000],
+                'variants'     => [
+                    ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'Windows 11', 'editions' => ['Retail Key']],
+                ],
+                'system_requirement' => [],
+                'submitted_by'       => 'seller',
+            ],
+            [
+                'name'         => 'Office 2021 Professional Plus Key',
+                'publisher'    => 'Microsoft',
+                'developer'    => 'Microsoft',
+                'release_date' => '2023-11-20',
+                'description'  => 'Key vĩnh viễn cho bộ Office 2021 Professional Plus.',
+                'categories'   => ['productivity-software', 'design-software'],
+                'price_range'  => [499000, 899000],
+                'variants'     => [
+                    ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Lifetime Key']],
+                ],
+                'system_requirement' => $this->getSystemRequirements('low'),
+                'submitted_by'       => 'seller',
+            ],
+        ];
     }
 
     protected function getProductsData(): array
@@ -430,63 +626,6 @@ class ProductSeeder extends Seeder
                     ['platform' => 'Steam', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['Standard']],
                 ],
                 'system_requirement' => $this->getSystemRequirements('low'),
-            ],
-
-            // Software & Services
-            [
-                'name'         => 'Microsoft 365 Personal',
-                'publisher'    => 'Microsoft',
-                'developer'    => 'Microsoft',
-                'release_date' => '2020-04-28',
-                'description'  => 'Get premium Office apps including Word, Excel, PowerPoint, Outlook, and 1TB of OneDrive cloud storage for one person.',
-                'categories'   => ['productivity-software', 'subscription-services'],
-                'price_range'  => [29.99, 69.99],
-                'variants'     => [
-                    ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['1 Year Subscription']],
-                    ['platform' => 'Microsoft Store', 'region' => 'Global', 'os' => 'macOS', 'editions' => ['1 Year Subscription']],
-                ],
-                'system_requirement' => $this->getSystemRequirements('low'),
-            ],
-            [
-                'name'         => 'Adobe Creative Cloud All Apps',
-                'publisher'    => 'Adobe',
-                'developer'    => 'Adobe',
-                'release_date' => '2021-06-15',
-                'description'  => 'Get 20+ creative apps including Photoshop, Illustrator, Premiere Pro, After Effects, and more.',
-                'categories'   => ['productivity-software', 'design-software'],
-                'price_range'  => [39.99, 59.99],
-                'variants'     => [
-                    ['platform' => 'Adobe Creative Cloud', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['1 Year Subscription']],
-                    ['platform' => 'Adobe Creative Cloud', 'region' => 'Global', 'os' => 'macOS', 'editions' => ['1 Year Subscription']],
-                ],
-                'system_requirement' => $this->getSystemRequirements('medium'),
-            ],
-            [
-                'name'         => 'Spotify Premium',
-                'publisher'    => 'Spotify',
-                'developer'    => 'Spotify',
-                'release_date' => '2022-01-01',
-                'description'  => 'Ad-free music listening with offline mode and on-demand playback. Download and listen to songs offline.',
-                'categories'   => ['subscription-services', 'entertainment-services'],
-                'price_range'  => [9.99, 49.99],
-                'variants'     => [
-                    ['platform' => 'Spotify', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['1 Month', '3 Months', '6 Months', '1 Year']],
-                ],
-                'system_requirement' => [],
-            ],
-            [
-                'name'         => 'Netflix Premium',
-                'publisher'    => 'Netflix',
-                'developer'    => 'Netflix',
-                'release_date' => '2022-01-01',
-                'description'  => 'Watch unlimited movies and TV shows on your phone, tablet, laptop, and TV. 4 screens simultaneously in Ultra HD.',
-                'categories'   => ['subscription-services', 'entertainment-services'],
-                'price_range'  => [14.99, 89.99],
-                'variants'     => [
-                    ['platform' => 'Netflix', 'region' => 'Global', 'os' => 'Windows 10', 'editions' => ['1 Month', '3 Months', '6 Months', '1 Year']],
-                    ['platform' => 'Netflix', 'region' => 'Southeast Asia', 'os' => 'Windows 10', 'editions' => ['1 Month', '3 Months', '6 Months']],
-                ],
-                'system_requirement' => [],
             ],
 
             // More Popular Games

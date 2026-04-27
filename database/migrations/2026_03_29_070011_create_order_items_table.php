@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('listing_id')->constrained('product_listings')->restrictOnDelete();
-            $table->foreignId('seller_id')->constrained()->restrictOnDelete();
+            $table->foreignId('seller_id')->nullable()->constrained()->nullOnDelete();
             $table->string('product_name_snapshot', 255);
             $table->json('variant_snapshot')->nullable();
             $table->unsignedInteger('quantity');
