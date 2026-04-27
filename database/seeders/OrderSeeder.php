@@ -29,6 +29,8 @@ use Illuminate\Support\Str;
 
 class OrderSeeder extends Seeder
 {
+    private PaymentMethod $seedPaymentMethod = PaymentMethod::VNPay;
+
     /**
      * Run the database seeds.
      */
@@ -64,7 +66,7 @@ class OrderSeeder extends Seeder
                 $buyer = $buyers->random();
                 $selectedListings = collect($activeListings->random(random_int(1, $maxItemsPerOrder)));
                 $orderDate = Carbon::now()->subDays(random_int(14, 180))->subMinutes(random_int(0, 1440));
-                $paymentMethod = fake()->randomElement([PaymentMethod::VNPay, PaymentMethod::Stripe]);
+                $paymentMethod = $this->seedPaymentMethod;
 
                 $order = $this->createOrder($buyer, $orderDate, $paymentMethod);
                 $totalPrice = 0;
@@ -300,22 +302,12 @@ class OrderSeeder extends Seeder
 
     protected function generatePaymentInfo(PaymentMethod $method): array
     {
-        if ($method === PaymentMethod::VNPay) {
-            return [
-                'method'         => 'VNPay',
-                'transaction_id' => 'VNP'.fake()->numerify('##############'),
-                'bank_code'      => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV', 'MB', 'ACB']),
-                'card_type'      => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD', 'JCB']),
-                'response_code'  => '00',
-            ];
-        }
-
         return [
-            'method'            => 'Stripe',
-            'transaction_id'    => 'pi_'.fake()->bothify('????####################'),
-            'payment_method_id' => 'pm_'.fake()->bothify('????####################'),
-            'card_brand'        => fake()->randomElement(['visa', 'mastercard', 'amex']),
-            'last4'             => fake()->numerify('####'),
+            'method'         => 'VNPay',
+            'transaction_id' => 'VNP'.fake()->numerify('##############'),
+            'bank_code'      => fake()->randomElement(['NCB', 'VIETCOMBANK', 'TECHCOMBANK', 'SACOMBANK', 'BIDV', 'MB', 'ACB']),
+            'card_type'      => fake()->randomElement(['ATM', 'VISA', 'MASTERCARD', 'JCB']),
+            'response_code'  => '00',
         ];
     }
 }
