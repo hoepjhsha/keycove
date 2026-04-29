@@ -7,6 +7,7 @@ use App\Livewire\Auth\Action\Register;
 use App\Livewire\Auth\Action\ResetPassword;
 use App\Livewire\Auth\Action\VerifyOtp;
 use App\Livewire\Profile\MyProfile;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')
@@ -30,3 +31,11 @@ Route::middleware('auth')
 Route::get('/my-profile', MyProfile::class)
     ->middleware('auth')
     ->name('app.profile.show');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect()
+        ->route('app.profile.show', ['section' => 'security'])
+        ->with('profile-status', 'Your email address has been verified.');
+})->middleware(['auth', 'signed'])->name('verification.verify');

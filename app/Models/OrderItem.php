@@ -27,18 +27,20 @@ class OrderItem extends Model
         'platform_fee',
         'seller_amount',
         'status',
+        'buyer_key_viewed_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'variant_snapshot' => 'array',
-            'quantity'         => 'integer',
-            'unit_price'       => 'decimal:2',
-            'subtotal'         => 'decimal:2',
-            'platform_fee'     => 'decimal:2',
-            'seller_amount'    => 'decimal:2',
-            'status'           => OrderStatus::class,
+            'variant_snapshot'    => 'array',
+            'quantity'            => 'integer',
+            'unit_price'          => 'decimal:2',
+            'subtotal'            => 'decimal:2',
+            'platform_fee'        => 'decimal:2',
+            'seller_amount'       => 'decimal:2',
+            'status'              => OrderStatus::class,
+            'buyer_key_viewed_at' => 'datetime',
         ];
     }
 
