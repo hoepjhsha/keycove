@@ -5,6 +5,7 @@ use App\Http\Controllers\PaymentController;
 use App\Livewire\Shop\Home;
 use App\Livewire\Shop\Product\ProductIndex;
 use App\Livewire\Shop\Product\ProductShow;
+use App\Livewire\Shop\SellerBrowse\SellerIndex;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,8 @@ Route::livewire('/products', ProductIndex::class)->name('app.products.index');
 Route::livewire('/products/{product:slug}/{listing:slug}', ProductShow::class)
     ->scopeBindings()
     ->name('app.products.show');
+
+Route::livewire('/sellers', SellerIndex::class)->name('app.sellers.index');
 
 Route::middleware('auth')
     ->prefix('cart/items')

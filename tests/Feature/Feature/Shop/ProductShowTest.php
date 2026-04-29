@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
+use App\Models\Seller;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -52,6 +53,50 @@ it('renders the detail page for a scoped admin listing', function (): void {
     $response->assertOk();
     $response->assertSeeLivewire(ProductShow::class);
     $response->assertSee('Detail Bundle');
+});
+
+it('renders the detail page for a seller listing', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+
+    $product = Product::factory()->withCategories(Category::factory()->create(['status' => GeneralStatus::Active]))->create([
+        'name'   => 'Seller Product',
+        'slug'   => 'seller-product',
+        'status' => GeneralStatus::Active,
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $seller = Seller::query()->create([
+        'user_id'          => User::factory()->create()->id,
+        'shop_name'        => 'Seller Shop',
+        'cccd_number'      => '123456789012',
+        'cccd_front_image' => 'sellers/test-front.jpg',
+        'cccd_back_image'  => 'sellers/test-back.jpg',
+        'kyc_status'       => 1,
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => $seller->id,
+        'display_name' => 'Seller Bundle',
+        'price'        => 149000,
+        'stock_count'  => 2,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    $response = $this->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]));
+
+    $response->assertOk();
+    $response->assertSee('Seller Bundle');
 });
 
 it('allows signed in users to add the detail listing to cart', function (): void {

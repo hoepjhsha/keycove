@@ -30,10 +30,6 @@ class ProductShow extends Component
             abort(404);
         }
 
-        if ($listing->seller_id !== null) {
-            abort(404);
-        }
-
         if ($product->trashed() || $listing->trashed() || $listing->variant?->trashed()) {
             abort(404);
         }
@@ -61,7 +57,6 @@ class ProductShow extends Component
             ->select('product_listings.*')
             ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->whereNull('product_listings.seller_id')
             ->where('product_listings.status', ProductListingStatus::Active)
             ->where('product_variants.status', ProductVariantStatus::Active)
             ->where('products.status', GeneralStatus::Active)
@@ -95,7 +90,6 @@ class ProductShow extends Component
             ->select('product_listings.*')
             ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
-            ->whereNull('product_listings.seller_id')
             ->where('product_listings.status', ProductListingStatus::Active)
             ->where('product_variants.status', ProductVariantStatus::Active)
             ->where('products.status', GeneralStatus::Active)
