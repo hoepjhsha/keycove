@@ -68,7 +68,7 @@ class ProductShow extends Component
             ->limit(4)
             ->get();
 
-        return view('livewire.shop.product-show', [
+        return view('pages.shop.product-show', [
             'relatedListings' => $relatedListings,
             'displayTitle'    => $this->listing->display_name ?: $this->product->name,
             'productImage'    => $this->product->image_thumbnail_path ? StorageUtility::getUrl($this->product->image_thumbnail_path) : null,

@@ -100,7 +100,7 @@
                 </div>
             </section>
 
-            <aside class="space-y-5 lg:sticky lg:top-6 lg:self-start">
+            <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Meta</p>
                     <div class="mt-4 space-y-3 text-sm">

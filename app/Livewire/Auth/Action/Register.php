@@ -29,6 +29,8 @@ class Register extends Component
 
     public function render()
     {
-        return view('pages.auth.register')->layout('components.layouts.auth');
+        return view('pages.auth.register')->layout('components.layouts.shop', [
+            'offsetHeader' => false,
+        ]);
     }
 }

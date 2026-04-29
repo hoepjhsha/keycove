@@ -97,7 +97,7 @@ class ProductIndex extends Component
     {
         $listings = $this->catalogQuery()->paginate($this->perPage);
 
-        return view('livewire.shop.product-index', [
+        return view('pages.shop.product-index', [
             'listings'          => $listings,
             'categories'        => $this->categoryOptions(),
             'platforms'         => $this->platformOptions(),
@@ -110,7 +110,7 @@ class ProductIndex extends Component
 
     public function paginationView(): string
     {
-        return 'livewire.shop.pagination';
+        return 'pages.shop.pagination';
     }
 
     protected function catalogQuery(): Builder

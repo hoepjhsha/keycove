@@ -26,6 +26,6 @@ class ForgotPassword extends Component
 
     public function render()
     {
-        return view('pages.auth.forgot-password')->layout('components.layouts.auth');
+        return view('pages.auth.forgot-password')->layout('components.layouts.shop');
     }
 }

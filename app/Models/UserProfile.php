@@ -29,7 +29,7 @@ class UserProfile extends Model
     protected function casts(): array
     {
         return [
-            'dob'    => '',
+            'dob'    => 'date',
             'gender' => Gender::class,
         ];
     }

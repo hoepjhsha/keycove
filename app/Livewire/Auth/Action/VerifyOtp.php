@@ -49,6 +49,6 @@ class VerifyOtp extends Component
 
     public function render()
     {
-        return view('pages.auth.verify-otp')->layout('components.layouts.auth');
+        return view('pages.auth.verify-otp')->layout('components.layouts.shop');
     }
 }

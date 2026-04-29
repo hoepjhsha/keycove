@@ -6,6 +6,7 @@ use App\Livewire\Auth\Action\Login;
 use App\Livewire\Auth\Action\Register;
 use App\Livewire\Auth\Action\ResetPassword;
 use App\Livewire\Auth\Action\VerifyOtp;
+use App\Livewire\Profile\MyProfile;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')
@@ -25,3 +26,7 @@ Route::middleware('auth')
     ->group(function () {
         Route::get('/logout', [Logout::class, 'logout'])->name('logout');
     });
+
+Route::get('/my-profile', MyProfile::class)
+    ->middleware('auth')
+    ->name('app.profile.show');
