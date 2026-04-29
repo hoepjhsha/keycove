@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Profile;
+namespace App\Livewire\Shop\Profile;
 
 use App\Enums\OrderStatus;
 use App\Models\OrderItem;

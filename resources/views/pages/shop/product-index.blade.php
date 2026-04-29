@@ -57,16 +57,16 @@
         </section>
 
         @php
-            $selectedCategory = collect($categories)->first(fn ($category) => (int) data_get($category, 'id', $category->id ?? 0) === (int) $categoryId);
-            $selectedPlatform = collect($platforms)->first(fn ($platform) => (int) data_get($platform, 'id', $platform->id ?? 0) === (int) $platformId);
-            $selectedRegion = collect($regions)->first(fn ($region) => (int) data_get($region, 'id', $region->id ?? 0) === (int) $regionId);
-            $selectedOs = collect($operatingSystems)->first(fn ($os) => (int) data_get($os, 'id', $os->id ?? 0) === (int) $osId);
+            $selectedCategory = collect($categories)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $category);
+            $selectedPlatform = collect($platforms)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $platform);
+            $selectedRegion = collect($regions)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $region);
+            $selectedOs = collect($operatingSystems)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $os);
 
             $hasActiveFilters = filled($search)
-                || (int) $categoryId > 0
-                || (int) $platformId > 0
-                || (int) $regionId > 0
-                || (int) $osId > 0
+                || filled($category)
+                || filled($platform)
+                || filled($region)
+                || filled($os)
                 || filled($edition)
                 || filled($minPrice)
                 || filled($maxPrice)
@@ -131,10 +131,10 @@
 
                         <div>
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
-                            <select wire:model.live="categoryId" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="0">All categories</option>
+                            <select wire:model.live="category" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                <option value="">All categories</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ data_get($category, 'id') }}">{{ data_get($category, 'name') }}</option>
+                                    <option value="{{ data_get($category, 'slug') }}">{{ data_get($category, 'name') }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -150,30 +150,30 @@
 
                         <div>
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Platform</label>
-                            <select wire:model.live="platformId" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="0">All</option>
+                            <select wire:model.live="platform" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                <option value="">All</option>
                                 @foreach($platforms as $platform)
-                                    <option value="{{ $platform->id }}">{{ $platform->name }}</option>
+                                    <option value="{{ $platform->slug }}">{{ $platform->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Region</label>
-                            <select wire:model.live="regionId" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="0">All</option>
+                            <select wire:model.live="region" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                <option value="">All</option>
                                 @foreach($regions as $region)
-                                    <option value="{{ $region->id }}">{{ $region->name }}</option>
+                                    <option value="{{ $region->slug }}">{{ $region->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Operating system</label>
-                            <select wire:model.live="osId" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="0">All operating systems</option>
+                            <select wire:model.live="os" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                <option value="">All operating systems</option>
                                 @foreach($operatingSystems as $os)
-                                    <option value="{{ $os->id }}">{{ $os->name }}</option>
+                                    <option value="{{ $os->slug }}">{{ $os->name }}</option>
                                 @endforeach
                             </select>
                         </div>

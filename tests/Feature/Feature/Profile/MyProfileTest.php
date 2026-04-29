@@ -7,7 +7,7 @@ use App\Enums\GeneralStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
-use App\Livewire\Profile\MyProfile;
+use App\Livewire\Shop\Profile\MyProfile;
 use App\Models\OperatingSystem;
 use App\Models\Order;
 use App\Models\OrderItem;

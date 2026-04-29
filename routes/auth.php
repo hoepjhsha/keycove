@@ -6,7 +6,7 @@ use App\Livewire\Auth\Action\Login;
 use App\Livewire\Auth\Action\Register;
 use App\Livewire\Auth\Action\ResetPassword;
 use App\Livewire\Auth\Action\VerifyOtp;
-use App\Livewire\Profile\MyProfile;
+use App\Livewire\Shop\Profile\MyProfile;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 

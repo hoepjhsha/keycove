@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\PaymentController;
-use App\Livewire\Shop\ProductIndex;
-use App\Livewire\Shop\ProductShow;
+use App\Livewire\Shop\Home;
+use App\Livewire\Shop\Product\ProductIndex;
+use App\Livewire\Shop\Product\ProductShow;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +17,7 @@ Route::prefix('payment')->group(function () {
     Route::get('vnpay/ipn', [PaymentController::class, 'vnpayIpn'])->name('payment.vnpay.ipn')->withoutMiddleware([VerifyCsrfToken::class]);
 });
 
-Route::get('/', function () {
-    return view('pages.landing.shop');
-})->name('app.shop.index');
+Route::livewire('/', Home::class)->name('app.shop.index');
 
 Route::livewire('/products', ProductIndex::class)->name('app.products.index');
 

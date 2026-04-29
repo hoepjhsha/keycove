@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\GeneralStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
-use App\Livewire\Shop\ProductIndex;
+use App\Livewire\Shop\Product\ProductIndex;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\OperatingSystem;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Shop;
+namespace App\Livewire\Shop\Product;
 
 use App\Enums\GeneralStatus;
 use App\Enums\ProductKeyStatus;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Shop;
+namespace App\Livewire\Shop\Product;
 
 use App\Enums\GeneralStatus;
 use App\Enums\ProductKeyStatus;
@@ -31,17 +31,20 @@ class ProductIndex extends Component
     #[Url(except: '')]
     public string $search = '';
 
-    #[Url(except: 0)]
-    public int $categoryId = 0;
+    #[Url(except: '')]
+    public string $product = '';
 
-    #[Url(except: 0)]
-    public int $platformId = 0;
+    #[Url(except: '')]
+    public string $category = '';
 
-    #[Url(except: 0)]
-    public int $regionId = 0;
+    #[Url(except: '')]
+    public string $platform = '';
 
-    #[Url(except: 0)]
-    public int $osId = 0;
+    #[Url(except: '')]
+    public string $region = '';
+
+    #[Url(except: '')]
+    public string $os = '';
 
     #[Url(except: '')]
     public string $edition = '';
@@ -65,16 +68,16 @@ class ProductIndex extends Component
 
     public int $perPage = 20;
 
-    public function updated($property): void
+    public function updated(string $property): void
     {
-        if (in_array($property, ['search', 'categoryId', 'platformId', 'regionId', 'osId', 'edition', 'minPrice', 'maxPrice', 'inStock', 'sortBy', 'viewMode'], true)) {
+        if (in_array($property, ['search', 'product', 'category', 'platform', 'region', 'os', 'edition', 'minPrice', 'maxPrice', 'inStock', 'sortBy', 'viewMode'], true)) {
             $this->resetPage();
         }
     }
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'categoryId', 'platformId', 'regionId', 'osId', 'edition', 'minPrice', 'maxPrice', 'inStock', 'sortBy']);
+        $this->reset(['search', 'product', 'category', 'platform', 'region', 'os', 'edition', 'minPrice', 'maxPrice', 'inStock', 'sortBy']);
         $this->sortBy = 'newest';
         $this->showMobileFilters = false;
         $this->resetPage();
@@ -197,15 +200,33 @@ class ProductIndex extends Component
             });
         });
 
-        $query->when($this->categoryId > 0, function (Builder $query): void {
+        $query->when($this->product !== '', function (Builder $query): void {
+            $query->where('products.slug', $this->product);
+        });
+
+        $query->when($this->category !== '', function (Builder $query): void {
             $query->whereHas('variant.product.categories', function (Builder $categoryQuery): void {
-                $categoryQuery->whereKey($this->categoryId);
+                $categoryQuery->where('slug', $this->category);
             });
         });
 
-        $query->when($this->platformId > 0, fn (Builder $query) => $query->where('product_variants.platform_id', $this->platformId));
-        $query->when($this->regionId > 0, fn (Builder $query) => $query->where('product_variants.region_id', $this->regionId));
-        $query->when($this->osId > 0, fn (Builder $query) => $query->where('product_variants.os_id', $this->osId));
+        $query->when($this->platform !== '', function (Builder $query): void {
+            $query->whereHas('variant.platform', function (Builder $platformQuery): void {
+                $platformQuery->where('slug', $this->platform);
+            });
+        });
+
+        $query->when($this->region !== '', function (Builder $query): void {
+            $query->whereHas('variant.region', function (Builder $regionQuery): void {
+                $regionQuery->where('slug', $this->region);
+            });
+        });
+
+        $query->when($this->os !== '', function (Builder $query): void {
+            $query->whereHas('variant.operatingSystem', function (Builder $osQuery): void {
+                $osQuery->where('slug', $this->os);
+            });
+        });
 
         $query->when($this->edition !== '', function (Builder $query): void {
             $query->where('product_variants.edition', 'like', '%'.trim($this->edition).'%');
@@ -243,12 +264,12 @@ class ProductIndex extends Component
             ->get()
             ->flatMap(function (Category $category) {
                 $options = [
-                    ['id' => $category->id, 'name' => $category->name],
+                    ['slug' => $category->slug, 'name' => $category->name],
                 ];
 
                 foreach ($category->children as $child) {
                     $options[] = [
-                        'id'   => $child->id,
+                        'slug' => $child->slug,
                         'name' => $category->name.' / '.$child->name,
                     ];
                 }
@@ -262,7 +283,7 @@ class ProductIndex extends Component
         return Platform::query()
             ->where('status', GeneralStatus::Active)
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['slug', 'name']);
     }
 
     protected function regionOptions()
@@ -270,7 +291,7 @@ class ProductIndex extends Component
         return Region::query()
             ->where('status', GeneralStatus::Active)
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['slug', 'name']);
     }
 
     protected function operatingSystemOptions()
@@ -278,7 +299,7 @@ class ProductIndex extends Component
         return OperatingSystem::query()
             ->where('status', GeneralStatus::Active)
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['slug', 'name']);
     }
 
     protected function sortOptions(): array
