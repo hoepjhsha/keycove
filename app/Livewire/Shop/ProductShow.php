@@ -8,6 +8,7 @@ use App\Enums\GeneralStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Models\Cart;
 use App\Models\Product;
 use App\Models\ProductListing;
 use App\Utilities\StorageUtility;
@@ -46,6 +47,46 @@ class ProductShow extends Component
         $this->listing->loadCount(['keys as available_keys_count' => function (Builder $query): void {
             $query->where('status', ProductKeyStatus::Available->value);
         }]);
+    }
+
+    public function addToCart(int $listingId)
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return redirect()->route('app.auth.login');
+        }
+
+        $listing = ProductListing::query()
+            ->select('product_listings.*')
+            ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->whereNull('product_listings.seller_id')
+            ->where('product_listings.status', ProductListingStatus::Active)
+            ->where('product_variants.status', ProductVariantStatus::Active)
+            ->where('products.status', GeneralStatus::Active)
+            ->with(['variant.product'])
+            ->findOrFail($listingId);
+
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $cartItem = $cart->items()->firstOrNew(['listing_id' => $listing->id]);
+        $cartItem->quantity = $cartItem->exists ? $cartItem->quantity + 1 : 1;
+        $cartItem->save();
+
+        $product = $listing->variant?->product;
+        $title = $listing->display_name ?: ($product?->name ?? 'Untitled listing');
+
+        $this->dispatch('shop:cart:add', item: [
+            'id'         => $cartItem->id,
+            'listing_id' => $listing->id,
+            'title'      => $title,
+            'subtitle'   => collect([$product?->name, $listing->variant?->edition])->filter()->implode(' • '),
+            'quantity'   => (int) $cartItem->quantity,
+            'price'      => (float) $listing->price,
+            'stock'      => (int) $listing->stock_count,
+            'url'        => route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]),
+            'image'      => $product?->image_thumbnail_path ? StorageUtility::getUrl($product->image_thumbnail_path) : null,
+        ]);
     }
 
     public function render(): View

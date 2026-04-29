@@ -242,87 +242,9 @@
                                 $categories = $product?->display_categories ?? collect();
                             @endphp
 
-                            <a wire:key="listing-{{ $listing->id }}" href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="group relative block overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-white/10 dark:bg-gray-900/95 dark:focus-visible:ring-offset-gray-950">
-                                <div class="relative aspect-[5/4] overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    @if($imageUrl)
-                                        <img src="{{ $imageUrl }}" alt="{{ $title }}" class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
-                                    @else
-                                        <div class="flex h-full items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-[#D32F2F] text-white">
-                                            <i class="fa-solid fa-gamepad text-3xl opacity-70"></i>
-                                        </div>
-                                    @endif
-
-                                    <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
-                                        <div class="absolute left-[-45%] top-[-35%] h-[170%] w-[38%] rotate-12 bg-white/35 blur-sm opacity-0 transition-all duration-700 ease-out will-change-transform group-hover:translate-x-[260%] group-hover:translate-y-[260%] group-hover:opacity-100"></div>
-                                    </div>
-
-                                    <div class="absolute right-3 top-3 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-gray-900 shadow-lg shadow-black/10 dark:bg-gray-950/95 dark:text-white">
-                                        {{ number_format((float) $listing->price, 0, ',', '.') }} VND
-                                    </div>
-
-                                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/90 via-gray-950/45 to-transparent p-4">
-                                        <div class="flex flex-wrap gap-2">
-                                            @foreach($categories->take(3) as $category)
-                                                <span class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur">{{ data_get($category, 'name', $category->name ?? '') }}</span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col gap-4 p-4">
-                                    <div>
-                                        <h2 class="line-clamp-1 text-base font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
-                                        <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $product?->name ?? 'Unknown product' }}
-                                            @if($listing->variant?->edition)
-                                                <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
-                                            @endif
-                                        </p>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-2 text-[11px]">
-                                        <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                            <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
-                                            <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                            <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Platform</div>
-                                            <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->platform?->name ?? '--' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                            <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">OS</div>
-                                            <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->operatingSystem?->name ?? '--' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                            <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                            <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-between border-t border-black/6 pt-1 dark:border-white/8">
-                                        <span class="rounded-full bg-black px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-gray-950">{{ $listing->stock_count > 0 ? 'Ready to buy' : 'Out of stock' }}</span>
-                                        <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors group-hover:text-[#D32F2F] dark:text-gray-300 dark:group-hover:text-[#ff9c9c]">
-                                            View details
-                                            <i class="fa-solid fa-arrow-right text-[11px] transition-transform duration-300 group-hover:translate-x-1"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="space-y-3">
-                        @foreach($listings as $listing)
-                            @php
-                                $product = $listing->variant?->product;
-                                $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Untitled listing');
-                                $imageUrl = $product?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($product->image_thumbnail_path) : null;
-                                $categories = $product?->display_categories ?? collect();
-                            @endphp
-
-                            <a wire:key="listing-list-{{ $listing->id }}" href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="group block overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-white/10 dark:bg-gray-900/95 dark:focus-visible:ring-offset-gray-950">
-                                <div class="flex flex-col gap-0 sm:flex-row">
-                                    <div class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-gray-100 sm:w-44 sm:aspect-auto sm:min-h-[170px] lg:w-56 dark:bg-gray-800">
+                            <div wire:key="listing-{{ $listing->id }}" class="group relative overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900/95">
+                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
+                                    <div class="relative aspect-[5/4] overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         @if($imageUrl)
                                             <img src="{{ $imageUrl }}" alt="{{ $title }}" class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
                                         @else
@@ -334,35 +256,32 @@
                                         <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
                                             <div class="absolute left-[-45%] top-[-35%] h-[170%] w-[38%] rotate-12 bg-white/35 blur-sm opacity-0 transition-all duration-700 ease-out will-change-transform group-hover:translate-x-[260%] group-hover:translate-y-[260%] group-hover:opacity-100"></div>
                                         </div>
-                                    </div>
 
-                                    <div class="flex flex-1 flex-col gap-4 p-4 sm:p-5">
-                                        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                            <div class="min-w-0 space-y-2">
-                                                <div class="flex flex-wrap gap-2">
-                                                    @foreach($categories->take(2) as $category)
-                                                        <span class="rounded-full bg-[#FCF9F4] px-2.5 py-1 text-[10px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">{{ data_get($category, 'name', $category->name ?? '') }}</span>
-                                                    @endforeach
-                                                </div>
-
-                                                <div>
-                                                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
-                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                        {{ $product?->name ?? 'Unknown product' }}
-                                                        @if($listing->variant?->edition)
-                                                            <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
-                                                        @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-gray-800/70 lg:text-right">
-                                                <div class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Price</div>
-                                                <div class="mt-1 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $listing->price, 0, ',', '.') }} VND</div>
-                                            </div>
+                                        <div class="absolute right-3 top-3 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-gray-900 shadow-lg shadow-black/10 dark:bg-gray-950/95 dark:text-white">
+                                            {{ number_format((float) $listing->price, 0, ',', '.') }} VND
                                         </div>
 
-                                        <div class="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
+                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/90 via-gray-950/45 to-transparent p-4">
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach($categories->take(3) as $category)
+                                                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur">{{ data_get($category, 'name', $category->name ?? '') }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-4 p-4">
+                                        <div>
+                                            <h2 class="line-clamp-1 text-base font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
+                                            <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $product?->name ?? 'Unknown product' }}
+                                                @if($listing->variant?->edition)
+                                                    <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
+                                                @endif
+                                            </p>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 text-[11px]">
                                             <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
                                                 <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
                                                 <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
@@ -380,18 +299,142 @@
                                                 <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
                                             </div>
                                         </div>
+                                    </div>
+                                </a>
 
-                                        <div class="flex items-center justify-between border-t border-black/6 pt-1 text-sm dark:border-white/8">
-                                            <span class="rounded-full bg-black px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-gray-950">{{ $listing->stock_count > 0 ? 'Instant access' : 'Currently unavailable' }}</span>
-                                            <span class="inline-flex items-center gap-2 font-medium text-gray-700 transition-colors group-hover:text-[#D32F2F] dark:text-gray-300 dark:group-hover:text-[#ff9c9c]">
-                                                Open listing
-                                                <i class="fa-solid fa-arrow-right text-[11px] transition-transform duration-300 group-hover:translate-x-1"></i>
-                                            </span>
+                                <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="flex flex-wrap items-center gap-2 border-t border-black/6 px-4 pb-4 pt-1 dark:border-white/8">
+                                    <button
+                                        type="button"
+                                        x-on:click.stop.prevent="pulse('wishlistPulse'); $dispatch('shop:wishlist:add', {
+                                            id: {{ $listing->id }},
+                                            title: @js($title),
+                                            subtitle: @js(collect([$product?->name, $listing->variant?->edition])->filter()->implode(' • ')),
+                                            price: @js((float) $listing->price),
+                                            url: @js(route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug])),
+                                            image: @js($imageUrl),
+                                        })"
+                                        x-bind:class="wishlistPulse ? 'scale-[1.03] border-[#D32F2F]/35 text-[#D32F2F] shadow-lg shadow-[#D32F2F]/10 dark:text-[#ffb1b1]' : ''"
+                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
+                                        <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
+                                        Wishlist
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        x-on:click="pulse('cartPulse')"
+                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                        Add to cart
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="space-y-3">
+                        @foreach($listings as $listing)
+                            @php
+                                $product = $listing->variant?->product;
+                                $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Untitled listing');
+                                $imageUrl = $product?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($product->image_thumbnail_path) : null;
+                                $categories = $product?->display_categories ?? collect();
+                            @endphp
+
+                            <div wire:key="listing-list-{{ $listing->id }}" class="group overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900/95">
+                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
+                                    <div class="flex flex-col gap-0 sm:flex-row">
+                                        <div class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-gray-100 sm:w-44 sm:aspect-auto sm:min-h-[170px] lg:w-56 dark:bg-gray-800">
+                                            @if($imageUrl)
+                                                <img src="{{ $imageUrl }}" alt="{{ $title }}" class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
+                                            @else
+                                                <div class="flex h-full items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-[#D32F2F] text-white">
+                                                    <i class="fa-solid fa-gamepad text-3xl opacity-70"></i>
+                                                </div>
+                                            @endif
+
+                                            <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
+                                                <div class="absolute left-[-45%] top-[-35%] h-[170%] w-[38%] rotate-12 bg-white/35 blur-sm opacity-0 transition-all duration-700 ease-out will-change-transform group-hover:translate-x-[260%] group-hover:translate-y-[260%] group-hover:opacity-100"></div>
+                                            </div>
                                         </div>
 
+                                        <div class="flex flex-1 flex-col gap-4 p-4 sm:p-5">
+                                            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                                <div class="min-w-0 space-y-2">
+                                                    <div class="flex flex-wrap gap-2">
+                                                        @foreach($categories->take(2) as $category)
+                                                            <span class="rounded-full bg-[#FCF9F4] px-2.5 py-1 text-[10px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">{{ data_get($category, 'name', $category->name ?? '') }}</span>
+                                                        @endforeach
+                                                    </div>
+
+                                                    <div>
+                                                        <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
+                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                            {{ $product?->name ?? 'Unknown product' }}
+                                                            @if($listing->variant?->edition)
+                                                                <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
+                                                            @endif
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-gray-800/70 lg:text-right">
+                                                    <div class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Price</div>
+                                                    <div class="mt-1 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $listing->price, 0, ',', '.') }} VND</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
+                                                <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
+                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
+                                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
+                                                </div>
+                                                <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
+                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Platform</div>
+                                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->platform?->name ?? '--' }}</div>
+                                                </div>
+                                                <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
+                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">OS</div>
+                                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->operatingSystem?->name ?? '--' }}</div>
+                                                </div>
+                                                <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
+                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
+                                                    <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                </a>
+
+                                <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="flex flex-wrap items-center gap-2 border-t border-black/6 px-4 pb-4 pt-1 text-sm dark:border-white/8 sm:px-5">
+                                    <button
+                                        type="button"
+                                        x-on:click.stop.prevent="pulse('wishlistPulse'); $dispatch('shop:wishlist:add', {
+                                            id: {{ $listing->id }},
+                                            title: @js($title),
+                                            subtitle: @js(collect([$product?->name, $listing->variant?->edition])->filter()->implode(' • ')),
+                                            price: @js((float) $listing->price),
+                                            url: @js(route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug])),
+                                            image: @js($imageUrl),
+                                        })"
+                                        x-bind:class="wishlistPulse ? 'scale-[1.03] border-[#D32F2F]/35 text-[#D32F2F] shadow-lg shadow-[#D32F2F]/10 dark:text-[#ffb1b1]' : ''"
+                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
+                                        <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
+                                        Wishlist
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        x-on:click="pulse('cartPulse')"
+                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                        Add to cart
+                                    </button>
                                 </div>
-                            </a>
+                            </div>
                         @endforeach
                     </div>
                 @endif

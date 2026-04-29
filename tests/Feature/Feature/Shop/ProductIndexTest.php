@@ -6,6 +6,7 @@ use App\Enums\GeneralStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
 use App\Livewire\Shop\ProductIndex;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\OperatingSystem;
 use App\Models\Platform;
@@ -201,4 +202,42 @@ test('shop sorts by price ascending', function (): void {
     Livewire::test(ProductIndex::class)
         ->set('sortBy', 'price_asc')
         ->assertSeeInOrder(['Budget listing', 'Premium listing']);
+});
+
+test('authenticated users can add a listing to cart from the shop page', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $user = User::factory()->create();
+
+    $product = Product::factory()->create([
+        'name'   => 'Cart Product',
+        'status' => GeneralStatus::Active,
+        'slug'   => Str::slug('cart product storefront'),
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => null,
+        'display_name' => 'Cartable listing',
+        'price'        => 125000,
+        'stock_count'  => 9,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductIndex::class)
+        ->call('addToCart', $listing->id)
+        ->assertDispatched('shop:cart:add');
+
+    expect(CartItem::query()->where('listing_id', $listing->id)->count())->toBe(1);
 });

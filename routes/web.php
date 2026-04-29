@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\PaymentController;
 use App\Livewire\Shop\ProductIndex;
 use App\Livewire\Shop\ProductShow;
@@ -24,6 +25,14 @@ Route::livewire('/products', ProductIndex::class)->name('app.products.index');
 Route::livewire('/products/{product:slug}/{listing:slug}', ProductShow::class)
     ->scopeBindings()
     ->name('app.products.show');
+
+Route::middleware('auth')
+    ->prefix('cart/items')
+    ->name('app.cart.items.')
+    ->group(function () {
+        Route::patch('/{cartItem}', [CartItemController::class, 'update'])->name('update');
+        Route::delete('/{cartItem}', [CartItemController::class, 'destroy'])->name('destroy');
+    });
 
 Route::get('/seller/dashboard', function () {
     return view('pages.landing.seller-dashboard');

@@ -125,9 +125,30 @@
 
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Actions</p>
-                    <div class="mt-4 space-y-3">
-                        <button type="button" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">Add to cart</button>
-                        <button type="button" class="w-full rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">Wishlist</button>
+                    <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="mt-4 space-y-3">
+                        <button type="button" x-on:click="pulse('cartPulse')" wire:click.stop.prevent="addToCart({{ $listing->id }})" x-bind:class="cartPulse ? 'scale-[1.02] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20' : ''" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-indigo-700 data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90">
+                            <span class="inline-flex items-center gap-2">
+                                <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                Add to cart
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            x-on:click.stop.prevent="pulse('wishlistPulse'); $dispatch('shop:wishlist:add', {
+                                id: {{ $listing->id }},
+                                title: @js($displayTitle),
+                                subtitle: @js(collect([$product->name, $listing->variant?->edition])->filter()->implode(' • ')),
+                                price: @js((float) $listing->price),
+                                url: @js(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug])),
+                                image: @js($productImage),
+                            })"
+                            x-bind:class="wishlistPulse ? 'scale-[1.02] border-[#D32F2F]/35 text-[#D32F2F] shadow-lg shadow-[#D32F2F]/10 dark:text-[#ffb1b1]' : ''"
+                            class="w-full rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
+                            <span class="inline-flex items-center gap-2">
+                                <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
+                                Wishlist
+                            </span>
+                        </button>
                     </div>
                 </div>
             </aside>
