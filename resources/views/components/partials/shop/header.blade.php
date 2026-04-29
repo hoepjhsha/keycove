@@ -681,8 +681,7 @@
                                                     </button>
                                                 </div>
 
-                                                <div class="mt-4 flex items-center justify-between">
-                                                    <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-black shadow-sm dark:bg-gray-900 dark:text-white">Cookie saved</span>
+                                                <div class="mt-4 flex items-center justify-end gap-3">
                                                     <span class="text-sm font-semibold text-black dark:text-white" x-text="formatPrice(item.price)"></span>
                                                 </div>
                                             </div>
