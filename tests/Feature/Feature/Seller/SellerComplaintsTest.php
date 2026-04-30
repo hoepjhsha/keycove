@@ -8,6 +8,7 @@ use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Events\ComplaintThreadUpdated;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use App\Models\Complaint;
 use App\Models\ComplaintMessage;
@@ -22,6 +23,7 @@ use App\Models\Region;
 use App\Models\Seller;
 use App\Models\User;
 use App\Notifications\ComplaintActivityNotification;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 test('seller can open their complaints index and complaint thread', function (): void {
@@ -122,7 +124,6 @@ test('seller can open their complaints index and complaint thread', function ():
 
     Livewire::actingAs($admin, 'admin')
         ->test(ComplaintThread::class, ['complaint' => $complaint])
-        ->assertSeeHtml('wire:poll.visible.15s')
         ->assertSee('Complaint thread')
         ->assertSee('Buyer, seller, and admin');
 });
@@ -223,6 +224,7 @@ test('admin and seller can open complaint threads without a complaint code', fun
 
 test('admin can reply to complaint without a complaint code', function (): void {
     Notification::fake();
+    Event::fake([ComplaintThreadUpdated::class]);
 
     $sellerUser = User::factory()->seller()->create();
     $seller = Seller::query()->create([
@@ -312,6 +314,11 @@ test('admin can reply to complaint without a complaint code', function (): void 
         ->set('replyMessage', 'Admin follow-up with update.')
         ->call('reply')
         ->assertHasNoErrors();
+
+    Event::assertDispatched(ComplaintThreadUpdated::class, function (ComplaintThreadUpdated $event) use ($complaint): bool {
+        return $event->complaintId === $complaint->id
+            && $event->action === 'replied';
+    });
 
     Notification::assertSentTo($buyer, ComplaintActivityNotification::class);
     Notification::assertSentTo($sellerUser, ComplaintActivityNotification::class);

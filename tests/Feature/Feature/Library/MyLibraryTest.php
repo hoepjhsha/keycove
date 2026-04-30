@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Events\ComplaintThreadUpdated;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use App\Livewire\Shop\Library\MyLibrary;
 use App\Models\Complaint;
@@ -25,6 +26,7 @@ use App\Models\Seller;
 use App\Models\User;
 use App\Notifications\ComplaintActivityNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -352,6 +354,7 @@ test('authenticated user cannot submit a second review for the same order item',
 
 test('authenticated user can view and reply to an existing complaint thread', function (): void {
     Notification::fake();
+    Event::fake([ComplaintThreadUpdated::class]);
 
     $user = User::factory()->create();
     $admin = User::factory()->admin()->create();
@@ -399,13 +402,17 @@ test('authenticated user can view and reply to an existing complaint thread', fu
 
     Livewire::actingAs($user)
         ->test(ComplaintThread::class, ['complaint' => $complaint])
-        ->assertSeeHtml('wire:poll.visible.15s')
         ->assertSee('Complaint thread')
         ->set('replyMessage', 'I have another screenshot showing the mismatch.')
         ->set('replyAttachments', [$replyFile])
         ->call('reply')
         ->assertHasNoErrors()
         ->assertSee('Your message has been added to the complaint thread.');
+
+    Event::assertDispatched(ComplaintThreadUpdated::class, function (ComplaintThreadUpdated $event) use ($complaint): bool {
+        return $event->complaintId === $complaint->id
+            && $event->action === 'replied';
+    });
 
     expect($complaint->fresh()->messages()->count())->toBe(2);
 });

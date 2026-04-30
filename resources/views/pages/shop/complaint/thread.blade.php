@@ -1,4 +1,4 @@
-<div wire:poll.visible.15s class="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+<div class="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-[#F6EBD9] via-[#FCF9F4] to-transparent dark:from-gray-900 dark:via-gray-950"></div>
 
     <div class="mx-auto max-w-7xl space-y-6">

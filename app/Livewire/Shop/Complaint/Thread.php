@@ -11,6 +11,7 @@ use App\Services\Shop\ComplaintService;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -115,6 +116,12 @@ class Thread extends Component
 
         $this->refreshComplaint();
         session()->flash('complaint-status', 'Complaint marked as resolved and funds released.');
+    }
+
+    #[On('echo-private:complaints.{complaint.id},ComplaintThreadUpdated')]
+    public function refreshFromBroadcast(): void
+    {
+        $this->refreshComplaint();
     }
 
     public function render(): View

@@ -8,6 +8,7 @@ use App\Enums\ComplaintStatus;
 use App\Enums\EscrowStatus;
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
+use App\Events\ComplaintThreadUpdated;
 use App\Models\Complaint;
 use App\Models\ComplaintMessage;
 use App\Models\OrderItem;
@@ -53,6 +54,8 @@ class ComplaintService
             'A new complaint was opened for '.$this->complaintSummary($complaint).'.'
         );
 
+        $this->broadcastThreadUpdate($complaint, $actor, 'opened');
+
         return $complaint;
     }
 
@@ -79,6 +82,8 @@ class ComplaintService
             'Complaint updated',
             ($actor->username ?? 'Someone').' added a new message to '.$this->complaintSummary($complaint).'.'
         );
+
+        $this->broadcastThreadUpdate($complaint, $actor, 'replied', $messageRecord->id);
 
         return $messageRecord;
     }
@@ -123,7 +128,19 @@ class ComplaintService
             ($actor->username ?? 'Admin').' resolved '.$this->complaintSummary($resolvedComplaint).' as '.($status === ComplaintStatus::ApprovedRefund ? 'refund approved' : 'funds released').'.'
         );
 
+        $this->broadcastThreadUpdate($resolvedComplaint, $actor, $status === ComplaintStatus::ApprovedRefund ? 'refund-approved' : 'release-approved');
+
         return $resolvedComplaint;
+    }
+
+    protected function broadcastThreadUpdate(Complaint $complaint, User $actor, string $action, ?int $messageId = null): void
+    {
+        event(new ComplaintThreadUpdated(
+            complaintId: $complaint->id,
+            actorId: $actor->id,
+            action: $action,
+            messageId: $messageId,
+        ));
     }
 
     /**
