@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Seller;
 
+use App\Enums\ComplaintStatus;
 use App\Enums\GeneralStatus;
 use App\Enums\KycStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\UserRole;
+use App\Models\Complaint;
 use App\Models\Product;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
@@ -49,16 +51,31 @@ class Dashboard extends Component
     {
         $productsQuery = Product::query()->where('submitted_by_seller_id', $seller->id);
         $listingsQuery = ProductListing::query()->where('seller_id', $seller->id);
+        $complaints = $this->complaints($seller);
 
         return [
-            'products'       => (clone $productsQuery)->count(),
-            'activeProducts' => (clone $productsQuery)->where('status', GeneralStatus::Active)->count(),
-            'listings'       => (clone $listingsQuery)->count(),
-            'activeListings' => (clone $listingsQuery)->where('status', ProductListingStatus::Active)->count(),
-            'walletBalance'  => (float) ($seller->wallet?->balance ?? 0),
-            'walletHolding'  => (float) ($seller->wallet?->holding ?? 0),
-            'availableKeys'  => $this->availableKeys($seller),
+            'products'         => (clone $productsQuery)->count(),
+            'activeProducts'   => (clone $productsQuery)->where('status', GeneralStatus::Active)->count(),
+            'listings'         => (clone $listingsQuery)->count(),
+            'activeListings'   => (clone $listingsQuery)->where('status', ProductListingStatus::Active)->count(),
+            'complaints'       => $complaints->count(),
+            'activeComplaints' => $complaints->whereIn('status', [ComplaintStatus::Open, ComplaintStatus::InProcess, ComplaintStatus::Escalated])->count(),
+            'walletBalance'    => (float) ($seller->wallet?->balance ?? 0),
+            'walletHolding'    => (float) ($seller->wallet?->holding ?? 0),
+            'availableKeys'    => $this->availableKeys($seller),
         ];
+    }
+
+    /**
+     * @return Collection<int, Complaint>
+     */
+    protected function complaints(Seller $seller): Collection
+    {
+        return Complaint::query()
+            ->whereHas('orderItem', function (Builder $query) use ($seller): void {
+                $query->where('seller_id', $seller->id);
+            })
+            ->get();
     }
 
     /**

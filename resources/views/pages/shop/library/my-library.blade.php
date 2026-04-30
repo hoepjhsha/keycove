@@ -232,7 +232,7 @@
                                                 @endif
                                             @endif
 
-                                            @if($isPaidOrder && $item->status === \App\Enums\OrderStatus::Delivered && $item->buyer_key_viewed_at !== null)
+                                            @if($isPaidOrder && $item->buyer_key_viewed_at !== null && in_array($item->status, [\App\Enums\OrderStatus::Delivered, \App\Enums\OrderStatus::Disputing], true))
                                                 <button type="button" wire:click="openConfirmReceivedModal({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/30 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/30 dark:hover:text-emerald-300">
                                                     Confirm received
                                                 </button>
@@ -240,9 +240,16 @@
 
                                             @if($isPaidOrder && $item->buyer_key_viewed_at !== null)
                                                 @if($item->complaint)
+                                                    @php
+                                                        $complaintRouteValue = $item->complaint->complaint_code ?: $item->complaint->id;
+                                                        $complaintThreadUrl = route('app.library.complaints.show', ['complaint' => $complaintRouteValue]);
+                                                    @endphp
                                                     <button type="button" wire:click="openComplaintDetails({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm ring-1 ring-amber-400/20 transition-colors hover:border-amber-500/30 hover:bg-amber-500/15 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-300/20 dark:hover:bg-amber-400/15">
                                                         View complaint
                                                     </button>
+                                                    <a href="{{ $complaintThreadUrl }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/30 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/30 dark:hover:text-[#ff9c9c]">
+                                                        Open complaint page
+                                                    </a>
                                                 @elseif($item->status !== \App\Enums\OrderStatus::Completed)
                                                     <button type="button" wire:click="openComplaintForm({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-rose-500/30 hover:text-rose-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-rose-400/30 dark:hover:text-rose-300">
                                                         Open complaint
@@ -268,7 +275,7 @@
                                 @if($visibleKeys !== [] && ($hasViewedKey || $isKeyVisible))
                                     <div class="mt-4 space-y-3 border-t border-black/8 pt-4 dark:border-white/10">
                                         <div class="rounded-2xl border border-amber-500/15 bg-amber-500/8 px-4 py-3 text-sm text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                                            Stay on this screen while reviewing and activating your key. Do not leave the verification and usage flow midway so your purchase rights remain easier to protect.
+                                            Record your full screen from the moment you open the key until you try to use it. Upload that video here if the key is fake, expired, or otherwise invalid.
                                         </div>
 
                                         <div class="space-y-2">
@@ -437,6 +444,9 @@
 
         @if($selectedComplaintOrderItem && $selectedComplaint)
             @php
+                $selectedComplaintRouteValue = $selectedComplaint->complaint_code ?: $selectedComplaint->id;
+                $selectedComplaintThreadUrl = route('app.library.complaints.show', ['complaint' => $selectedComplaintRouteValue]);
+
                 $selectedComplaintStatusClasses = match ($selectedComplaint->status->value) {
                     0 => 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
                     1 => 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
@@ -514,6 +524,12 @@
                                 </div>
                             @endif
 
+                            <div class="flex flex-wrap gap-3">
+                                <a href="{{ $selectedComplaintThreadUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                    Open complaint page
+                                </a>
+                            </div>
+
                             @if($selectedComplaint->resolved_at || filled($selectedComplaint->resolution_note))
                                 <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/8 p-4 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
                                     <p class="font-semibold">Resolution note</p>
@@ -575,7 +591,7 @@
 
                                     <div>
                                         <label for="complaint-reply-attachments" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Attachments</label>
-                                        <input id="complaint-reply-attachments" wire:model="complaintReplyAttachments" type="file" multiple accept="image/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
+                                        <input id="complaint-reply-attachments" wire:model="complaintReplyAttachments" type="file" multiple accept="image/*,video/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
                                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Optional. Up to 5 files.</p>
                                         @error('complaintReplyAttachments')
                                             <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
@@ -753,7 +769,7 @@
                         <div>
                             <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Complaint</p>
                             <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Describe the issue</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Explain what went wrong so the order item can move into the dispute flow with clear context.</p>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Record your full screen while opening the key and trying to use it, then explain what went wrong.</p>
                         </div>
 
                         <button type="button" wire:click="cancelComplaintForm" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -772,8 +788,8 @@
 
                         <div>
                             <label for="complaint-evidence" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Evidence</label>
-                            <input id="complaint-evidence" wire:model="complaintEvidence" type="file" multiple accept="image/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
-                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Optional. Up to 5 files.</p>
+                            <input id="complaint-evidence" wire:model="complaintEvidence" type="file" multiple accept="image/*,video/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Upload a full-screen recording or supporting proof. Required. Up to 3 files.</p>
                             @error('complaintEvidence')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                             @enderror

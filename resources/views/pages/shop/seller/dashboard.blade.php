@@ -3,6 +3,10 @@
         $libraryUrl = \Illuminate\Support\Facades\Route::has('app.library.show')
             ? route('app.library.show')
             : url('/my-library');
+
+        $complaintsUrl = \Illuminate\Support\Facades\Route::has('seller.complaints.index')
+            ? route('seller.complaints.index')
+            : url('/seller/complaints');
     @endphp
 
     @if(session('seller-status'))
@@ -28,6 +32,9 @@
                     </a>
                     <a href="{{ route('seller.listings.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
                         Manage listings
+                    </a>
+                    <a href="{{ $complaintsUrl }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
+                        Complaints
                     </a>
                     <a href="{{ $libraryUrl }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
                         My Library
@@ -66,6 +73,12 @@
             <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Keys available</p>
             <p class="mt-3 text-3xl font-semibold text-gray-950 dark:text-white">{{ number_format($metrics['availableKeys']) }}</p>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Ready for checkout</p>
+        </article>
+
+        <article class="rounded-[1.75rem] border border-black/8 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-900/85">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Complaints</p>
+            <p class="mt-3 text-3xl font-semibold text-gray-950 dark:text-white">{{ number_format($metrics['complaints']) }}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ number_format($metrics['activeComplaints']) }} active</p>
         </article>
     </section>
 

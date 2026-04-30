@@ -18,6 +18,7 @@ use App\Livewire\Admin\Action\SystemConfig\SystemConfigIndex;
 use App\Livewire\Admin\Action\Transaction\TransactionIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
 use App\Livewire\Admin\Auth\Action\Login;
+use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')
@@ -115,6 +116,7 @@ Route::middleware('auth:admin')
             ->name('complaints.')
             ->group(function () {
                 Route::get('/', ComplaintIndex::class)->name('index');
+                Route::livewire('/{complaint}', ComplaintThread::class)->name('show');
             });
 
         Route::prefix('/escrows')

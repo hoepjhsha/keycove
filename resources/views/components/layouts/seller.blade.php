@@ -19,6 +19,10 @@
         ? route('seller.listings.index')
         : url('/seller/listings');
 
+    $complaintsUrl = \Illuminate\Support\Facades\Route::has('seller.complaints.index')
+        ? route('seller.complaints.index')
+        : url('/seller/complaints');
+
     $shopHomeUrl = \Illuminate\Support\Facades\Route::has('app.shop.index')
         ? route('app.shop.index')
         : url('/');
@@ -31,6 +35,7 @@
         ['label' => 'Dashboard', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
         ['label' => 'Application', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
         ['label' => 'Listings', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
+        ['label' => 'Complaints', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
         ['label' => 'Back to shop', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
     ];
 @endphp

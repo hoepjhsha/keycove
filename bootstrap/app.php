@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (Throwable $e, $request) {
-            return new Handler(app())->render($request, $e);
-        });
+        //        $exceptions->render(function (Throwable $e, $request) {
+        //            return new Handler(app())->render($request, $e);
+        //        });
     })->create();

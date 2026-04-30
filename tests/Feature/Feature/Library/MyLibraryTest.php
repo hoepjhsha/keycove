@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use App\Livewire\Shop\Library\MyLibrary;
 use App\Models\Complaint;
 use App\Models\OperatingSystem;
@@ -22,7 +23,9 @@ use App\Models\Region;
 use App\Models\Review;
 use App\Models\Seller;
 use App\Models\User;
+use App\Notifications\ComplaintActivityNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -203,7 +206,7 @@ test('completed items cannot open a new complaint', function (): void {
         ->assertDontSee('Open complaint')
         ->call('openComplaintForm', $orderItem->id)
         ->assertSet('complaintOrderItemId', null)
-        ->assertSee('Completed items can no longer be disputed.');
+        ->assertSee('Complaints can only be opened for delivered or disputing items.');
 });
 
 test('authenticated user can confirm received through a modal', function (): void {
@@ -348,7 +351,10 @@ test('authenticated user cannot submit a second review for the same order item',
 });
 
 test('authenticated user can view and reply to an existing complaint thread', function (): void {
+    Notification::fake();
+
     $user = User::factory()->create();
+    $admin = User::factory()->admin()->create();
     $order = Order::factory()->forBuyer($user)->create();
     $listing = createAdminListingForLibrary();
 
@@ -365,6 +371,7 @@ test('authenticated user can view and reply to an existing complaint thread', fu
         'platform_fee'          => 0,
         'seller_amount'         => 0,
         'status'                => OrderStatus::Disputing,
+        'buyer_key_viewed_at'   => now(),
     ]);
 
     Storage::fake(config('filesystems.public_disk'));
@@ -379,21 +386,28 @@ test('authenticated user can view and reply to an existing complaint thread', fu
         ->set('complaintEvidence', [$evidenceFile])
         ->call('submitComplaint')
         ->assertHasNoErrors()
-        ->assertSee('Complaint details')
-        ->set('complaintReplyMessage', 'I have another screenshot showing the mismatch.')
-        ->set('complaintReplyAttachments', [$replyFile])
-        ->call('replyComplaint')
-        ->assertHasNoErrors()
-        ->assertSee('I have another screenshot showing the mismatch.')
-        ->assertSee('Your message has been added to the complaint thread.');
+        ->assertRedirect(route('app.library.complaints.show', ['complaint' => Complaint::query()->where('order_item_id', $orderItem->id)->firstOrFail()->complaint_code]));
 
     $complaint = Complaint::query()->where('order_item_id', $orderItem->id)->firstOrFail();
 
     expect($complaint->evidence)->toHaveCount(1);
-    expect($complaint->messages()->count())->toBe(2);
+    expect($complaint->messages()->count())->toBe(1);
+
+    Notification::assertSentTo($admin, ComplaintActivityNotification::class);
 
     Storage::disk(config('filesystems.public_disk'))->assertExists($complaint->evidence[0]);
-    Storage::disk(config('filesystems.public_disk'))->assertExists($complaint->messages()->latest('id')->first()->attachments[0]);
+
+    Livewire::actingAs($user)
+        ->test(ComplaintThread::class, ['complaint' => $complaint])
+        ->assertSeeHtml('wire:poll.visible.15s')
+        ->assertSee('Complaint thread')
+        ->set('replyMessage', 'I have another screenshot showing the mismatch.')
+        ->set('replyAttachments', [$replyFile])
+        ->call('reply')
+        ->assertHasNoErrors()
+        ->assertSee('Your message has been added to the complaint thread.');
+
+    expect($complaint->fresh()->messages()->count())->toBe(2);
 });
 
 function createAdminListingForLibrary(): ProductListing

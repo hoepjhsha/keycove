@@ -43,6 +43,15 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">Thread</dt>
+                            <dd class="col-span-2">
+                                <a href="{{ $viewData['thread_url'] }}" class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                                    Open thread page
+                                </a>
+                            </dd>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 py-3">
                             <dt class="font-medium text-slate-500 dark:text-slate-400">Reason</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['reason'] }}</dd>
                         </div>
