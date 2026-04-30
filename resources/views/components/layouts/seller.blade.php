@@ -15,13 +15,13 @@
         ? route('seller.apply')
         : url('/seller/apply');
 
-    $profileUrl = \Illuminate\Support\Facades\Route::has('app.profile.show')
-        ? route('app.profile.show')
-        : url('/my-profile');
+    $listingsUrl = \Illuminate\Support\Facades\Route::has('seller.listings.index')
+        ? route('seller.listings.index')
+        : url('/seller/listings');
 
-    $libraryUrl = \Illuminate\Support\Facades\Route::has('app.library.show')
-        ? route('app.library.show')
-        : url('/my-library');
+    $shopHomeUrl = \Illuminate\Support\Facades\Route::has('app.shop.index')
+        ? route('app.shop.index')
+        : url('/');
 
     $logoutUrl = \Illuminate\Support\Facades\Route::has('app.auth.logout')
         ? route('app.auth.logout')
@@ -30,8 +30,8 @@
     $navItems = [
         ['label' => 'Dashboard', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
         ['label' => 'Application', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
-        ['label' => 'Profile', 'url' => $profileUrl, 'section' => 'profile', 'icon' => 'fa-regular fa-user'],
-        ['label' => 'Library', 'url' => $libraryUrl, 'section' => 'library', 'icon' => 'fa-solid fa-folder-open'],
+        ['label' => 'Listings', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
+        ['label' => 'Back to shop', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
     ];
 @endphp
 

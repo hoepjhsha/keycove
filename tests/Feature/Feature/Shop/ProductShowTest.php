@@ -304,6 +304,51 @@ it('allows signed in users to add the detail listing to cart', function (): void
     expect(CartItem::query()->where('listing_id', $listing->id)->count())->toBe(1);
 });
 
+it('disables the add to cart action for the owning seller', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $sellerUser = User::factory()->seller()->create();
+    $seller = Seller::query()->create([
+        'user_id'             => $sellerUser->id,
+        'shop_name'           => 'Detail Seller',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => 1,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $product = Product::factory()->create([
+        'name'   => 'Seller Detail Product',
+        'slug'   => 'seller-detail-product',
+        'status' => GeneralStatus::Active,
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => $seller->id,
+        'display_name' => 'Seller Owned Bundle',
+        'price'        => 223000,
+        'stock_count'  => 3,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    $this->actingAs($sellerUser)
+        ->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]))
+        ->assertOk()
+        ->assertSee('Owned by your shop');
+});
+
 it('returns 404 when product and listing do not match', function (): void {
     $region = Region::factory()->create(['status' => GeneralStatus::Active]);
     $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);

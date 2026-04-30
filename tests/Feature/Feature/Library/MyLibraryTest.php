@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\GeneralStatus;
+use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
@@ -19,6 +20,7 @@ use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Review;
+use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -39,6 +41,24 @@ test('verified users can start seller onboarding from my library', function (): 
         ->test(MyLibrary::class)
         ->assertSee('Become a seller')
         ->assertSee(route('seller.apply'));
+});
+
+test('approved sellers can open the seller dashboard from my library', function (): void {
+    $user = User::factory()->seller()->create();
+    Seller::query()->create([
+        'user_id'             => $user->id,
+        'shop_name'           => 'KeyCove Store',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->assertSee('Open dashboard')
+        ->assertSee(route('seller.dashboard.index'));
 });
 
 test('seller dashboard redirects unverified users back to profile verification', function (): void {

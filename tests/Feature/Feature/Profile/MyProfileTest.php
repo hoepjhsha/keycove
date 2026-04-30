@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\Gender;
+use App\Enums\KycStatus;
 use App\Livewire\Shop\Profile\MyProfile;
+use App\Models\Seller;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -44,6 +46,25 @@ test('verified users can start seller onboarding from my profile', function (): 
         ->test(MyProfile::class)
         ->assertSee('Become a seller')
         ->assertSee(route('seller.apply'));
+});
+
+test('approved sellers can open the seller dashboard from my profile', function (): void {
+    $user = User::factory()->seller()->create();
+
+    Seller::query()->create([
+        'user_id'             => $user->id,
+        'shop_name'           => 'KeyCove Store',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyProfile::class)
+        ->assertSee('Open dashboard')
+        ->assertSee(route('seller.dashboard.index'));
 });
 
 test('unverified users are shown the seller onboarding restriction on my profile', function (): void {

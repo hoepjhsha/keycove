@@ -49,6 +49,8 @@ class SellerIndex extends Component
 
     protected function catalogQuery(): Builder
     {
+        $currentSellerId = auth()->user()?->loadMissing('seller')?->seller?->id;
+
         $query = ProductListing::query()
             ->select('product_listings.*')
             ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
@@ -57,6 +59,9 @@ class SellerIndex extends Component
             ->where('product_listings.status', ProductListingStatus::Active)
             ->where('product_variants.status', ProductVariantStatus::Active)
             ->where('products.status', GeneralStatus::Active)
+            ->when($currentSellerId !== null, function (Builder $query) use ($currentSellerId): void {
+                $query->where('product_listings.seller_id', '!=', $currentSellerId);
+            })
             ->with([
                 'seller.user',
                 'variant.product.categories',

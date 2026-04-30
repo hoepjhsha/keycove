@@ -9,6 +9,7 @@ use App\Livewire\Shop\Product\ProductIndex;
 use App\Livewire\Shop\Product\ProductShow;
 use App\Livewire\Shop\Seller\Apply;
 use App\Livewire\Shop\Seller\Dashboard;
+use App\Livewire\Shop\Seller\SellerListings;
 use App\Livewire\Shop\SellerBrowse\SellerIndex;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,10 @@ Route::livewire('/seller/apply', Apply::class)
 Route::livewire('/seller/dashboard', Dashboard::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
     ->name('seller.dashboard.index');
+
+Route::livewire('/seller/listings', SellerListings::class)
+    ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
+    ->name('seller.listings.index');
 
 Route::get('/sample', function () {
     return view('sample');

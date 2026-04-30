@@ -40,6 +40,7 @@ class CheckoutService
         $hasOrderItemCodeColumn = Schema::hasColumn('order_items', 'order_item_code');
 
         $cart->loadMissing([
+            'user.seller',
             'items.listing.variant.product',
             'items.listing.variant.region',
             'items.listing.variant.platform',
@@ -71,6 +72,8 @@ class CheckoutService
                 'payment_status' => PaymentStatus::Pending,
             ]);
 
+            $buyerSellerId = $cart->user?->seller?->id;
+
             $totalPrice = 0.0;
 
             foreach ($items as $cartItem) {
@@ -78,6 +81,10 @@ class CheckoutService
 
                 if ($listing === null) {
                     continue;
+                }
+
+                if ($buyerSellerId !== null && $buyerSellerId === $listing->seller_id) {
+                    abort(422, 'You cannot purchase your own listing.');
                 }
 
                 $quantity = min(max(1, (int) $cartItem->quantity), max(0, (int) $listing->stock_count));

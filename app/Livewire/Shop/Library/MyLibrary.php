@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Shop\Library;
 
 use App\Enums\ComplaintStatus;
+use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Managers\PaymentManager;
@@ -469,6 +470,9 @@ class MyLibrary extends Component
     public function render(): View
     {
         $user = $this->resolveUser();
+        $user->loadMissing('seller');
+
+        $hasApprovedSellerAccount = $user->seller?->kyc_status === KycStatus::Approved;
 
         $orders = $user->orders()
             ->with([
@@ -510,6 +514,7 @@ class MyLibrary extends Component
             'orders'                           => $orders,
             'pendingPaymentCount'              => $orders->where('payment_status', PaymentStatus::Pending)->count(),
             'completedOrderCount'              => $orders->filter(fn (Order $order): bool => $order->status === OrderStatus::Completed)->count(),
+            'hasApprovedSellerAccount'         => $hasApprovedSellerAccount,
             'revealedKeys'                     => $this->revealedKeys,
             'selectedOrderItem'                => $selectedOrderItem,
             'selectedComplaintOrderItem'       => $selectedComplaintOrderItem,

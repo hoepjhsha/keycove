@@ -20,7 +20,9 @@
         default => 'bg-gray-500/10 text-gray-700 dark:text-gray-300',
     };
 
-    $sellerApplyUrl = route('seller.apply');
+    $sellerDashboardUrl = \Illuminate\Support\Facades\Route::has('seller.dashboard.index')
+        ? route('seller.dashboard.index')
+        : route('seller.apply');
 
     $navItems = [
         ['key' => 'profile', 'label' => 'Profile', 'icon' => 'fa-regular fa-id-card', 'description' => 'Identity and contact'],
@@ -126,15 +128,23 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller onboarding</p>
-                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">Become a seller</h2>
+                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $hasApprovedSellerAccount ? 'Seller dashboard' : 'Become a seller' }}</h2>
                     <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">
-                        {{ $user->hasVerifiedEmail() ? 'Open the seller application and complete your KYC details.' : 'Verify your email first to unlock seller onboarding.' }}
+                        @if($hasApprovedSellerAccount)
+                            You already have seller access. Open your dashboard to manage listings and keys.
+                        @else
+                            {{ $user->hasVerifiedEmail() ? 'Open the seller application and complete your KYC details.' : 'Verify your email first to unlock seller onboarding.' }}
+                        @endif
                     </p>
                 </div>
 
                 <div class="space-y-2 sm:text-right">
-                    @if($user->hasVerifiedEmail())
-                        <a href="{{ $sellerApplyUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                    @if($hasApprovedSellerAccount)
+                        <a href="{{ $sellerDashboardUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                            Open dashboard
+                        </a>
+                    @elseif($user->hasVerifiedEmail())
+                        <a href="{{ route('seller.apply') }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
                             Become a seller
                         </a>
                     @else

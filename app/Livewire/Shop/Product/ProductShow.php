@@ -12,6 +12,7 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Models\ProductListing;
 use App\Models\Review;
+use App\Models\User;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +66,12 @@ class ProductShow extends Component
             ->with(['variant.product'])
             ->findOrFail($listingId);
 
+        if ($this->currentSellerId() !== null && $this->currentSellerId() === $listing->seller_id) {
+            session()->flash('seller-status', 'You cannot buy your own listing.');
+
+            return;
+        }
+
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $cartItem = $cart->items()->firstOrNew(['listing_id' => $listing->id]);
         $cartItem->quantity = $cartItem->exists ? $cartItem->quantity + 1 : 1;
@@ -89,6 +96,8 @@ class ProductShow extends Component
 
     public function render(): View
     {
+        $currentSellerId = $this->currentSellerId();
+
         $reviewQuery = Review::query()
             ->with(['user'])
             ->whereHas('orderItem', function (Builder $query): void {
@@ -128,6 +137,12 @@ class ProductShow extends Component
             ->where('products.status', GeneralStatus::Active)
             ->where('products.id', $this->product->id)
             ->where('product_listings.id', '!=', $this->listing->id)
+            ->when($currentSellerId !== null, function (Builder $query) use ($currentSellerId): void {
+                $query->where(function (Builder $sellerQuery) use ($currentSellerId): void {
+                    $sellerQuery->whereNull('product_listings.seller_id')
+                        ->orWhere('product_listings.seller_id', '!=', $currentSellerId);
+                });
+            })
             ->with(['variant.product.categories', 'variant.region', 'variant.platform', 'variant.operatingSystem'])
             ->withCount(['keys as available_keys_count' => function ($query): void {
                 $query->where('status', ProductKeyStatus::Available->value);
@@ -143,6 +158,31 @@ class ProductShow extends Component
             'productReviewCount'   => $productReviewCount,
             'productReviewAverage' => $productReviewAverage,
             'productReviews'       => $productReviews,
+            'canAddToCart'         => $this->canAddToCart(),
         ])->layout('components.layouts.shop');
+    }
+
+    protected function currentSellerId(): ?int
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        $user->loadMissing('seller');
+
+        return $user->seller?->id;
+    }
+
+    protected function canAddToCart(): bool
+    {
+        $currentSellerId = $this->currentSellerId();
+
+        if ($currentSellerId === null) {
+            return true;
+        }
+
+        return $currentSellerId !== $this->listing->seller_id;
     }
 }
