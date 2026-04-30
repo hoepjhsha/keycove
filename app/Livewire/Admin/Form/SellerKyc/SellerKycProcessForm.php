@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\SellerKyc;
 
 use App\Enums\KycStatus;
+use App\Enums\UserRole;
 use App\Models\Seller;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Form;
@@ -34,6 +35,8 @@ class SellerKycProcessForm extends Form
 
     public function setSeller(Seller $seller): void
     {
+        $seller->loadMissing('user');
+
         $this->seller = $seller;
         $this->kyc_status = $seller->kyc_status->value;
         $this->kyc_rejected_reason = $seller->kyc_rejected_reason;
@@ -50,6 +53,14 @@ class SellerKycProcessForm extends Form
         $this->seller->kyc_status = KycStatus::tryFrom((int) $this->kyc_status);
         $this->seller->kyc_rejected_reason = $this->seller->kyc_status === KycStatus::Rejected ? $this->kyc_rejected_reason : null;
 
-        return $this->seller->save();
+        $saved = $this->seller->save();
+
+        if ($saved && $this->seller->user !== null) {
+            $this->seller->user->forceFill([
+                'role' => $this->seller->kyc_status === KycStatus::Approved ? UserRole::Seller : UserRole::User,
+            ])->save();
+        }
+
+        return $saved;
     }
 }

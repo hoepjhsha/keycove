@@ -83,7 +83,7 @@ class SellerKycIndex extends Component
     #[On('processSellerKyc')]
     public function processSellerKyc($rowId): void
     {
-        $seller = Seller::find($rowId);
+        $seller = Seller::with('user')->find($rowId);
 
         if ($seller && $seller->kyc_status === KycStatus::Pending) {
             $this->processForm->setSeller($seller);

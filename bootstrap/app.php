@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\Handler;
+use App\Http\Middleware\EnsureSellerEmailVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'seller.email.verified' => EnsureSellerEmailVerified::class,
+        ]);
+
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('admin/*')) {
                 return '/admin/auth/login';

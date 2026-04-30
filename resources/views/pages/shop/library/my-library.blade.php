@@ -1,3 +1,7 @@
+@php
+    $sellerApplyUrl = route('seller.apply');
+@endphp
+
 <div class="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-b from-[#F6EBD9] via-[#FCF9F4] to-transparent dark:from-gray-900 dark:via-gray-950"></div>
     <div aria-hidden="true" class="pointer-events-none absolute -top-10 right-0 -z-10 h-64 w-64 rounded-full bg-[#D32F2F]/8 blur-3xl dark:bg-[#D32F2F]/10"></div>
@@ -46,6 +50,31 @@
                         <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Completed</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $completedOrderCount }}</p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-5 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="space-y-1">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller onboarding</p>
+                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">Become a seller</h2>
+                    <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">
+                        {{ $user->hasVerifiedEmail() ? 'Open the seller application and complete your KYC details.' : 'Verify your email first to unlock seller onboarding.' }}
+                    </p>
+                </div>
+
+                <div class="space-y-2 sm:text-right">
+                    @if($user->hasVerifiedEmail())
+                        <a href="{{ $sellerApplyUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                            Become a seller
+                        </a>
+                    @else
+                        <span aria-disabled="true" class="inline-flex cursor-not-allowed items-center justify-center rounded-2xl bg-gray-400/20 px-5 py-3 text-sm font-semibold text-gray-500 dark:bg-white/10 dark:text-gray-400">
+                            Become a seller
+                        </span>
+                        <p class="text-xs text-amber-700 dark:text-amber-300">You need a verified email to continue.</p>
+                    @endif
                 </div>
             </div>
         </section>

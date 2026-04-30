@@ -506,6 +506,7 @@ class MyLibrary extends Component
             : null;
 
         return view('pages.shop.library.my-library', [
+            'user'                             => $user,
             'orders'                           => $orders,
             'pendingPaymentCount'              => $orders->where('payment_status', PaymentStatus::Pending)->count(),
             'completedOrderCount'              => $orders->filter(fn (Order $order): bool => $order->status === OrderStatus::Completed)->count(),

@@ -27,11 +27,27 @@ use Livewire\Livewire;
 test('authenticated user can access the my library page', function (): void {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->get('/my-library');
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->assertSee('My Library');
+});
 
-    $response->assertOk();
-    $response->assertSeeLivewire(MyLibrary::class);
-    $response->assertSee('My Library');
+test('verified users can start seller onboarding from my library', function (): void {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->assertSee('Become a seller')
+        ->assertSee(route('seller.apply'));
+});
+
+test('seller dashboard redirects unverified users back to profile verification', function (): void {
+    $user = User::factory()->unverified()->create();
+
+    $this->actingAs($user)
+        ->get('/seller/dashboard')
+        ->assertRedirect('/my-profile?section=security')
+        ->assertSessionHas('profile-status', 'Verify your email first to unlock seller onboarding.');
 });
 
 test('legacy orders route redirects to my library', function (): void {

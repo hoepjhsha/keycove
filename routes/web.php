@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\KycStatus;
+use App\Enums\UserRole;
 use App\Http\Controllers\CartCheckoutController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\PaymentController;
@@ -7,6 +9,7 @@ use App\Livewire\Shop\Checkout\CheckoutReview;
 use App\Livewire\Shop\Home;
 use App\Livewire\Shop\Product\ProductIndex;
 use App\Livewire\Shop\Product\ProductShow;
+use App\Livewire\Shop\Seller\Apply;
 use App\Livewire\Shop\SellerBrowse\SellerIndex;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -44,9 +47,27 @@ Route::middleware('auth')
         Route::delete('/{cartItem}', [CartItemController::class, 'destroy'])->name('destroy');
     });
 
-Route::get('/seller/dashboard', function () {
-    return view('pages.landing.seller-dashboard');
-})->name('seller.dashboard.index');
+Route::livewire('/seller/apply', Apply::class)
+    ->middleware(['auth', 'seller.email.verified'])
+    ->name('seller.apply');
+
+Route::middleware(['auth', 'seller.email.verified'])
+    ->get('/seller/dashboard', function () {
+        $user = auth()->user();
+
+        if ($user === null) {
+            abort(403);
+        }
+
+        if ($user->seller === null || $user->role !== UserRole::Seller || $user->seller->kyc_status !== KycStatus::Approved) {
+            return redirect()
+                ->route('seller.apply')
+                ->with('seller-status', 'Complete and submit your seller application first.');
+        }
+
+        return view('pages.landing.seller-dashboard');
+    })
+    ->name('seller.dashboard.index');
 
 Route::get('/sample', function () {
     return view('sample');
