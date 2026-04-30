@@ -17,6 +17,10 @@
         )
         : $loginUrl;
 
+    $libraryUrl = \Illuminate\Support\Facades\Route::has('app.library.show')
+        ? route('app.library.show')
+        : route('app.shop.index');
+
     $cartItemUpdateUrl = route('app.cart.items.update', ['cartItem' => '__CART_ITEM__']);
     $cartItemDestroyUrl = route('app.cart.items.destroy', ['cartItem' => '__CART_ITEM__']);
 
@@ -35,6 +39,7 @@
 
                 return [
                     'id' => $item->id,
+                    'code' => $item->cart_item_code,
                     'listing_id' => $listing?->id,
                     'title' => $listing?->display_name ?: ($product?->name ?? 'Unknown item'),
                     'subtitle' => collect([$product?->name, $listing?->variant?->edition])->filter()->implode(' • '),
@@ -68,6 +73,8 @@
         cartItemUpdateUrlTemplate: @js($cartItemUpdateUrl),
         cartItemDestroyUrlTemplate: @js($cartItemDestroyUrl),
         cartItems: @js($cartItems->all()),
+        checkoutReviewBaseUrl: @js(route('app.checkout.review')),
+        selectedCartItemCodes: [],
         wishlistItems: [],
         pendingCartItemIds: [],
         wishlistPulse: false,
@@ -78,6 +85,7 @@
         pulseTimeouts: { wishlist: null, cart: null },
         init() {
             this.loadWishlist();
+        this.selectedCartItemCodes = this.cartItems.map(item => String(item.code));
 
             this.$watch('drawerOpen', value => {
                 document.body.classList.toggle('overflow-hidden', value);
@@ -129,6 +137,49 @@
             }
 
             this.pendingCartItemIds = this.pendingCartItemIds.filter(id => id !== normalizedId);
+        },
+        isCartItemSelected(itemCode) {
+            return this.selectedCartItemCodes.includes(String(itemCode));
+        },
+        toggleCartItemSelection(itemCode, selected) {
+            const normalizedCode = String(itemCode);
+
+            if (selected) {
+                if (! this.selectedCartItemCodes.includes(normalizedCode)) {
+                    this.selectedCartItemCodes.push(normalizedCode);
+                }
+
+                return;
+            }
+
+            this.selectedCartItemCodes = this.selectedCartItemCodes.filter(code => code !== normalizedCode);
+        },
+        selectedCartItems() {
+            return this.cartItems.filter(item => this.selectedCartItemCodes.includes(String(item.code)));
+        },
+        areAllCartItemsSelected() {
+            return this.cartItems.length > 0 && this.selectedCartItemCodes.length === this.cartItems.length;
+        },
+        toggleAllCartItemsSelection() {
+            if (this.areAllCartItemsSelected()) {
+                this.selectedCartItemCodes = [];
+                return;
+            }
+
+            this.selectedCartItemCodes = this.cartItems.map(item => String(item.code));
+        },
+        checkoutReviewUrl() {
+            if (! this.selectedCartItemCodes.length) {
+                return '#';
+            }
+
+            const params = new URLSearchParams();
+            params.set('item_codes', this.selectedCartItemCodes.join(','));
+
+            return `${this.checkoutReviewBaseUrl}?${params.toString()}`;
+        },
+        selectedCartSubtotal() {
+            return this.selectedCartItems().reduce((total, item) => total + (Number(item.price || 0) * Number(item.quantity || 0)), 0);
         },
         readCookie(name) {
             const prefix = `${name}=`;
@@ -284,6 +335,7 @@
                 }
 
                 this.cartItems = this.cartItems.filter(entry => String(entry.id) !== String(payload.item_id));
+                this.selectedCartItemCodes = this.selectedCartItemCodes.filter(code => String(code) !== String(payload.item_code));
                 this.pulseAction('cart');
                 this.showActionToast('cart', 'Removed from cart', existingItem.title);
             } catch (error) {
@@ -324,12 +376,14 @@
             const existingItem = this.cartItems.find(entry => String(entry.listing_id) === String(item.listing_id));
 
             if (existingItem) {
+                existingItem.code = String(item.code || existingItem.code || '');
                 existingItem.quantity = Number(item.quantity || existingItem.quantity || 1);
                 existingItem.price = Number(item.price || existingItem.price || 0);
                 existingItem.stock = Number(item.stock || existingItem.stock || 0);
             } else {
                 this.cartItems.unshift({
                     id: item.id,
+                    code: String(item.code || ''),
                     listing_id: item.listing_id,
                     title: item.title || 'Cart item',
                     subtitle: item.subtitle || '',
@@ -339,6 +393,8 @@
                     url: item.url || '#',
                     image: item.image || null,
                 });
+
+                this.selectedCartItemCodes.unshift(String(item.code));
             }
 
             this.pulseAction('cart');
@@ -397,7 +453,7 @@
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
                     </svg>
                 </a>
-                <a href="#" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
+                <a href="{{ $libraryUrl }}" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
                     My Library
                     <svg class="ml-1.5 h-3 w-3 text-gray-400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
@@ -447,6 +503,14 @@
                         </div>
 
                         <div class="mt-2 space-y-1">
+                            <a href="{{ $libraryUrl }}" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]">
+                                <span class="flex items-center gap-3">
+                                    <i class="fa-solid fa-folder-open text-[15px]"></i>
+                                    My library
+                                </span>
+                                <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
+                            </a>
+
                             <a x-bind:href="profileUrl" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]">
                                 <span class="flex items-center gap-3">
                                     <i class="fa-regular fa-id-badge text-[15px]"></i>
@@ -596,13 +660,26 @@
                                                         <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400" x-text="item.subtitle || 'Store listing'"></p>
                                                     </div>
 
-                                                    <button
-                                                        type="button"
-                                                        x-on:click="removeCartItem(item.id)"
-                                                        x-bind:disabled="isCartItemPending(item.id)"
-                                                        class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-gray-500 transition-colors hover:border-rose-500/30 hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-gray-300 dark:hover:border-rose-400/40 dark:hover:bg-rose-500 dark:hover:text-white">
-                                                        <i class="fa-solid fa-trash-can text-[12px]"></i>
-                                                    </button>
+                                                    <div class="flex flex-col items-end gap-2">
+                                                        <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                            <input
+                                                                type="checkbox"
+                                                            x-model="selectedCartItemCodes"
+                                                                x-bind:value="String(item.code)"
+                                                                x-bind:disabled="isCartItemPending(item.id)"
+                                                                class="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F] dark:border-white/20 dark:bg-gray-950"
+                                                            >
+                                                            <span>Select</span>
+                                                        </label>
+
+                                                        <button
+                                                            type="button"
+                                                            x-on:click="removeCartItem(item.id)"
+                                                            x-bind:disabled="isCartItemPending(item.id)"
+                                                            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-gray-500 transition-colors hover:border-rose-500/30 hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-gray-300 dark:hover:border-rose-400/40 dark:hover:bg-rose-500 dark:hover:text-white">
+                                                            <i class="fa-solid fa-trash-can text-[12px]"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
 
                                                 <div class="mt-4 flex items-end justify-between gap-3">
@@ -697,17 +774,32 @@
                     <div x-show="activeDrawerTab === 'cart'" class="space-y-4">
                         <template x-if="isAuthenticated && cartItems.length">
                             <div class="rounded-3xl bg-[#F6EBD9] px-4 py-4 dark:bg-white/5">
+                                <div class="flex items-center justify-between gap-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    <label class="inline-flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            x-bind:checked="areAllCartItemsSelected()"
+                                            x-on:change="toggleAllCartItemsSelection()"
+                                            class="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F] dark:border-white/20 dark:bg-gray-950"
+                                        >
+                                        <span x-text="areAllCartItemsSelected() ? 'Clear all' : 'Select all'"></span>
+                                    </label>
+
+                                    <span x-text="`${selectedCartItemCodes.length} / ${cartItems.length} selected`"></span>
+                                </div>
+
                                 <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                                     <span>Subtotal</span>
-                                    <span class="font-semibold text-black dark:text-white" x-text="formatPrice(cartSubtotal())"></span>
+                                    <span class="font-semibold text-black dark:text-white" x-text="formatPrice(selectedCartSubtotal())"></span>
                                 </div>
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="`${selectedCartItemCodes.length} item(s) selected`"></p>
                                 <div class="mt-3 grid grid-cols-2 gap-3">
-                                    <button type="button" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-900 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
-                                        Review cart
-                                    </button>
-                                    <button type="button" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        Checkout soon
-                                    </button>
+                        <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-900 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
+                            Continue shopping
+                        </a>
+                                    <a x-bind:href="checkoutReviewUrl()" x-bind:aria-disabled="! selectedCartItemCodes.length" x-bind:class="selectedCartItemCodes.length ? 'inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white' : 'pointer-events-none inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white opacity-50 dark:bg-white dark:text-gray-950'">
+                                        Review checkout
+                                    </a>
                                 </div>
                             </div>
                         </template>

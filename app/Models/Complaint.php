@@ -17,6 +17,7 @@ class Complaint extends Model
     protected $fillable = [
         'order_item_id',
         'resolved_by',
+        'complaint_code',
         'reason',
         'evidence',
         'status',
@@ -27,9 +28,10 @@ class Complaint extends Model
     protected function casts(): array
     {
         return [
-            'evidence'    => 'array',
-            'status'      => ComplaintStatus::class,
-            'resolved_at' => 'datetime',
+            'complaint_code' => 'string',
+            'evidence'       => 'array',
+            'status'         => ComplaintStatus::class,
+            'resolved_at'    => 'datetime',
         ];
     }
 
@@ -46,5 +48,10 @@ class Complaint extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(ComplaintMessage::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'complaint_code';
     }
 }

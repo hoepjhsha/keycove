@@ -58,6 +58,7 @@ class CartItemController extends Controller
 
         return [
             'id'         => $cartItem->id,
+            'code'       => $cartItem->cart_item_code,
             'listing_id' => $listing?->id,
             'title'      => $listing?->display_name ?: ($product?->name ?? 'Unknown item'),
             'subtitle'   => collect([$product?->name, $listing?->variant?->edition])->filter()->implode(' • '),

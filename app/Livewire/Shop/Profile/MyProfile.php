@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Profile;
 
-use App\Enums\OrderStatus;
-use App\Models\OrderItem;
 use App\Models\User;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
@@ -27,15 +25,6 @@ class MyProfile extends Component
     public string $newPassword = '';
 
     public string $newPasswordConfirmation = '';
-
-    public string $keyAccessPassword = '';
-
-    public ?int $keyAccessOrderItemId = null;
-
-    /**
-     * @var array<int, list<string>>
-     */
-    public array $revealedKeys = [];
 
     public function mount(): void
     {
@@ -91,80 +80,6 @@ class MyProfile extends Component
         $this->section = 'security';
     }
 
-    public function promptKeyReveal(int $orderItemId): void
-    {
-        $orderItem = $this->resolveOwnedOrderItem($orderItemId);
-
-        if (! $this->canRevealKeys($orderItem)) {
-            return;
-        }
-
-        $keys = $this->orderItemKeys($orderItem);
-
-        if ($keys === []) {
-            return;
-        }
-
-        if ($orderItem->buyer_key_viewed_at !== null) {
-            $this->revealedKeys[$orderItem->id] = $keys;
-            $this->keyAccessOrderItemId = null;
-            $this->keyAccessPassword = '';
-            $this->section = 'orders';
-
-            return;
-        }
-
-        $this->resetValidation('keyAccessPassword');
-        $this->keyAccessPassword = '';
-        $this->keyAccessOrderItemId = $orderItem->id;
-        $this->section = 'orders';
-    }
-
-    public function cancelKeyReveal(): void
-    {
-        $this->resetValidation('keyAccessPassword');
-        $this->keyAccessPassword = '';
-        $this->keyAccessOrderItemId = null;
-    }
-
-    public function revealOrderItemKeys(): void
-    {
-        $this->validate([
-            'keyAccessPassword' => ['required', 'current_password'],
-        ]);
-
-        $orderItem = $this->resolveOwnedOrderItem((int) $this->keyAccessOrderItemId);
-
-        if (! $this->canRevealKeys($orderItem)) {
-            return;
-        }
-
-        $keys = $this->orderItemKeys($orderItem);
-
-        if ($keys === []) {
-            $this->addError('keyAccessPassword', 'No product keys are attached to this order item yet.');
-
-            return;
-        }
-
-        $this->revealedKeys[$orderItem->id] = $keys;
-
-        if ($orderItem->buyer_key_viewed_at === null) {
-            $orderItem->forceFill([
-                'buyer_key_viewed_at' => now(),
-            ])->save();
-        }
-
-        $this->keyAccessPassword = '';
-        $this->keyAccessOrderItemId = null;
-        session()->flash('profile-status', 'Your key is now visible below. Stay on this screen while reviewing and activating it.');
-    }
-
-    public function hideOrderItemKeys(int $orderItemId): void
-    {
-        unset($this->revealedKeys[$orderItemId]);
-    }
-
     public function render(): View
     {
         $user = $this->resolveUser();
@@ -197,26 +112,12 @@ class MyProfile extends Component
             ])->filter()->count() / 7 * 100
         );
 
-        $orders = $user->orders()
-            ->with([
-                'items' => fn ($query) => $query
-                    ->select(['id', 'order_id', 'listing_id', 'product_name_snapshot', 'quantity', 'unit_price', 'subtotal', 'status', 'buyer_key_viewed_at'])
-                    ->with(['listing.variant.product'])
-                    ->withCount('keys')
-                    ->orderBy('id'),
-            ])
-            ->withCount('items')
-            ->orderByDesc('created_at')
-            ->limit(8)
-            ->get();
-
         return view('pages.shop.profile.my-profile', [
             'user'              => $user,
             'profile'           => $profile,
             'avatarUrl'         => $avatarUrl,
             'fullName'          => $fullName !== '' ? $fullName : $user->username,
             'profileCompletion' => $profileCompletion,
-            'orders'            => $orders,
         ])->layout('components.layouts.shop');
     }
 
@@ -231,41 +132,8 @@ class MyProfile extends Component
 
     protected function normalizeSection(): void
     {
-        if (! in_array($this->section, ['profile', 'orders', 'security'], true)) {
+        if (! in_array($this->section, ['profile', 'security'], true)) {
             $this->section = 'profile';
         }
-    }
-
-    protected function resolveOwnedOrderItem(int $orderItemId): OrderItem
-    {
-        return OrderItem::query()
-            ->whereKey($orderItemId)
-            ->whereHas('order', function ($query): void {
-                $query->where('buyer_id', $this->resolveUser()->id);
-            })
-            ->firstOrFail();
-    }
-
-    protected function canRevealKeys(OrderItem $orderItem): bool
-    {
-        return in_array($orderItem->status, [
-            OrderStatus::Delivered,
-            OrderStatus::Disputing,
-            OrderStatus::Completed,
-        ], true);
-    }
-
-    /**
-     * @return list<string>
-     */
-    protected function orderItemKeys(OrderItem $orderItem): array
-    {
-        return $orderItem->keys()
-            ->orderBy('id')
-            ->get(['id', 'order_item_id', 'key_code'])
-            ->pluck('key_code')
-            ->filter(fn (?string $keyCode): bool => filled($keyCode))
-            ->values()
-            ->all();
     }
 }

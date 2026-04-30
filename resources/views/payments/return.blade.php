@@ -122,12 +122,12 @@
                     ← Back to Home
                 </a>
                 @if($success)
-                    <a href="/account/orders" class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
-                        View Your Orders →
+                    <a href="{{ route('app.library.show') }}" class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
+                        Open My Library →
                     </a>
                 @else
-                    <a href="/cart" class="inline-flex items-center justify-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
-                        Try Again →
+                    <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors">
+                        Continue shopping →
                     </a>
                 @endif
             </div>

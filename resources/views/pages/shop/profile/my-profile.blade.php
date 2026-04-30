@@ -3,6 +3,10 @@
         ? route('app.auth.logout')
         : route('app.shop.index');
 
+    $libraryUrl = \Illuminate\Support\Facades\Route::has('app.library.show')
+        ? route('app.library.show')
+        : route('app.shop.index');
+
     $initials = collect(explode(' ', $fullName))
         ->filter()
         ->take(2)
@@ -18,7 +22,6 @@
 
     $navItems = [
         ['key' => 'profile', 'label' => 'Profile', 'icon' => 'fa-regular fa-id-card', 'description' => 'Identity and contact'],
-        ['key' => 'orders', 'label' => 'Orders', 'icon' => 'fa-solid fa-bag-shopping', 'description' => 'Purchase history'],
         ['key' => 'security', 'label' => 'Security', 'icon' => 'fa-solid fa-shield-halved', 'description' => 'Verification and password'],
     ];
 @endphp
@@ -67,7 +70,7 @@
                                 <div>
                                     <h1 class="text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">{{ $fullName }}</h1>
                                     <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">
-                                        {{ $profile?->bio ?: 'Manage your identity, orders, and account security from a cleaner account workspace.' }}
+                                        {{ $profile?->bio ?: 'Manage your identity and account security here, while purchases now live in My Library.' }}
                                     </p>
                                 </div>
                             </div>
@@ -88,8 +91,8 @@
                                     <div class="mt-2 truncate font-semibold text-gray-950 dark:text-white">{{ $user->email }}</div>
                                 </div>
                                 <div class="rounded-2xl border border-black/8 bg-white/80 px-4 py-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                                    <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Orders</div>
-                                    <div class="mt-2 font-semibold text-gray-950 dark:text-white">{{ $orders->count() }} recent</div>
+                                    <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Workspace</div>
+                                    <div class="mt-2 font-semibold text-gray-950 dark:text-white">Profile & security</div>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +151,19 @@
                                 <i class="fa-solid fa-chevron-right text-[11px] opacity-50"></i>
                             </button>
                         @endforeach
+
+                        <a href="{{ $libraryUrl }}" class="flex w-full items-center justify-between gap-3 rounded-[1.4rem] px-4 py-3 text-left text-gray-600 transition-all duration-200 hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-[#ff9c9c]">
+                            <span class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-gray-900 shadow-sm dark:bg-gray-950 dark:text-white">
+                                    <i class="fa-solid fa-folder-open text-[14px]"></i>
+                                </span>
+                                <span>
+                                    <span class="block text-sm font-semibold">My Library</span>
+                                    <span class="block text-xs text-gray-500 dark:text-gray-400">Orders, keys, and complaints</span>
+                                </span>
+                            </span>
+                            <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
+                        </a>
 
                         <a href="{{ $logoutUrl }}" class="flex w-full items-center justify-between gap-3 rounded-[1.4rem] px-4 py-3 text-left text-rose-600 transition-all duration-200 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10">
                             <span class="flex min-w-0 items-center gap-3">
@@ -240,152 +256,6 @@
                     </div>
                 @endif
 
-                @if($section === 'orders')
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-4 shadow-[0_24px_60px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Recent orders</p>
-                            <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $orders->count() }}</p>
-                        </div>
-                        <div class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-4 shadow-[0_24px_60px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Latest order</p>
-                            <p class="mt-3 text-sm font-semibold text-gray-950 dark:text-white">{{ $orders->first()?->order_code ?? 'No orders yet' }}</p>
-                        </div>
-                        <div class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-4 shadow-[0_24px_60px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Current focus</p>
-                            <p class="mt-3 text-sm font-semibold text-gray-950 dark:text-white">Track completed, processing, and payment states in one place</p>
-                        </div>
-                    </div>
-
-                    @if($orders->isEmpty())
-                        <div class="rounded-[2rem] border border-dashed border-black/15 bg-white/90 p-10 text-center shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
-                            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FCF9F4] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                                <i class="fa-solid fa-bag-shopping"></i>
-                            </div>
-                            <h2 class="mt-5 text-lg font-semibold text-gray-950 dark:text-white">No orders yet</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Your purchases will appear here once checkout and fulfillment start moving through the storefront.</p>
-                        </div>
-                    @else
-                        <div class="space-y-4">
-                            @foreach($orders as $order)
-                                @php
-                                    $orderStatusClasses = match ($order->status->value) {
-                                        0, 1 => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-                                        2, 4 => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-                                        3, 5, 6 => 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
-                                        default => 'bg-gray-500/10 text-gray-700 dark:text-gray-300',
-                                    };
-
-                                    $paymentStatusClasses = match ($order->payment_status?->value) {
-                                        1 => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-                                        0 => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-                                        default => 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
-                                    };
-                                @endphp
-
-                                <article class="rounded-[2rem] border border-black/8 bg-white/90 p-6 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
-                                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                                        <div class="space-y-3">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span class="rounded-full bg-black px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-gray-950">{{ $order->order_code }}</span>
-                                                <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $orderStatusClasses }}">{{ $order->status->label() }}</span>
-                                                <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $paymentStatusClasses }}">{{ $order->payment_status?->label() ?? 'Unknown' }}</span>
-                                            </div>
-
-                                            <div>
-                                                <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $order->payment_method?->label() ?? 'Payment' }} order</h2>
-                                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Placed on {{ $order->created_at?->format('d/m/Y H:i') ?? '--' }} with {{ $order->items_count }} item{{ $order->items_count === 1 ? '' : 's' }}.</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-gray-800/70 lg:min-w-44 lg:text-right">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Order total</div>
-                                            <div class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $order->total_price, 0, ',', '.') }} VND</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-6 space-y-4 border-t border-black/8 pt-6 dark:border-white/10">
-                                        @foreach($order->items as $item)
-                                            @php
-                                                $itemStatusClasses = match ($item->status?->value) {
-                                                    0, 1 => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-                                                    2, 4 => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-                                                    3, 5, 6 => 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
-                                                    default => 'bg-gray-500/10 text-gray-700 dark:text-gray-300',
-                                                };
-
-                                                $visibleKeys = $revealedKeys[$item->id] ?? [];
-                                                $canViewKeys = in_array($item->status, [
-                                                    \App\Enums\OrderStatus::Delivered,
-                                                    \App\Enums\OrderStatus::Disputing,
-                                                    \App\Enums\OrderStatus::Completed,
-                                                ], true);
-                                            @endphp
-
-                                            <div class="rounded-[1.6rem] border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
-                                                <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                                                    <div class="space-y-3">
-                                                        <div class="flex flex-wrap items-center gap-2">
-                                                            <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $itemStatusClasses }}">{{ $item->status?->label() ?? 'Unknown' }}</span>
-                                                            <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">Qty {{ $item->quantity }}</span>
-                                                            <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">{{ $item->keys_count }} key{{ $item->keys_count === 1 ? '' : 's' }}</span>
-                                                        </div>
-
-                                                        <div>
-                                                            <h3 class="text-base font-semibold text-gray-950 dark:text-white">{{ $item->product_name_snapshot }}</h3>
-                                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                                {{ $item->listing?->variant?->product?->name ?? 'Store item' }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="flex flex-col items-start gap-3 xl:items-end">
-                                                        <div class="text-left xl:text-right">
-                                                            <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Item subtotal</div>
-                                                            <div class="mt-1 text-base font-semibold text-gray-950 dark:text-white">{{ number_format((float) $item->subtotal, 0, ',', '.') }} VND</div>
-                                                        </div>
-
-                                                        <div class="flex flex-wrap gap-2">
-                                                            @if($item->keys_count > 0 && $canViewKeys)
-                                                                @if($visibleKeys !== [])
-                                                                    <button type="button" wire:click="hideOrderItemKeys({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/30 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/30 dark:hover:text-[#ff9c9c]">
-                                                                        Hide keys
-                                                                    </button>
-                                                                @else
-                                                                    <button type="button" wire:click="promptKeyReveal({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                                                        View key
-                                                                    </button>
-                                                                @endif
-                                                            @elseif($item->keys_count > 0)
-                                                                <span class="inline-flex items-center rounded-2xl border border-dashed border-black/15 px-4 py-2.5 text-sm font-medium text-gray-500 dark:border-white/10 dark:text-gray-400">Keys unlock after delivery or dispute handling</span>
-                                                            @else
-                                                                <span class="inline-flex items-center rounded-2xl border border-dashed border-black/15 px-4 py-2.5 text-sm font-medium text-gray-500 dark:border-white/10 dark:text-gray-400">No key attached yet</span>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                @if($visibleKeys !== [])
-                                                    <div class="mt-4 space-y-3 border-t border-black/8 pt-4 dark:border-white/10">
-                                                        <div class="rounded-2xl border border-amber-500/15 bg-amber-500/8 px-4 py-3 text-sm text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                                                            Stay on this screen while reviewing and activating your key. Do not leave the verification and usage flow midway so your purchase rights remain easier to protect.
-                                                        </div>
-
-                                                        <div class="space-y-2">
-                                                            @foreach($visibleKeys as $keyCode)
-                                                                <div class="overflow-x-auto rounded-2xl bg-gray-950 px-4 py-3 font-mono text-sm text-white">{{ $keyCode }}</div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    @endif
-                @endif
-
                 @if($section === 'security')
                     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                         <article class="rounded-[2rem] border border-black/8 bg-white/90 p-6 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
@@ -469,48 +339,5 @@
                 @endif
             </section>
         </div>
-
-        @if($keyAccessOrderItemId)
-            <div class="fixed inset-0 z-[80] flex items-center justify-center p-4">
-                <button type="button" wire:click="cancelKeyReveal" class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></button>
-
-                <div class="relative z-10 w-full max-w-lg rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Protected access</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Confirm password to view your key</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Before revealing a purchased key, re-enter your account password and read the warning below carefully.</p>
-                        </div>
-
-                        <button type="button" wire:click="cancelKeyReveal" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    <div class="mt-5 rounded-2xl border border-amber-500/15 bg-amber-500/8 px-4 py-4 text-sm leading-6 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                        Stay on the key viewing and activation screen while using the code. Avoid breaking the process halfway so your support and rights remain easier to verify if something goes wrong.
-                    </div>
-
-                    <form wire:submit="revealOrderItemKeys" class="mt-5 space-y-4">
-                        <div>
-                            <label for="key-access-password" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Account password</label>
-                            <input id="key-access-password" wire:model="keyAccessPassword" type="password" autofocus class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                            @error('keyAccessPassword')
-                                <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="flex flex-wrap justify-end gap-3">
-                            <button type="button" wire:click="cancelKeyReveal" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                                Cancel
-                            </button>
-                            <button type="submit" wire:loading.attr="disabled" wire:target="revealOrderItemKeys" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                Show key
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        @endif
     </div>
 </div>

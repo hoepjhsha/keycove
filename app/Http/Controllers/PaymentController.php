@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Abstracts\Controller;
 use App\Managers\PaymentManager;
+use App\Models\Order;
+use App\Services\Shop\PaymentSettlementService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -13,25 +15,13 @@ class PaymentController extends Controller
 {
     protected PaymentManager $paymentManager;
 
-    public function __construct(PaymentManager $paymentManager)
+    protected PaymentSettlementService $paymentSettlementService;
+
+    public function __construct(PaymentManager $paymentManager, PaymentSettlementService $paymentSettlementService)
     {
         $this->paymentManager = $paymentManager;
+        $this->paymentSettlementService = $paymentSettlementService;
     }
-
-    //    public function pay(Request $request)
-    //    {
-    //        $paymentData = [
-    //            'txn_ref' => uniqid('ORDER_'),
-    //            'amount' => 50000,
-    //            'order_info' => 'Thanh toan hoa don test',
-    //            'order_type' => 'other',
-    //            'locale' => 'vn',
-    //        ];
-    //
-    //        $url = $this->paymentManager->driver('vnpay')->createPayment($paymentData);
-    //
-    //        return redirect()->away($url);
-    //    }
 
     /**
      * Handle the return from VNPAY after payment is completed.
@@ -39,6 +29,14 @@ class PaymentController extends Controller
     public function vnpayReturn(Request $request): Factory|View|\Illuminate\View\View
     {
         $result = $this->paymentManager->driver('vnpay')->handleReturn($request->all());
+
+        if ($result['success']) {
+            $order = Order::query()->where('order_code', $result['order_id'])->first();
+
+            if ($order !== null) {
+                $this->paymentSettlementService->settlePaidOrder($order, $request->all());
+            }
+        }
 
         return view('payments.return', [
             'success'       => $result['success'],

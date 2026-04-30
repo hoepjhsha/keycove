@@ -19,6 +19,7 @@ class OrderItem extends Model
         'order_id',
         'listing_id',
         'seller_id',
+        'order_item_code',
         'product_name_snapshot',
         'variant_snapshot',
         'quantity',
@@ -33,6 +34,7 @@ class OrderItem extends Model
     protected function casts(): array
     {
         return [
+            'order_item_code'     => 'string',
             'variant_snapshot'    => 'array',
             'quantity'            => 'integer',
             'unit_price'          => 'decimal:2',

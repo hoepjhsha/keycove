@@ -72,6 +72,11 @@ class Order extends Model
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'order_code';
+    }
+
     protected function status(): Attribute
     {
         return Attribute::make(

@@ -127,6 +127,7 @@ class ProductIndex extends Component
 
         $this->dispatch('shop:cart:add', item: [
             'id'         => $cartItem->id,
+            'code'       => $cartItem->cart_item_code,
             'listing_id' => $listing->id,
             'title'      => $title,
             'subtitle'   => collect([$product?->name, $listing->variant?->edition])->filter()->implode(' • '),
