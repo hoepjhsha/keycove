@@ -20,6 +20,7 @@ use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
+use App\Models\SystemConfig;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
@@ -100,7 +101,9 @@ class CheckoutService
                 abort_if($keys->count() < $quantity, 422, 'One of the cart items does not have enough available keys.');
 
                 $subtotal = (float) $listing->price * $quantity;
-                $sellerAmount = $subtotal;
+                $commissionRate = $this->commissionRate();
+                $platformFee = round($subtotal * ($commissionRate / 100), 2);
+                $sellerAmount = round($subtotal - $platformFee, 2);
 
                 $orderItemAttributes = [
                     'order_id'              => $order->id,
@@ -118,7 +121,7 @@ class CheckoutService
                     'quantity'      => $quantity,
                     'unit_price'    => $listing->price,
                     'subtotal'      => $subtotal,
-                    'platform_fee'  => 0,
+                    'platform_fee'  => $platformFee,
                     'seller_amount' => $sellerAmount,
                     'status'        => OrderStatus::PendingPayment,
                 ];
@@ -197,6 +200,15 @@ class CheckoutService
     protected function generateOrderItemCode(): string
     {
         return 'OI-'.now()->format('Ymd').'-'.Str::upper(Str::random(6));
+    }
+
+    protected function commissionRate(): float
+    {
+        $configuredValue = SystemConfig::query()
+            ->where('key', 'commission_rate')
+            ->value('value');
+
+        return max(0.0, (float) ($configuredValue ?: 10));
     }
 
     protected function resolveWallet(ProductListing $listing): Wallet

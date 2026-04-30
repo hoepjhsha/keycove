@@ -7,10 +7,12 @@ namespace App\Livewire\Shop\Seller;
 use App\Enums\ComplaintStatus;
 use App\Enums\GeneralStatus;
 use App\Enums\KycStatus;
+use App\Enums\OrderStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\UserRole;
 use App\Models\Complaint;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
@@ -52,6 +54,7 @@ class Dashboard extends Component
         $productsQuery = Product::query()->where('submitted_by_seller_id', $seller->id);
         $listingsQuery = ProductListing::query()->where('seller_id', $seller->id);
         $complaints = $this->complaints($seller);
+        $financialSummary = $this->financialSummary($seller);
 
         return [
             'products'         => (clone $productsQuery)->count(),
@@ -62,7 +65,30 @@ class Dashboard extends Component
             'activeComplaints' => $complaints->whereIn('status', [ComplaintStatus::Open, ComplaintStatus::InProcess, ComplaintStatus::Escalated])->count(),
             'walletBalance'    => (float) ($seller->wallet?->balance ?? 0),
             'walletHolding'    => (float) ($seller->wallet?->holding ?? 0),
+            'sellerEarnings'   => $financialSummary['seller_earnings'],
+            'platformFee'      => $financialSummary['platform_fee'],
             'availableKeys'    => $this->availableKeys($seller),
+        ];
+    }
+
+    /**
+     * @return array{seller_earnings: float, platform_fee: float}
+     */
+    protected function financialSummary(Seller $seller): array
+    {
+        $summary = OrderItem::query()
+            ->where('seller_id', $seller->id)
+            ->whereIn('status', [
+                OrderStatus::Delivered->value,
+                OrderStatus::Disputing->value,
+                OrderStatus::Completed->value,
+            ])
+            ->selectRaw('COALESCE(SUM(seller_amount), 0) as seller_earnings, COALESCE(SUM(platform_fee), 0) as platform_fee')
+            ->first();
+
+        return [
+            'seller_earnings' => (float) ($summary?->seller_earnings ?? 0),
+            'platform_fee'    => (float) ($summary?->platform_fee ?? 0),
         ];
     }
 

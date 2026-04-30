@@ -6,14 +6,20 @@ namespace App\Livewire\Admin\Table\Escrow;
 
 use App\Enums\AuditEvent;
 use App\Enums\EscrowStatus;
+use App\Enums\TransactionBalanceType;
+use App\Enums\TransactionStatus;
+use App\Enums\TransactionType;
+use App\Enums\WalletType;
 use App\Exceptions\Admin\EscrowException;
 use App\Models\AuditLog;
 use App\Models\Escrow;
+use App\Models\Wallet;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -233,6 +239,15 @@ final class EscrowTable extends PowerGridComponent
                     throw EscrowException::statusChangedDuringProcess();
                 }
 
+                $wallet = Wallet::firstOrCreate(
+                    ['seller_id' => $escrow->seller_id],
+                    ['type' => WalletType::Seller, 'code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
+                );
+
+                $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+                $amount = (float) $escrow->amount;
+
                 $oldValues = [
                     'status'     => $escrow->status->name,
                     'updated_at' => $escrow->updated_at->toDateTimeString(),
@@ -240,6 +255,28 @@ final class EscrowTable extends PowerGridComponent
 
                 $escrow->status = EscrowStatus::Released;
                 $escrow->save();
+
+                $wallet->forceFill([
+                    'holding' => round((float) $wallet->holding - $amount, 2),
+                    'balance' => round((float) $wallet->balance + $amount, 2),
+                ])->save();
+
+                $wallet->transactions()->create([
+                    'order_id'     => $escrow->orderItem?->order_id,
+                    'source_type'  => Escrow::class,
+                    'source_id'    => $escrow->id,
+                    'type'         => TransactionType::EscrowRelease,
+                    'balance_type' => TransactionBalanceType::Available,
+                    'payment_info' => [
+                        'escrow_id' => $escrow->id,
+                        'source'    => 'admin_release',
+                    ],
+                    'amount'   => $amount,
+                    'status'   => TransactionStatus::Completed,
+                    'metadata' => [
+                        'escrow_id' => $escrow->id,
+                    ],
+                ]);
 
                 $newValues = [
                     'status'     => $escrow->status->name,

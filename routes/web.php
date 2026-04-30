@@ -12,6 +12,7 @@ use App\Livewire\Shop\Seller\Apply;
 use App\Livewire\Shop\Seller\ComplaintIndex as SellerComplaintIndex;
 use App\Livewire\Shop\Seller\Dashboard;
 use App\Livewire\Shop\Seller\SellerListings;
+use App\Livewire\Shop\Seller\Withdrawals;
 use App\Livewire\Shop\SellerBrowse\SellerIndex;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +70,10 @@ Route::livewire('/seller/complaints/{complaint}', ComplaintThread::class)
 Route::livewire('/seller/listings', SellerListings::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
     ->name('seller.listings.index');
+
+Route::livewire('/seller/withdrawals', Withdrawals::class)
+    ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
+    ->name('seller.withdrawals.index');
 
 Route::get('/sample', function () {
     return view('sample');

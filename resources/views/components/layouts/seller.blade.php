@@ -23,6 +23,10 @@
         ? route('seller.complaints.index')
         : url('/seller/complaints');
 
+    $withdrawalsUrl = \Illuminate\Support\Facades\Route::has('seller.withdrawals.index')
+        ? route('seller.withdrawals.index')
+        : url('/seller/withdrawals');
+
     $shopHomeUrl = \Illuminate\Support\Facades\Route::has('app.shop.index')
         ? route('app.shop.index')
         : url('/');
@@ -36,6 +40,7 @@
         ['label' => 'Application', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
         ['label' => 'Listings', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
         ['label' => 'Complaints', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
+        ['label' => 'Withdrawals', 'url' => $withdrawalsUrl, 'section' => 'withdrawals', 'icon' => 'fa-solid fa-money-bill-transfer'],
         ['label' => 'Back to shop', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
     ];
 @endphp

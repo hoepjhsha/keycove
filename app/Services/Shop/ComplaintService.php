@@ -7,12 +7,18 @@ namespace App\Services\Shop;
 use App\Enums\ComplaintStatus;
 use App\Enums\EscrowStatus;
 use App\Enums\OrderStatus;
+use App\Enums\TransactionBalanceType;
+use App\Enums\TransactionStatus;
+use App\Enums\TransactionType;
 use App\Enums\UserRole;
+use App\Enums\WalletType;
 use App\Events\ComplaintThreadUpdated;
 use App\Models\Complaint;
 use App\Models\ComplaintMessage;
+use App\Models\Escrow;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Notifications\ComplaintActivityNotification;
 use App\Utilities\StorageUtility;
 use Illuminate\Support\Carbon;
@@ -102,7 +108,7 @@ class ComplaintService
     {
         $complaint->loadMissing(['orderItem.order.buyer', 'orderItem.seller.user', 'orderItem.escrow']);
 
-        $resolvedComplaint = DB::transaction(function () use ($complaint, $actor, $resolutionNote, $status, $orderStatus): Complaint {
+        $resolvedComplaint = DB::transaction(function () use ($complaint, $actor, $resolutionNote, $status, $orderStatus, $resolvedAt): Complaint {
             $complaint->forceFill([
                 'status'          => $status,
                 'resolved_by'     => $actor->id,
@@ -117,6 +123,64 @@ class ComplaintService
             $complaint->orderItem?->escrow?->forceFill([
                 'status' => $status === ComplaintStatus::ApprovedRefund ? EscrowStatus::Refunded : EscrowStatus::Released,
             ])->save();
+
+            if ($complaint->orderItem?->seller_id !== null && $complaint->orderItem?->escrow !== null) {
+                $wallet = Wallet::firstOrCreate(
+                    ['seller_id' => $complaint->orderItem->seller_id],
+                    ['type' => WalletType::Seller, 'code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
+                );
+
+                $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+                $amount = (float) $complaint->orderItem->escrow->amount;
+
+                if ($status === ComplaintStatus::ApprovedRefund) {
+                    $wallet->forceFill([
+                        'holding' => round((float) $wallet->holding - $amount, 2),
+                    ])->save();
+
+                    $wallet->transactions()->create([
+                        'order_id'     => $complaint->orderItem->order_id,
+                        'source_type'  => Escrow::class,
+                        'source_id'    => $complaint->orderItem->escrow->id,
+                        'type'         => TransactionType::Refund,
+                        'balance_type' => TransactionBalanceType::Holding,
+                        'payment_info' => [
+                            'complaint_code' => $complaint->complaint_code,
+                            'resolution'     => 'refund',
+                        ],
+                        'amount'   => -$amount,
+                        'status'   => TransactionStatus::Completed,
+                        'metadata' => [
+                            'complaint_id'  => $complaint->id,
+                            'order_item_id' => $complaint->orderItem->id,
+                        ],
+                    ]);
+                } else {
+                    $wallet->forceFill([
+                        'holding' => round((float) $wallet->holding - $amount, 2),
+                        'balance' => round((float) $wallet->balance + $amount, 2),
+                    ])->save();
+
+                    $wallet->transactions()->create([
+                        'order_id'     => $complaint->orderItem->order_id,
+                        'source_type'  => Escrow::class,
+                        'source_id'    => $complaint->orderItem->escrow->id,
+                        'type'         => TransactionType::EscrowRelease,
+                        'balance_type' => TransactionBalanceType::Available,
+                        'payment_info' => [
+                            'complaint_code' => $complaint->complaint_code,
+                            'resolution'     => 'release',
+                        ],
+                        'amount'   => $amount,
+                        'status'   => TransactionStatus::Completed,
+                        'metadata' => [
+                            'complaint_id'  => $complaint->id,
+                            'order_item_id' => $complaint->orderItem->id,
+                        ],
+                    ]);
+                }
+            }
 
             return $complaint;
         });
