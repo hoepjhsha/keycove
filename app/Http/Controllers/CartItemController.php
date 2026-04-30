@@ -37,8 +37,9 @@ class CartItemController extends Controller
         $cartItem->delete();
 
         return response()->json([
-            'item_id' => $itemId,
-            'count'   => $this->cartCount($cart),
+            'item_id'   => $itemId,
+            'item_code' => $cartItem->cart_item_code,
+            'count'     => $this->cartCount($cart),
         ]);
     }
 
