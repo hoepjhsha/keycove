@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('complaints', function (Blueprint $table) {
             $table->id();
+            $table->string('complaint_code', 255)->nullable()->unique();
             $table->foreignId('order_item_id')->unique()->constrained()->cascadeOnDelete();
             $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('reason');

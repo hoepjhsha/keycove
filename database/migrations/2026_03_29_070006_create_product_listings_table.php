@@ -17,6 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('variant_id')->constrained('product_variants')->cascadeOnDelete();
             $table->foreignId('seller_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('display_name', 255)->nullable();
+            $table->string('slug', 255)->nullable();
+            $table->unique('slug');
             $table->decimal('price', 15, 2);
             $table->unsignedInteger('stock_count')->default(0);
             $table->tinyInteger('status')->default(0);

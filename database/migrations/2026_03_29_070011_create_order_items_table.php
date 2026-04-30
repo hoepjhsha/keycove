@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
+            $table->string('order_item_code', 255)->nullable()->unique();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('listing_id')->constrained('product_listings')->restrictOnDelete();
             $table->foreignId('seller_id')->nullable()->constrained()->nullOnDelete();
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->decimal('platform_fee', 15, 2)->default(0);
             $table->decimal('seller_amount', 15, 2)->default(0);
             $table->tinyInteger('status')->default(0);
+            $table->timestamp('buyer_key_viewed_at')->nullable();
             $table->timestamps();
         });
     }
