@@ -157,6 +157,15 @@ it('shows reviews for the current product on the detail page', function (): void
         'status'       => ProductListingStatus::Active,
     ]);
 
+    $sameProductOtherListing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => null,
+        'display_name' => 'Same Product Other Bundle',
+        'price'        => 88888,
+        'stock_count'  => 2,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
     $reviewOneItem = OrderItem::query()->create([
         'order_id'              => Order::factory()->forBuyer($buyerOne)->create(['payment_status' => PaymentStatus::Completed])->id,
         'listing_id'            => $listing->id,
@@ -199,6 +208,20 @@ it('shows reviews for the current product on the detail page', function (): void
         'status'                => OrderStatus::Completed,
     ]);
 
+    $sameProductOtherItem = OrderItem::query()->create([
+        'order_id'              => Order::factory()->forBuyer(User::factory()->create())->create(['payment_status' => PaymentStatus::Completed])->id,
+        'listing_id'            => $sameProductOtherListing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Same Product Other Key',
+        'variant_snapshot'      => ['variant_id' => $variant->id],
+        'quantity'              => 1,
+        'unit_price'            => $sameProductOtherListing->price,
+        'subtotal'              => $sameProductOtherListing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
     Review::query()->create([
         'user_id'       => $buyerOne->id,
         'order_item_id' => $reviewOneItem->id,
@@ -223,6 +246,14 @@ it('shows reviews for the current product on the detail page', function (): void
         'media'         => [],
     ]);
 
+    Review::query()->create([
+        'user_id'       => $sameProductOtherItem->order->buyer_id,
+        'order_item_id' => $sameProductOtherItem->id,
+        'rating'        => 2,
+        'comment'       => 'Review for another listing of the same product.',
+        'media'         => [],
+    ]);
+
     $response = $this->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]));
 
     $response->assertOk();
@@ -232,6 +263,7 @@ it('shows reviews for the current product on the detail page', function (): void
     $response->assertSee('Perfect delivery.');
     $response->assertSee('Worked as expected.');
     $response->assertDontSee('Unrelated product review.');
+    $response->assertDontSee('Review for another listing of the same product.');
 });
 
 it('allows signed in users to add the detail listing to cart', function (): void {

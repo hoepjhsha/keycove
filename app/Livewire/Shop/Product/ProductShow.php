@@ -91,8 +91,8 @@ class ProductShow extends Component
     {
         $reviewQuery = Review::query()
             ->with(['user'])
-            ->whereHas('orderItem.listing.variant', function (Builder $query): void {
-                $query->where('product_id', $this->product->id);
+            ->whereHas('orderItem', function (Builder $query): void {
+                $query->where('listing_id', $this->listing->id);
             });
 
         $productReviewCount = (clone $reviewQuery)->count();
