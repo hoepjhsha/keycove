@@ -70,6 +70,19 @@ services:
       - keycove_network
     entrypoint: ["sh", "-c", "npm install && npm run dev -- --host"]
 
+  reverb:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    container_name: keycove_reverb
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:cached
+    networks:
+      - keycove_network
+    depends_on:
+      - redis
+
 networks:
   keycove_network:
     driver: bridge
