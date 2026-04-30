@@ -6,6 +6,7 @@ use App\Enums\KycStatus;
 use App\Enums\UserRole;
 use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Shop\Seller\Apply;
+use App\Livewire\Shop\Seller\Dashboard;
 use App\Models\Seller;
 use App\Models\User;
 use App\Models\Wallet;
@@ -80,4 +81,45 @@ test('admin approval promotes the user to seller role', function (): void {
 
     expect($seller->fresh()->kyc_status)->toBe(KycStatus::Approved);
     expect($user->fresh()->role)->toBe(UserRole::Seller);
+});
+
+test('approved sellers can access the seller dashboard', function (): void {
+    $user = User::factory()->seller()->create();
+
+    Seller::query()->create([
+        'user_id'             => $user->id,
+        'shop_name'           => 'KeyCove Store',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/seller/dashboard')
+        ->assertOk()
+        ->assertSeeLivewire(Dashboard::class)
+        ->assertSee('Seller Portal')
+        ->assertSee('Recent products')
+        ->assertSee('Recent listings');
+});
+
+test('pending sellers are redirected from the seller dashboard to the application', function (): void {
+    $user = User::factory()->create();
+
+    Seller::query()->create([
+        'user_id'             => $user->id,
+        'shop_name'           => 'KeyCove Store',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Pending,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/seller/dashboard')
+        ->assertRedirect('/seller/apply')
+        ->assertSessionHas('seller-status', 'Complete and submit your seller application first.');
 });

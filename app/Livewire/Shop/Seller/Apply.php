@@ -153,10 +153,16 @@ class Apply extends Component
             ],
         };
 
-        return view('livewire.shop.seller.apply', [
+        return view('pages.shop.seller.apply', [
             'user'        => $user,
+            'seller'      => $this->seller,
             'portalState' => $portalState,
-        ])->layout('components.layouts.shop');
+        ])->layout('components.layouts.seller', [
+            'title'         => 'Seller Application',
+            'user'          => $user,
+            'seller'        => $this->seller,
+            'activeSection' => 'application',
+        ]);
     }
 
     protected function syncForm(): void

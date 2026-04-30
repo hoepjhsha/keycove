@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\ComplaintStatus;
 use App\Http\Middleware\EnsureSellerEmailVerified;
+use App\Http\Middleware\EnsureSellerPortalApproved;
 use App\Models\Complaint;
 use App\Utilities\StorageUtility;
 use Illuminate\Foundation\AliasLoader;
@@ -31,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
         Livewire::addPersistentMiddleware([
             EnsureSellerEmailVerified::class,
+            EnsureSellerPortalApproved::class,
         ]);
 
         View::composer('components.partials.dashboard.sidebar', function ($view): void {
