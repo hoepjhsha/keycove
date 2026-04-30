@@ -12,6 +12,7 @@ use App\Models\Complaint;
 use App\Models\ComplaintMessage;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Review;
 use App\Models\User;
 use App\Services\Shop\PendingOrderService;
 use App\Utilities\StorageUtility;
@@ -37,6 +38,17 @@ class MyLibrary extends Component
     public ?int $viewingOrderItemId = null;
 
     public ?int $confirmReceivedOrderItemId = null;
+
+    public ?int $reviewOrderItemId = null;
+
+    public string $reviewRating = '5';
+
+    public string $reviewComment = '';
+
+    /**
+     * @var array<int, UploadedFile>
+     */
+    public array $reviewMedia = [];
 
     public string $complaintReason = '';
 
@@ -219,6 +231,94 @@ class MyLibrary extends Component
         session()->flash('library-status', 'The order item has been marked as completed.');
     }
 
+    public function openReviewForm(int $orderItemId): void
+    {
+        $orderItem = $this->resolveOwnedOrderItem($orderItemId);
+
+        if ($orderItem->status !== OrderStatus::Completed) {
+            session()->flash('library-status', 'Only completed items can be reviewed.');
+
+            return;
+        }
+
+        if ($orderItem->review !== null) {
+            session()->flash('library-status', 'You have already reviewed this item.');
+
+            return;
+        }
+
+        $this->reviewOrderItemId = $orderItem->id;
+        $this->reviewRating = '5';
+        $this->reviewComment = '';
+        $this->reviewMedia = [];
+        $this->resetValidation('reviewRating');
+        $this->resetValidation('reviewComment');
+        $this->resetValidation('reviewMedia');
+    }
+
+    public function cancelReviewForm(): void
+    {
+        $this->reviewOrderItemId = null;
+        $this->reviewRating = '5';
+        $this->reviewComment = '';
+        $this->reviewMedia = [];
+        $this->resetValidation('reviewRating');
+        $this->resetValidation('reviewComment');
+        $this->resetValidation('reviewMedia');
+    }
+
+    public function submitReview(): void
+    {
+        $this->validate([
+            'reviewRating'  => ['required', 'integer', 'between:1,5'],
+            'reviewComment' => ['nullable', 'string', 'max:2000'],
+            'reviewMedia'   => ['array', 'max:5'],
+            'reviewMedia.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:12288'],
+        ]);
+
+        if ($this->reviewOrderItemId === null) {
+            return;
+        }
+
+        $user = $this->resolveUser();
+
+        $created = DB::transaction(function () use ($user): bool {
+            $item = OrderItem::query()
+                ->whereKey($this->reviewOrderItemId)
+                ->whereHas('order', function ($query) use ($user): void {
+                    $query->where('buyer_id', $user->id);
+                })
+                ->where('status', OrderStatus::Completed->value)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($item->review()->exists()) {
+                return false;
+            }
+
+            Review::create([
+                'user_id'       => $user->id,
+                'order_item_id' => $item->id,
+                'rating'        => (int) $this->reviewRating,
+                'comment'       => filled(trim($this->reviewComment)) ? trim($this->reviewComment) : null,
+                'media'         => $this->storeUploadedFiles($this->reviewMedia, 'reviews/media'),
+            ]);
+
+            return true;
+        }, attempts: 3);
+
+        if (! $created) {
+            $this->cancelReviewForm();
+            session()->flash('library-status', 'You have already reviewed this item.');
+
+            return;
+        }
+
+        $this->cancelReviewForm();
+
+        session()->flash('library-status', 'Your review has been submitted.');
+    }
+
     public function openConfirmReceivedModal(int $orderItemId): void
     {
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
@@ -374,7 +474,7 @@ class MyLibrary extends Component
             ->with([
                 'items' => fn ($query) => $query
                     ->select(['id', 'order_id', 'listing_id', 'order_item_code', 'product_name_snapshot', 'quantity', 'unit_price', 'subtotal', 'status', 'buyer_key_viewed_at'])
-                    ->with(['listing.variant.product', 'listing.variant.region', 'listing.variant.platform', 'listing.variant.operatingSystem', 'complaint.messages.sender', 'complaint.resolvedBy'])
+                    ->with(['listing.variant.product', 'listing.variant.region', 'listing.variant.platform', 'listing.variant.operatingSystem', 'complaint.messages.sender', 'complaint.resolvedBy', 'review'])
                     ->withCount('keys')
                     ->orderBy('id'),
             ])
@@ -397,6 +497,10 @@ class MyLibrary extends Component
 
         $selectedComplaint = $selectedComplaintOrderItem?->complaint;
 
+        $selectedReviewMedia = $selectedOrderItem?->review !== null
+            ? $this->resolveStoredPaths($selectedOrderItem->review->media)
+            : [];
+
         $selectedConfirmReceivedOrderItem = $this->confirmReceivedOrderItemId !== null
             ? $orders->flatMap(fn (Order $order): Collection => $order->items)->firstWhere('id', $this->confirmReceivedOrderItemId)
             : null;
@@ -412,6 +516,7 @@ class MyLibrary extends Component
             'selectedComplaint'                => $selectedComplaint,
             'selectedComplaintEvidence'        => $this->resolveStoredPaths($selectedComplaint?->evidence),
             'selectedComplaintMessages'        => $this->resolveComplaintMessages($selectedComplaint),
+            'selectedReviewMedia'              => $selectedReviewMedia,
             'selectedConfirmReceivedOrderItem' => $selectedConfirmReceivedOrderItem,
         ])->layout('components.layouts.shop');
     }
@@ -494,7 +599,7 @@ class MyLibrary extends Component
             ->whereHas('order', function ($query): void {
                 $query->where('buyer_id', $this->resolveUser()->id);
             })
-            ->with(['complaint'])
+            ->with(['complaint', 'review'])
             ->firstOrFail();
     }
 

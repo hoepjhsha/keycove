@@ -18,6 +18,7 @@ use App\Models\ProductKey;
 use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
+use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -205,9 +206,109 @@ test('authenticated user can confirm received through a modal', function (): voi
         ->assertSet('confirmReceivedOrderItemId', $orderItem->id)
         ->assertSee('Mark this order as completed?')
         ->call('confirmReceived', $orderItem->id)
-        ->assertSet('confirmReceivedOrderItemId', null);
+        ->assertSet('confirmReceivedOrderItemId', null)
+        ->assertSee('Write review');
 
     expect($orderItem->refresh()->status)->toBe(OrderStatus::Completed);
+});
+
+test('authenticated user can leave a review for a completed order item', function (): void {
+    $user = User::factory()->create();
+    $order = Order::factory()->forBuyer($user)->create([
+        'payment_status' => PaymentStatus::Completed,
+    ]);
+    $listing = createAdminListingForLibrary();
+
+    Storage::fake(config('filesystems.public_disk'));
+
+    $reviewImage = UploadedFile::fake()->image('review-proof.png');
+    $reviewDocument = UploadedFile::fake()->create('invoice.pdf', 120, 'application/pdf');
+
+    $orderItem = OrderItem::query()->create([
+        'order_id'              => $order->id,
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Reviewed Game Key',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => $listing->price,
+        'subtotal'              => $listing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->assertSee('Write review')
+        ->call('openReviewForm', $orderItem->id)
+        ->assertSet('reviewOrderItemId', $orderItem->id)
+        ->set('reviewRating', '4')
+        ->set('reviewComment', 'Fast delivery and the key worked right away.')
+        ->set('reviewMedia', [$reviewImage, $reviewDocument])
+        ->call('submitReview')
+        ->assertHasNoErrors()
+        ->assertSet('reviewOrderItemId', null)
+        ->assertSee('Your review has been submitted.')
+        ->assertSee('Reviewed');
+
+    $review = Review::query()->where('order_item_id', $orderItem->id)->first();
+
+    expect($review)->not->toBeNull();
+    expect($review?->rating)->toBe(4);
+    expect($review?->comment)->toBe('Fast delivery and the key worked right away.');
+    expect($review?->media)->toHaveCount(2);
+    expect($orderItem->refresh()->review)->not->toBeNull();
+
+    foreach ($review?->media ?? [] as $path) {
+        Storage::disk(config('filesystems.public_disk'))->assertExists($path);
+    }
+});
+
+test('authenticated user cannot submit a second review for the same order item', function (): void {
+    $user = User::factory()->create();
+    $order = Order::factory()->forBuyer($user)->create([
+        'payment_status' => PaymentStatus::Completed,
+    ]);
+    $listing = createAdminListingForLibrary();
+
+    $orderItem = OrderItem::query()->create([
+        'order_id'              => $order->id,
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Duplicate Review Key',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => $listing->price,
+        'subtotal'              => $listing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->call('openReviewForm', $orderItem->id)
+        ->set('reviewRating', '5')
+        ->set('reviewComment', 'Great purchase.')
+        ->call('submitReview')
+        ->assertHasNoErrors()
+        ->assertSee('Your review has been submitted.');
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->set('reviewOrderItemId', $orderItem->id)
+        ->set('reviewRating', '1')
+        ->set('reviewComment', 'Trying to edit the review.')
+        ->call('submitReview')
+        ->assertHasNoErrors()
+        ->assertSee('You have already reviewed this item.');
+
+    $reviews = Review::query()->where('order_item_id', $orderItem->id)->get();
+
+    expect($reviews)->toHaveCount(1);
+    expect($reviews->first()->rating)->toBe(5);
+    expect($reviews->first()->comment)->toBe('Great purchase.');
 });
 
 test('authenticated user can view and reply to an existing complaint thread', function (): void {

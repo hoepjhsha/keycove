@@ -210,6 +210,18 @@
                                                     </button>
                                                 @endif
                                             @endif
+
+                                            @if($item->status === \App\Enums\OrderStatus::Completed)
+                                                @if($item->review)
+                                                    <span class="inline-flex items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
+                                                        Reviewed
+                                                    </span>
+                                                @else
+                                                    <button type="button" wire:click="openReviewForm({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/30 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/30 dark:hover:text-emerald-300">
+                                                        Write review
+                                                    </button>
+                                                @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -305,6 +317,81 @@
                             <p class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $selectedOrderItem->subtotal, 0, ',', '.') }} VND</p>
                         </div>
                     </div>
+
+                    @if($selectedOrderItem->review)
+                        <div class="mt-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/8 p-4 dark:border-emerald-400/20 dark:bg-emerald-400/10">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Your review</p>
+                                    <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->review->rating }}/5</p>
+                                </div>
+                                <div class="flex items-center gap-1 text-amber-400">
+                                    @for($star = 1; $star <= (int) $selectedOrderItem->review->rating; $star++)
+                                        <i class="fa-solid fa-star"></i>
+                                    @endfor
+                                </div>
+                            </div>
+
+                            @if(filled($selectedOrderItem->review->comment))
+                                <p class="mt-3 whitespace-pre-line text-sm leading-6 text-emerald-800 dark:text-emerald-100">{{ $selectedOrderItem->review->comment }}</p>
+                            @endif
+
+                            @if(($selectedReviewMedia ?? []) !== [])
+                                <div x-data="{ previewUrl: null }" class="mt-4 space-y-2 border-t border-emerald-500/15 pt-4 dark:border-emerald-400/20">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Attached media</p>
+                                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                        @foreach($selectedReviewMedia as $media)
+                                            @php
+                                                $extension = strtolower(pathinfo($media['label'], PATHINFO_EXTENSION));
+                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'], true);
+                                                $isPdf = $extension === 'pdf';
+                                            @endphp
+
+                                            @if($media['url'] && $isImage)
+                                                <button type="button" x-on:click="previewUrl = @js($media['url'])" class="group overflow-hidden rounded-xl border border-emerald-500/15 bg-white shadow-sm transition hover:border-emerald-500/30 hover:shadow-md dark:border-emerald-400/20 dark:bg-gray-950">
+                                                    <div class="aspect-[4/3] bg-gray-100 dark:bg-gray-900">
+                                                        <img src="{{ $media['url'] }}" alt="" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]">
+                                                    </div>
+                                                </button>
+                                            @elseif($media['url'] && $isPdf)
+                                                <a href="{{ $media['url'] }}" target="_blank" rel="noopener noreferrer" class="overflow-hidden rounded-xl border border-emerald-500/15 bg-white shadow-sm transition hover:border-emerald-500/30 hover:shadow-md dark:border-emerald-400/20 dark:bg-gray-950">
+                                                    <div class="flex items-center justify-center border-b border-emerald-500/15 bg-emerald-500/8 px-3 py-3 dark:border-emerald-400/20 dark:bg-emerald-400/10">
+                                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-300">
+                                                            <i class="fa-solid fa-file-pdf"></i>
+                                                        </div>
+                                                    </div>
+                                                    <object data="{{ $media['url'] }}" type="application/pdf" class="h-64 w-full">
+                                                        <div class="p-3 text-sm text-gray-500 dark:text-gray-400">PDF preview unavailable.</div>
+                                                    </object>
+                                                </a>
+                                            @elseif($media['url'])
+                                                <a href="{{ $media['url'] }}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-emerald-500/15 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:border-emerald-500/30 hover:text-emerald-600 dark:border-emerald-400/20 dark:bg-gray-950 dark:text-gray-300 dark:hover:border-emerald-400/30 dark:hover:text-emerald-300">
+                                                    {{ $media['label'] }}
+                                                </a>
+                                            @else
+                                                <div class="rounded-xl border border-emerald-500/15 bg-white px-3 py-2 text-sm text-gray-700 dark:border-emerald-400/20 dark:bg-gray-950 dark:text-gray-300">
+                                                    {{ $media['label'] }}
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+
+                                    <div
+                                        x-cloak
+                                        x-show="previewUrl"
+                                        x-transition.opacity
+                                        x-on:click.self="previewUrl = null"
+                                        class="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4"
+                                    >
+                                        <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Close preview"></button>
+                                        <div class="relative z-10 max-h-[90vh] max-w-[92vw] overflow-hidden rounded-2xl bg-black shadow-2xl">
+                                            <img :src="previewUrl" alt="" class="max-h-[90vh] max-w-[92vw] object-contain">
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         @endif
@@ -506,6 +593,71 @@
                             Yes, confirm received
                         </button>
                     </div>
+                </div>
+            </div>
+        @endif
+
+        @if($reviewOrderItemId)
+            <div class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+                <button type="button" wire:click="cancelReviewForm" class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></button>
+
+                <div class="relative z-10 w-full max-w-xl rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Review</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Share your experience</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Your review helps other buyers understand the purchase quality.</p>
+                        </div>
+
+                        <button type="button" wire:click="cancelReviewForm" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit="submitReview" class="mt-6 space-y-4">
+                        <div>
+                            <label for="library-review-rating" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Rating</label>
+                            <select id="library-review-rating" wire:model="reviewRating" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Poor</option>
+                                <option value="1">1 - Bad</option>
+                            </select>
+                            @error('reviewRating')
+                                <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="library-review-comment" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Comment</label>
+                            <textarea id="library-review-comment" wire:model="reviewComment" rows="4" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Share what you liked or what could be better..."></textarea>
+                            @error('reviewComment')
+                                <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="library-review-media" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Media</label>
+                            <input id="library-review-media" wire:model="reviewMedia" type="file" multiple accept="image/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Optional. Up to 5 files.</p>
+                            @error('reviewMedia')
+                                <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                            @enderror
+                            @error('reviewMedia.*')
+                                <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="flex flex-wrap justify-end gap-3">
+                            <button type="button" wire:click="cancelReviewForm" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/25 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/25 dark:hover:text-emerald-300">
+                                Cancel
+                            </button>
+                            <button type="submit" wire:loading.attr="disabled" wire:target="submitReview" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-emerald-500 dark:hover:text-white">
+                                Submit review
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         @endif

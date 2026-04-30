@@ -11,9 +11,11 @@ use App\Enums\ProductVariantStatus;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\ProductListing;
+use App\Models\Review;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -87,6 +89,36 @@ class ProductShow extends Component
 
     public function render(): View
     {
+        $reviewQuery = Review::query()
+            ->with(['user'])
+            ->whereHas('orderItem.listing.variant', function (Builder $query): void {
+                $query->where('product_id', $this->product->id);
+            });
+
+        $productReviewCount = (clone $reviewQuery)->count();
+        $productReviewAverage = (float) ((clone $reviewQuery)->avg('rating') ?? 0);
+        $productReviews = (clone $reviewQuery)
+            ->latest('reviews.created_at')
+            ->limit(8)
+            ->get()
+            ->map(function (Review $review): array {
+                return [
+                    'id'         => $review->id,
+                    'user_name'  => $review->user?->username ?? 'Buyer',
+                    'rating'     => $review->rating,
+                    'comment'    => $review->comment,
+                    'created_at' => $review->created_at?->format('d/m/Y H:i'),
+                    'media'      => collect($review->media ?? [])
+                        ->filter(fn (mixed $path): bool => is_string($path) && $path !== '')
+                        ->map(fn (string $path): array => [
+                            'label' => Str::afterLast($path, '/'),
+                            'url'   => StorageUtility::getUrl($path),
+                        ])
+                        ->values()
+                        ->all(),
+                ];
+            });
+
         $relatedListings = ProductListing::query()
             ->select('product_listings.*')
             ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
@@ -105,9 +137,12 @@ class ProductShow extends Component
             ->get();
 
         return view('pages.shop.product-show', [
-            'relatedListings' => $relatedListings,
-            'displayTitle'    => $this->listing->display_name ?: $this->product->name,
-            'productImage'    => $this->product->image_thumbnail_path ? StorageUtility::getUrl($this->product->image_thumbnail_path) : null,
+            'relatedListings'      => $relatedListings,
+            'displayTitle'         => $this->listing->display_name ?: $this->product->name,
+            'productImage'         => $this->product->image_thumbnail_path ? StorageUtility::getUrl($this->product->image_thumbnail_path) : null,
+            'productReviewCount'   => $productReviewCount,
+            'productReviewAverage' => $productReviewAverage,
+            'productReviews'       => $productReviews,
         ])->layout('components.layouts.shop');
     }
 }

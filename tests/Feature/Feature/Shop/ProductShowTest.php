@@ -3,17 +3,22 @@
 declare(strict_types=1);
 
 use App\Enums\GeneralStatus;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
 use App\Livewire\Shop\Product\ProductShow;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\OperatingSystem;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Platform;
 use App\Models\Product;
 use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
+use App\Models\Review;
 use App\Models\Seller;
 use App\Models\User;
 use Livewire\Livewire;
@@ -97,6 +102,136 @@ it('renders the detail page for a seller listing', function (): void {
 
     $response->assertOk();
     $response->assertSee('Seller Bundle');
+});
+
+it('shows reviews for the current product on the detail page', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+
+    $product = Product::factory()->create([
+        'name'   => 'Reviewed Product',
+        'slug'   => 'reviewed-product',
+        'status' => GeneralStatus::Active,
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => null,
+        'display_name' => 'Reviewed Bundle',
+        'price'        => 123456,
+        'stock_count'  => 5,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    $buyerOne = User::factory()->create();
+    $buyerTwo = User::factory()->create();
+    $otherProduct = Product::factory()->create([
+        'name'   => 'Other Product',
+        'slug'   => 'other-product',
+        'status' => GeneralStatus::Active,
+    ]);
+    $otherVariant = ProductVariant::factory()->create([
+        'product_id'  => $otherProduct->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+    $otherListing = ProductListing::factory()->create([
+        'variant_id'   => $otherVariant->id,
+        'seller_id'    => null,
+        'display_name' => 'Other Bundle',
+        'price'        => 99999,
+        'stock_count'  => 2,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    $reviewOneItem = OrderItem::query()->create([
+        'order_id'              => Order::factory()->forBuyer($buyerOne)->create(['payment_status' => PaymentStatus::Completed])->id,
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Reviewed Product Key 1',
+        'variant_snapshot'      => ['variant_id' => $variant->id],
+        'quantity'              => 1,
+        'unit_price'            => $listing->price,
+        'subtotal'              => $listing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    $reviewTwoItem = OrderItem::query()->create([
+        'order_id'              => Order::factory()->forBuyer($buyerTwo)->create(['payment_status' => PaymentStatus::Completed])->id,
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Reviewed Product Key 2',
+        'variant_snapshot'      => ['variant_id' => $variant->id],
+        'quantity'              => 1,
+        'unit_price'            => $listing->price,
+        'subtotal'              => $listing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    $otherItem = OrderItem::query()->create([
+        'order_id'              => Order::factory()->forBuyer(User::factory()->create())->create(['payment_status' => PaymentStatus::Completed])->id,
+        'listing_id'            => $otherListing->id,
+        'seller_id'             => null,
+        'product_name_snapshot' => 'Other Product Key',
+        'variant_snapshot'      => ['variant_id' => $otherVariant->id],
+        'quantity'              => 1,
+        'unit_price'            => $otherListing->price,
+        'subtotal'              => $otherListing->price,
+        'platform_fee'          => 0,
+        'seller_amount'         => 0,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    Review::query()->create([
+        'user_id'       => $buyerOne->id,
+        'order_item_id' => $reviewOneItem->id,
+        'rating'        => 5,
+        'comment'       => 'Perfect delivery.',
+        'media'         => ['reviews/media/review-one.png'],
+    ]);
+
+    Review::query()->create([
+        'user_id'       => $buyerTwo->id,
+        'order_item_id' => $reviewTwoItem->id,
+        'rating'        => 4,
+        'comment'       => 'Worked as expected.',
+        'media'         => [],
+    ]);
+
+    Review::query()->create([
+        'user_id'       => $otherItem->order->buyer_id,
+        'order_item_id' => $otherItem->id,
+        'rating'        => 1,
+        'comment'       => 'Unrelated product review.',
+        'media'         => [],
+    ]);
+
+    $response = $this->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]));
+
+    $response->assertOk();
+    $response->assertSee('Reviews');
+    $response->assertSee('2 reviews');
+    $response->assertSee('4.5');
+    $response->assertSee('Perfect delivery.');
+    $response->assertSee('Worked as expected.');
+    $response->assertDontSee('Unrelated product review.');
 });
 
 it('allows signed in users to add the detail listing to cart', function (): void {
