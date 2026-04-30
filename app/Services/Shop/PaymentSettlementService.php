@@ -70,9 +70,15 @@ class PaymentSettlementService
                         ['type' => WalletType::Seller, 'code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
                     );
 
+                    $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+                    $wallet->forceFill([
+                        'holding' => round((float) $wallet->holding + (float) $item->seller_amount, 2),
+                    ])->save();
+
                     $wallet->transactions()->create([
                         'order_id'     => $order->id,
-                        'source_type'  => $item->escrow ? $item->escrow::class : null,
+                        'source_type'  => $item->escrow ? Escrow::class : null,
                         'source_id'    => $item->escrow?->id,
                         'type'         => TransactionType::PaymentReceived,
                         'balance_type' => TransactionBalanceType::Holding,

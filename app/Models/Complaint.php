@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ComplaintStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,11 +48,19 @@ class Complaint extends Model
 
     public function messages(): HasMany
     {
-        return $this->hasMany(ComplaintMessage::class);
+        return $this->hasMany(ComplaintMessage::class)->orderBy('created_at');
     }
 
     public function getRouteKeyName(): string
     {
         return 'complaint_code';
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null): Builder
+    {
+        return $query->where(function (Builder $query) use ($value): void {
+            $query->where('complaint_code', $value)
+                ->orWhere('id', $value);
+        });
     }
 }

@@ -98,6 +98,104 @@
                         <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">{{ $product->description ?? 'No description available.' }}</p>
                     </div>
                 </div>
+
+                <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Reviews</h2>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">What buyers said after completing their order.</p>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ number_format($productReviewAverage, 1) }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $productReviewCount }} review{{ $productReviewCount === 1 ? '' : 's' }}</div>
+                        </div>
+                    </div>
+
+                    @if($productReviewCount > 0)
+                        <div class="mt-5 space-y-4">
+                            @foreach($productReviews as $review)
+                                <article class="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-gray-900 dark:text-white">{{ $review['user_name'] }}</p>
+                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $review['created_at'] ?? '--' }}</p>
+                                        </div>
+
+                                        <div class="flex items-center gap-1 text-amber-400">
+                                            @for($star = 1; $star <= 5; $star++)
+                                                <i class="fa-solid fa-star {{ $star <= $review['rating'] ? '' : 'text-gray-300 dark:text-gray-600' }}"></i>
+                                            @endfor
+                                        </div>
+                                    </div>
+
+                                    @if(filled($review['comment']))
+                                        <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">{{ $review['comment'] }}</p>
+                                    @endif
+
+                                    @if(($review['media'] ?? []) !== [])
+                                        <div x-data="{ previewUrl: null }" class="mt-4 space-y-2 border-t border-gray-200 pt-4 dark:border-gray-800">
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Media</p>
+                                            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                                @foreach($review['media'] as $media)
+                                                    @php
+                                                        $extension = strtolower(pathinfo($media['label'], PATHINFO_EXTENSION));
+                                                        $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'], true);
+                                                        $isPdf = $extension === 'pdf';
+                                                    @endphp
+
+                                                    @if($media['url'] && $isImage)
+                                                        <button type="button" x-on:click="previewUrl = @js($media['url'])" class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-indigo-500/30">
+                                                            <div class="aspect-[4/3] bg-gray-100 dark:bg-gray-900">
+                                                                <img src="{{ $media['url'] }}" alt="" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]">
+                                                            </div>
+                                                        </button>
+                                                    @elseif($media['url'] && $isPdf)
+                                                        <a href="{{ $media['url'] }}" target="_blank" rel="noopener noreferrer" class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-indigo-500/30">
+                                                            <div class="flex items-center justify-center border-b border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-900">
+                                                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10 text-red-600 dark:text-red-300">
+                                                                    <i class="fa-solid fa-file-pdf"></i>
+                                                                </div>
+                                                            </div>
+                                                            <object data="{{ $media['url'] }}" type="application/pdf" class="h-64 w-full">
+                                                                <div class="p-3 text-sm text-gray-500 dark:text-gray-400">PDF preview unavailable.</div>
+                                                            </object>
+                                                        </a>
+                                                    @elseif($media['url'])
+                                                        <a href="{{ $media['url'] }}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:border-indigo-300 hover:text-indigo-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 dark:hover:border-indigo-500/30 dark:hover:text-indigo-300">
+                                                            {{ $media['label'] }}
+                                                        </a>
+                                                    @else
+                                                        <div class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300">
+                                                            {{ $media['label'] }}
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+
+                                            <div
+                                                x-cloak
+                                                x-show="previewUrl"
+                                                x-transition.opacity
+                                                x-on:click.self="previewUrl = null"
+                                                class="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4"
+                                            >
+                                                <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Close preview"></button>
+                                                <div class="relative z-10 max-h-[90vh] max-w-[92vw] overflow-hidden rounded-2xl bg-black shadow-2xl">
+                                                    <img :src="previewUrl" alt="" class="max-h-[90vh] max-w-[92vw] object-contain">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400">
+                            No reviews yet.
+                        </div>
+                    @endif
+                </div>
             </section>
 
             <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
@@ -126,12 +224,18 @@
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Actions</p>
                     <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="mt-4 space-y-3">
-                        <button type="button" x-on:click="pulse('cartPulse')" wire:click.stop.prevent="addToCart({{ $listing->id }})" x-bind:class="cartPulse ? 'scale-[1.02] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20' : ''" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-indigo-700 data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90">
-                            <span class="inline-flex items-center gap-2">
-                                <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                Add to cart
-                            </span>
-                        </button>
+                        @if($canAddToCart)
+                            <button type="button" x-on:click="pulse('cartPulse')" wire:click.stop.prevent="addToCart({{ $listing->id }})" x-bind:class="cartPulse ? 'scale-[1.02] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20' : ''" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-indigo-700 data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90">
+                                <span class="inline-flex items-center gap-2">
+                                    <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                    Add to cart
+                                </span>
+                            </button>
+                        @else
+                            <button type="button" disabled class="w-full cursor-not-allowed rounded-md bg-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                Owned by your shop
+                            </button>
+                        @endif
                         <button
                             type="button"
                             x-on:click.stop.prevent="pulse('wishlistPulse'); $dispatch('shop:wishlist:add', {

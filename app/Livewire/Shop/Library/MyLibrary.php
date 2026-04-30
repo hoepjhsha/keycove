@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Shop\Library;
 
 use App\Enums\ComplaintStatus;
+use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Managers\PaymentManager;
@@ -12,7 +13,9 @@ use App\Models\Complaint;
 use App\Models\ComplaintMessage;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Review;
 use App\Models\User;
+use App\Services\Shop\ComplaintService;
 use App\Services\Shop\PendingOrderService;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
@@ -37,6 +40,17 @@ class MyLibrary extends Component
     public ?int $viewingOrderItemId = null;
 
     public ?int $confirmReceivedOrderItemId = null;
+
+    public ?int $reviewOrderItemId = null;
+
+    public string $reviewRating = '5';
+
+    public string $reviewComment = '';
+
+    /**
+     * @var array<int, UploadedFile>
+     */
+    public array $reviewMedia = [];
 
     public string $complaintReason = '';
 
@@ -219,6 +233,94 @@ class MyLibrary extends Component
         session()->flash('library-status', 'The order item has been marked as completed.');
     }
 
+    public function openReviewForm(int $orderItemId): void
+    {
+        $orderItem = $this->resolveOwnedOrderItem($orderItemId);
+
+        if ($orderItem->status !== OrderStatus::Completed) {
+            session()->flash('library-status', 'Only completed items can be reviewed.');
+
+            return;
+        }
+
+        if ($orderItem->review !== null) {
+            session()->flash('library-status', 'You have already reviewed this item.');
+
+            return;
+        }
+
+        $this->reviewOrderItemId = $orderItem->id;
+        $this->reviewRating = '5';
+        $this->reviewComment = '';
+        $this->reviewMedia = [];
+        $this->resetValidation('reviewRating');
+        $this->resetValidation('reviewComment');
+        $this->resetValidation('reviewMedia');
+    }
+
+    public function cancelReviewForm(): void
+    {
+        $this->reviewOrderItemId = null;
+        $this->reviewRating = '5';
+        $this->reviewComment = '';
+        $this->reviewMedia = [];
+        $this->resetValidation('reviewRating');
+        $this->resetValidation('reviewComment');
+        $this->resetValidation('reviewMedia');
+    }
+
+    public function submitReview(): void
+    {
+        $this->validate([
+            'reviewRating'  => ['required', 'integer', 'between:1,5'],
+            'reviewComment' => ['nullable', 'string', 'max:2000'],
+            'reviewMedia'   => ['array', 'max:5'],
+            'reviewMedia.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:12288'],
+        ]);
+
+        if ($this->reviewOrderItemId === null) {
+            return;
+        }
+
+        $user = $this->resolveUser();
+
+        $created = DB::transaction(function () use ($user): bool {
+            $item = OrderItem::query()
+                ->whereKey($this->reviewOrderItemId)
+                ->whereHas('order', function ($query) use ($user): void {
+                    $query->where('buyer_id', $user->id);
+                })
+                ->where('status', OrderStatus::Completed->value)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($item->review()->exists()) {
+                return false;
+            }
+
+            Review::create([
+                'user_id'       => $user->id,
+                'order_item_id' => $item->id,
+                'rating'        => (int) $this->reviewRating,
+                'comment'       => filled(trim($this->reviewComment)) ? trim($this->reviewComment) : null,
+                'media'         => $this->storeUploadedFiles($this->reviewMedia, 'reviews/media'),
+            ]);
+
+            return true;
+        }, attempts: 3);
+
+        if (! $created) {
+            $this->cancelReviewForm();
+            session()->flash('library-status', 'You have already reviewed this item.');
+
+            return;
+        }
+
+        $this->cancelReviewForm();
+
+        session()->flash('library-status', 'Your review has been submitted.');
+    }
+
     public function openConfirmReceivedModal(int $orderItemId): void
     {
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
@@ -239,8 +341,14 @@ class MyLibrary extends Component
     {
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
 
-        if ($orderItem->status === OrderStatus::Completed) {
-            session()->flash('library-status', 'Completed items can no longer be disputed.');
+        if (! in_array($orderItem->status, [OrderStatus::Delivered, OrderStatus::Disputing], true)) {
+            session()->flash('library-status', 'Complaints can only be opened for delivered or disputing items.');
+
+            return;
+        }
+
+        if ($orderItem->buyer_key_viewed_at === null) {
+            session()->flash('library-status', 'Open the key first before filing a complaint.');
 
             return;
         }
@@ -281,12 +389,12 @@ class MyLibrary extends Component
         $this->resetValidation('complaintReplyMessage');
     }
 
-    public function submitComplaint(): void
+    public function submitComplaint(ComplaintService $complaintService): void
     {
         $this->validate([
             'complaintReason'     => ['required', 'string', 'min:10'],
-            'complaintEvidence'   => ['array', 'max:5'],
-            'complaintEvidence.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:12288'],
+            'complaintEvidence'   => ['required', 'array', 'min:1', 'max:3'],
+            'complaintEvidence.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,mp4,webm,mov', 'max:51200'],
         ]);
 
         $item = $this->resolveOwnedOrderItem((int) $this->complaintOrderItemId);
@@ -297,45 +405,24 @@ class MyLibrary extends Component
             return;
         }
 
-        DB::transaction(function () use ($item): void {
-            $evidence = $this->storeUploadedFiles($this->complaintEvidence, 'complaints/evidence');
+        $complaint = $complaintService->openComplaint(
+            $item,
+            $this->resolveUser(),
+            trim($this->complaintReason),
+            $this->complaintEvidence,
+        );
 
-            $attributes = [
-                'order_item_id' => $item->id,
-                'reason'        => $this->complaintReason,
-                'evidence'      => $evidence,
-                'status'        => ComplaintStatus::Open,
-            ];
-
-            if ($this->hasComplaintCodeColumn) {
-                $attributes['complaint_code'] = 'CMP-'.now()->format('Ymd').'-'.Str::upper(Str::random(5));
-            }
-
-            $complaint = Complaint::create($attributes);
-
-            ComplaintMessage::create([
-                'complaint_id' => $complaint->id,
-                'sender_id'    => $this->resolveUser()->id,
-                'message'      => $this->complaintReason,
-                'attachments'  => [],
-            ]);
-
-            $item->forceFill([
-                'status' => OrderStatus::Disputing,
-            ])->save();
-        });
-
-        $this->viewingComplaintOrderItemId = $item->id;
         $this->cancelComplaintForm();
-        session()->flash('library-status', 'Your complaint has been opened and the item is now marked as disputing.');
+
+        $this->redirectRoute('app.library.complaints.show', ['complaint' => $complaint->complaint_code]);
     }
 
-    public function replyComplaint(): void
+    public function replyComplaint(ComplaintService $complaintService): void
     {
         $this->validate([
             'complaintReplyMessage'       => ['required', 'string', 'min:10'],
             'complaintReplyAttachments'   => ['array', 'max:5'],
-            'complaintReplyAttachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:12288'],
+            'complaintReplyAttachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,mp4,webm,mov', 'max:51200'],
         ]);
 
         if ($this->viewingComplaintOrderItemId === null) {
@@ -353,12 +440,12 @@ class MyLibrary extends Component
             return;
         }
 
-        ComplaintMessage::create([
-            'complaint_id' => $complaint->id,
-            'sender_id'    => $this->resolveUser()->id,
-            'message'      => $this->complaintReplyMessage,
-            'attachments'  => $this->storeUploadedFiles($this->complaintReplyAttachments, 'complaints/messages'),
-        ]);
+        $complaintService->reply(
+            $complaint,
+            $this->resolveUser(),
+            trim($this->complaintReplyMessage),
+            $this->complaintReplyAttachments,
+        );
 
         $this->complaintReplyMessage = '';
         $this->complaintReplyAttachments = [];
@@ -369,12 +456,15 @@ class MyLibrary extends Component
     public function render(): View
     {
         $user = $this->resolveUser();
+        $user->loadMissing('seller');
+
+        $hasApprovedSellerAccount = $user->seller?->kyc_status === KycStatus::Approved;
 
         $orders = $user->orders()
             ->with([
                 'items' => fn ($query) => $query
                     ->select(['id', 'order_id', 'listing_id', 'order_item_code', 'product_name_snapshot', 'quantity', 'unit_price', 'subtotal', 'status', 'buyer_key_viewed_at'])
-                    ->with(['listing.variant.product', 'listing.variant.region', 'listing.variant.platform', 'listing.variant.operatingSystem', 'complaint.messages.sender', 'complaint.resolvedBy'])
+                    ->with(['listing.variant.product', 'listing.variant.region', 'listing.variant.platform', 'listing.variant.operatingSystem', 'complaint.messages.sender', 'complaint.resolvedBy', 'review'])
                     ->withCount('keys')
                     ->orderBy('id'),
             ])
@@ -397,14 +487,20 @@ class MyLibrary extends Component
 
         $selectedComplaint = $selectedComplaintOrderItem?->complaint;
 
+        $selectedReviewMedia = $selectedOrderItem?->review !== null
+            ? $this->resolveStoredPaths($selectedOrderItem->review->media)
+            : [];
+
         $selectedConfirmReceivedOrderItem = $this->confirmReceivedOrderItemId !== null
             ? $orders->flatMap(fn (Order $order): Collection => $order->items)->firstWhere('id', $this->confirmReceivedOrderItemId)
             : null;
 
         return view('pages.shop.library.my-library', [
+            'user'                             => $user,
             'orders'                           => $orders,
             'pendingPaymentCount'              => $orders->where('payment_status', PaymentStatus::Pending)->count(),
             'completedOrderCount'              => $orders->filter(fn (Order $order): bool => $order->status === OrderStatus::Completed)->count(),
+            'hasApprovedSellerAccount'         => $hasApprovedSellerAccount,
             'revealedKeys'                     => $this->revealedKeys,
             'selectedOrderItem'                => $selectedOrderItem,
             'selectedComplaintOrderItem'       => $selectedComplaintOrderItem,
@@ -412,6 +508,7 @@ class MyLibrary extends Component
             'selectedComplaint'                => $selectedComplaint,
             'selectedComplaintEvidence'        => $this->resolveStoredPaths($selectedComplaint?->evidence),
             'selectedComplaintMessages'        => $this->resolveComplaintMessages($selectedComplaint),
+            'selectedReviewMedia'              => $selectedReviewMedia,
             'selectedConfirmReceivedOrderItem' => $selectedConfirmReceivedOrderItem,
         ])->layout('components.layouts.shop');
     }
@@ -494,7 +591,7 @@ class MyLibrary extends Component
             ->whereHas('order', function ($query): void {
                 $query->where('buyer_id', $this->resolveUser()->id);
             })
-            ->with(['complaint'])
+            ->with(['complaint', 'review'])
             ->firstOrFail();
     }
 

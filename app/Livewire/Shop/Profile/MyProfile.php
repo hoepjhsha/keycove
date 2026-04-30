@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Shop\Profile;
 
 use App\Enums\Gender;
+use App\Enums\KycStatus;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Utilities\StorageUtility;
@@ -161,7 +162,7 @@ class MyProfile extends Component
     {
         $user = $this->resolveUser();
 
-        $user->load('profile');
+        $user->loadMissing(['profile', 'seller']);
 
         $profile = $user->profile;
         $avatarUrl = null;
@@ -190,12 +191,13 @@ class MyProfile extends Component
         );
 
         return view('pages.shop.profile.my-profile', [
-            'user'              => $user,
-            'profile'           => $profile,
-            'avatarUrl'         => $avatarUrl,
-            'fullName'          => $fullName !== '' ? $fullName : $user->username,
-            'profileCompletion' => $profileCompletion,
-            'genderOptions'     => Gender::cases(),
+            'user'                     => $user,
+            'profile'                  => $profile,
+            'avatarUrl'                => $avatarUrl,
+            'fullName'                 => $fullName !== '' ? $fullName : $user->username,
+            'profileCompletion'        => $profileCompletion,
+            'hasApprovedSellerAccount' => $user->seller?->kyc_status === KycStatus::Approved,
+            'genderOptions'            => Gender::cases(),
         ])->layout('components.layouts.shop');
     }
 

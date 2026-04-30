@@ -1,6 +1,8 @@
 <?php
 
 use App\Exceptions\Handler;
+use App\Http\Middleware\EnsureSellerEmailVerified;
+use App\Http\Middleware\EnsureSellerPortalApproved;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -10,9 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'seller.email.verified'  => EnsureSellerEmailVerified::class,
+            'seller.portal.approved' => EnsureSellerPortalApproved::class,
+        ]);
+
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('admin/*')) {
                 return '/admin/auth/login';
@@ -22,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (Throwable $e, $request) {
-            return new Handler(app())->render($request, $e);
-        });
+        //        $exceptions->render(function (Throwable $e, $request) {
+        //            return new Handler(app())->render($request, $e);
+        //        });
     })->create();

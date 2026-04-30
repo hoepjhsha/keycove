@@ -79,6 +79,13 @@ class ProductCreateForm extends Form
     ])]
     public $image = null;
 
+    #[Validate([
+        'nullable',
+        'integer',
+        'exists:sellers,id',
+    ])]
+    public ?int $submitted_by_seller_id = null;
+
     public array $systemRequirements = [
         ['key' => '', 'value' => ''],
     ];
@@ -124,15 +131,16 @@ class ProductCreateForm extends Form
         }
 
         $product = Product::create([
-            'name'                 => $this->name,
-            'slug'                 => $this->slug,
-            'publisher'            => $this->publisher,
-            'developer'            => $this->developer,
-            'release_date'         => $this->release_date,
-            'description'          => $this->description,
-            'status'               => $this->status,
-            'image_thumbnail_path' => $imagePath,
-            'system_requirement'   => ! empty($requirements) ? $requirements : null,
+            'submitted_by_seller_id' => $this->submitted_by_seller_id,
+            'name'                   => $this->name,
+            'slug'                   => $this->slug,
+            'publisher'              => $this->publisher,
+            'developer'              => $this->developer,
+            'release_date'           => $this->release_date,
+            'description'            => $this->description,
+            'status'                 => $this->status,
+            'image_thumbnail_path'   => $imagePath,
+            'system_requirement'     => ! empty($requirements) ? $requirements : null,
         ]);
 
         if (! empty($this->categories)) {

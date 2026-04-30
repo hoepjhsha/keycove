@@ -23,8 +23,10 @@ use App\Models\ProductKey;
 use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
+use App\Models\Seller;
 use App\Models\User;
 use App\Services\Payment\VNPayGateway;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 it('creates an order from cart and redirects to vnpay', function (): void {
@@ -54,6 +56,32 @@ it('creates an order from cart and redirects to vnpay', function (): void {
     expect(ProductKey::query()->where('listing_id', $listing->id)->where('status', ProductKeyStatus::Reserved)->count())->toBe(1);
     expect($listing->fresh()->stock_count)->toBe(5);
     expect(CartItem::query()->whereKey($otherCartItem->id)->exists())->toBeTrue();
+});
+
+it('prevents sellers from checking out their own listings', function (): void {
+    $sellerUser = User::factory()->seller()->create();
+    $seller = Seller::query()->create([
+        'user_id'             => $sellerUser->id,
+        'shop_name'           => 'Checkout Seller',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => 1,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $listing = activeCheckoutListing();
+    $listing->forceFill(['seller_id' => $seller->id])->save();
+    ProductKey::factory()->withListing($listing)->available()->count(1)->create();
+
+    $cart = Cart::factory()->forUser($sellerUser)->create();
+    $cartItem = CartItem::factory()->forCart($cart)->withListing($listing)->create(['quantity' => 1]);
+
+    $this->actingAs($sellerUser)
+        ->post(route('app.cart.checkout'), ['item_codes' => [$cartItem->cart_item_code]])
+        ->assertStatus(422);
+
+    expect(Order::query()->where('buyer_id', $sellerUser->id)->exists())->toBeFalse();
 });
 
 it('shows a checkout review page for selected cart items', function (): void {
@@ -222,9 +250,21 @@ it('expires pending orders after 24 hours and releases reserved keys', function 
 
 function activeCheckoutListing(): ProductListing
 {
-    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
-    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
-    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $region = Region::factory()->create([
+        'status'    => GeneralStatus::Active,
+        'slug'      => Str::uuid()->toString(),
+        'flag_code' => Str::substr(Str::uuid()->toString(), 0, 10),
+    ]);
+
+    $platform = Platform::factory()->create([
+        'status' => GeneralStatus::Active,
+        'slug'   => Str::uuid()->toString(),
+    ]);
+
+    $os = OperatingSystem::factory()->create([
+        'status' => GeneralStatus::Active,
+        'slug'   => Str::uuid()->toString(),
+    ]);
 
     $product = Product::factory()->create([
         'status' => GeneralStatus::Active,

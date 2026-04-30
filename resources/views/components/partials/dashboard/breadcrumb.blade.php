@@ -4,11 +4,7 @@
     <ol class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
         <li>
             @php
-                try {
-                    $homeUrl = route('admin.dashboard.index');
-                } catch (\Exception) {
-                    $homeUrl = '#';
-                }
+                $homeUrl = '/admin/dashboard';
             @endphp
             <a href="{{ $homeUrl }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                 <i class="fa-solid fa-house"></i>

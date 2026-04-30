@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\Gender;
+use App\Enums\KycStatus;
 use App\Livewire\Shop\Profile\MyProfile;
+use App\Models\Seller;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -27,16 +29,51 @@ test('authenticated user can access the my profile page', function (): void {
         'bio'          => 'Profile bio for storefront display.',
     ]);
 
-    $response = $this->actingAs($user)->get('/my-profile');
+    Livewire::actingAs($user)
+        ->test(MyProfile::class)
+        ->assertSee('Hoep Tran')
+        ->assertSee('0987654321')
+        ->assertSee('Profile bio for storefront display.')
+        ->assertSee('Profile')
+        ->assertSee('Security')
+        ->assertSee('My Library');
+});
 
-    $response->assertOk();
-    $response->assertSeeLivewire(MyProfile::class);
-    $response->assertSee('Hoep Tran');
-    $response->assertSee('0987654321');
-    $response->assertSee('Profile bio for storefront display.');
-    $response->assertSee('Profile');
-    $response->assertSee('Security');
-    $response->assertSee('My Library');
+test('verified users can start seller onboarding from my profile', function (): void {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(MyProfile::class)
+        ->assertSee('Become a seller')
+        ->assertSee(route('seller.apply'));
+});
+
+test('approved sellers can open the seller dashboard from my profile', function (): void {
+    $user = User::factory()->seller()->create();
+
+    Seller::query()->create([
+        'user_id'             => $user->id,
+        'shop_name'           => 'KeyCove Store',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyProfile::class)
+        ->assertSee('Open dashboard')
+        ->assertSee(route('seller.dashboard.index'));
+});
+
+test('unverified users are shown the seller onboarding restriction on my profile', function (): void {
+    $user = User::factory()->unverified()->create();
+
+    Livewire::actingAs($user)
+        ->test(MyProfile::class)
+        ->assertSee('Verify your email first to unlock seller onboarding.')
+        ->assertSee('You need a verified email to continue.');
 });
 
 test('authenticated user can change password from the security section', function (): void {

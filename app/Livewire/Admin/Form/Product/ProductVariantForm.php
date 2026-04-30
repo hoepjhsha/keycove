@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\Form\Product;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
 use App\Models\ProductVariant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -49,12 +50,35 @@ class ProductVariantForm extends Form
     {
         $this->validate();
 
+        $edition = filled($this->edition) ? trim($this->edition) : null;
+
+        if (ProductVariant::query()
+            ->where('product_id', $this->product_id)
+            ->where('region_id', $this->region_id)
+            ->where('platform_id', $this->platform_id)
+            ->where('os_id', $this->os_id)
+            ->where(function (Builder $query) use ($edition): void {
+                if ($edition === null) {
+                    $query->whereNull('edition');
+
+                    return;
+                }
+
+                $query->where('edition', $edition);
+            })
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'general' => 'This variant already exists for the selected product.',
+            ]);
+        }
+
         return ProductVariant::create([
             'product_id'  => $this->product_id,
             'region_id'   => $this->region_id,
             'platform_id' => $this->platform_id,
             'os_id'       => $this->os_id,
-            'edition'     => $this->edition,
+            'edition'     => $edition,
             'status'      => $this->status,
         ]);
     }
@@ -63,9 +87,33 @@ class ProductVariantForm extends Form
     {
         $this->validate();
 
+        $edition = filled($this->edition) ? trim($this->edition) : null;
+
         if ($this->status === ProductVariantStatus::Deleted->value) {
             throw ValidationException::withMessages([
                 'status' => 'Cannot set status to Deleted via update.',
+            ]);
+        }
+
+        if (ProductVariant::query()
+            ->where('product_id', $this->product_id)
+            ->where('region_id', $this->region_id)
+            ->where('platform_id', $this->platform_id)
+            ->where('os_id', $this->os_id)
+            ->where(function (Builder $query) use ($edition): void {
+                if ($edition === null) {
+                    $query->whereNull('edition');
+
+                    return;
+                }
+
+                $query->where('edition', $edition);
+            })
+            ->whereKeyNot($this->variant?->id)
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'general' => 'This variant already exists for the selected product.',
             ]);
         }
 
@@ -73,7 +121,7 @@ class ProductVariantForm extends Form
             'region_id'   => $this->region_id,
             'platform_id' => $this->platform_id,
             'os_id'       => $this->os_id,
-            'edition'     => $this->edition,
+            'edition'     => $edition,
             'status'      => $this->status,
         ]);
     }

@@ -20,6 +20,10 @@
         default => 'bg-gray-500/10 text-gray-700 dark:text-gray-300',
     };
 
+    $sellerDashboardUrl = \Illuminate\Support\Facades\Route::has('seller.dashboard.index')
+        ? route('seller.dashboard.index')
+        : route('seller.apply');
+
     $navItems = [
         ['key' => 'profile', 'label' => 'Profile', 'icon' => 'fa-regular fa-id-card', 'description' => 'Identity and contact'],
         ['key' => 'security', 'label' => 'Security', 'icon' => 'fa-solid fa-shield-halved', 'description' => 'Verification and password'],
@@ -116,6 +120,39 @@
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $user->created_at?->format('d/m/Y') ?? '--' }}</p>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Account creation date</p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-5 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="space-y-1">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller onboarding</p>
+                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $hasApprovedSellerAccount ? 'Seller dashboard' : 'Become a seller' }}</h2>
+                    <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">
+                        @if($hasApprovedSellerAccount)
+                            You already have seller access. Open your dashboard to manage listings and keys.
+                        @else
+                            {{ $user->hasVerifiedEmail() ? 'Open the seller application and complete your KYC details.' : 'Verify your email first to unlock seller onboarding.' }}
+                        @endif
+                    </p>
+                </div>
+
+                <div class="space-y-2 sm:text-right">
+                    @if($hasApprovedSellerAccount)
+                        <a href="{{ $sellerDashboardUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                            Open dashboard
+                        </a>
+                    @elseif($user->hasVerifiedEmail())
+                        <a href="{{ route('seller.apply') }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                            Become a seller
+                        </a>
+                    @else
+                        <span aria-disabled="true" class="inline-flex cursor-not-allowed items-center justify-center rounded-2xl bg-gray-400/20 px-5 py-3 text-sm font-semibold text-gray-500 dark:bg-white/10 dark:text-gray-400">
+                            Become a seller
+                        </span>
+                        <p class="text-xs text-amber-700 dark:text-amber-300">You need a verified email to continue.</p>
+                    @endif
                 </div>
             </div>
         </section>

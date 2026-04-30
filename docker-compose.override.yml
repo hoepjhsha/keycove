@@ -24,3 +24,8 @@ services:
   node:
     ports:
       - "${DOCKER_NODE_PORT:-5173}:5173"
+
+  reverb:
+    command: php artisan reverb:start --host="0.0.0.0" --port=${REVERB_PORT:-3624}
+    ports:
+      - "${REVERB_PORT:-3624}:${REVERB_PORT:-3624}"

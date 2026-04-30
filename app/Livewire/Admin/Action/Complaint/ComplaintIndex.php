@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Action\Complaint;
 
 use App\Enums\ComplaintStatus;
-use App\Enums\EscrowStatus;
-use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Managers\PaymentManager;
 use App\Models\Complaint;
+use App\Services\Shop\ComplaintService;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -88,6 +85,7 @@ class ComplaintIndex extends Component
 
             $this->viewData = [
                 'complaint_id'    => $complaint->id,
+                'thread_url'      => url('/admin/complaints/'.($complaint->complaint_code ?: $complaint->id)),
                 'order_code'      => $complaint->orderItem?->order?->order_code ?? '-',
                 'buyer_username'  => $complaint->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'     => $complaint->orderItem?->order?->buyer?->email ?? '-',
@@ -147,7 +145,7 @@ class ComplaintIndex extends Component
         }
     }
 
-    public function processRefund(): void
+    public function processRefund(ComplaintService $complaintService): void
     {
         $this->validate([
             'resolutionNote' => ['required', 'string', 'min:3'],
@@ -162,7 +160,7 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.escrow'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
@@ -212,17 +210,12 @@ class ComplaintIndex extends Component
             //                return;
             //            }
 
-            DB::transaction(function () use ($complaint): void {
-                $complaint->update([
-                    'status'          => ComplaintStatus::ApprovedRefund->value,
-                    'resolved_by'     => auth()->id(),
-                    'resolution_note' => $this->resolutionNote,
-                    'resolved_at'     => Carbon::parse($this->resolvedAt),
-                ]);
-
-                $complaint->orderItem?->update(['status' => OrderStatus::Refunded]);
-                $complaint->orderItem?->escrow?->update(['status' => EscrowStatus::Refunded]);
-            });
+            $complaintService->resolveRefund(
+                $complaint,
+                auth()->guard('admin')->user() ?? auth()->user(),
+                (string) $this->resolutionNote,
+                $this->resolvedAt,
+            );
 
             $this->showViewModal = false;
             $this->dispatch('notify', [
@@ -238,7 +231,7 @@ class ComplaintIndex extends Component
         }
     }
 
-    public function processRelease(): void
+    public function processRelease(ComplaintService $complaintService): void
     {
         $this->validate([
             'resolutionNote' => ['required', 'string', 'min:3'],
@@ -253,7 +246,7 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.escrow'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
@@ -261,17 +254,12 @@ class ComplaintIndex extends Component
 
         // TODO: release stuff
 
-        DB::transaction(function () use ($complaint): void {
-            $complaint->update([
-                'status'          => ComplaintStatus::RejectedRelease->value,
-                'resolved_by'     => auth()->id(),
-                'resolution_note' => $this->resolutionNote,
-                'resolved_at'     => Carbon::parse($this->resolvedAt),
-            ]);
-
-            $complaint->orderItem?->update(['status' => OrderStatus::Completed]);
-            $complaint->orderItem?->escrow?->update(['status' => EscrowStatus::Released]);
-        });
+        $complaintService->resolveRelease(
+            $complaint,
+            auth()->guard('admin')->user() ?? auth()->user(),
+            (string) $this->resolutionNote,
+            $this->resolvedAt,
+        );
 
         $this->showViewModal = false;
         $this->dispatch('notify', [

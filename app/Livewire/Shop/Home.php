@@ -199,6 +199,8 @@ class Home extends Component
      */
     protected function sellerListings(int $limit): Collection
     {
+        $currentSellerId = auth()->user()?->loadMissing('seller')?->seller?->id;
+
         return ProductListing::query()
             ->select('product_listings.*')
             ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
@@ -207,6 +209,9 @@ class Home extends Component
             ->where('product_listings.status', ProductListingStatus::Active)
             ->where('product_variants.status', ProductVariantStatus::Active)
             ->where('products.status', GeneralStatus::Active)
+            ->when($currentSellerId !== null, function (Builder $query) use ($currentSellerId): void {
+                $query->where('product_listings.seller_id', '!=', $currentSellerId);
+            })
             ->with([
                 'seller.user',
                 'variant.product.categories',
