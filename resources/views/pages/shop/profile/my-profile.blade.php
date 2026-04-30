@@ -254,6 +254,124 @@
                             </div>
                         </article>
                     </div>
+
+                    <article class="rounded-[2rem] border border-black/8 bg-white/90 p-6 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
+                        @php
+                            $editingAvatarPreview = null;
+
+                            if ($avatar && method_exists($avatar, 'temporaryUrl')) {
+                                $editingAvatarPreview = $avatar->temporaryUrl();
+                            } elseif ($avatarUrl) {
+                                $editingAvatarPreview = $avatarUrl;
+                            }
+                        @endphp
+
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FCF9F4] text-gray-700 dark:bg-white/5 dark:text-gray-300">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-950 dark:text-white">Edit profile</h2>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your display details, avatar, and contact information here.</p>
+                            </div>
+                        </div>
+
+                        <form wire:submit="saveProfile" class="mt-6 space-y-6">
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label for="profile-username" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Username</label>
+                                    <input id="profile-username" wire:model="username" type="text" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                    @error('username')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-phone-number" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Phone number</label>
+                                    <input id="profile-phone-number" wire:model="phoneNumber" type="text" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                    @error('phoneNumber')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-first-name" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">First name</label>
+                                    <input id="profile-first-name" wire:model="firstName" type="text" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                    @error('firstName')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-last-name" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Last name</label>
+                                    <input id="profile-last-name" wire:model="lastName" type="text" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                    @error('lastName')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-dob" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Date of birth</label>
+                                    <input id="profile-dob" wire:model="dob" type="date" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                    @error('dob')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-gender" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Gender</label>
+                                    <select id="profile-gender" wire:model="gender" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                                        @foreach($genderOptions as $genderOption)
+                                            <option value="{{ $genderOption->value }}">{{ $genderOption->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('gender')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 xl:grid-cols-[14rem_minmax(0,1fr)]">
+                                <div class="rounded-[1.6rem] border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Avatar</p>
+
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-black/8 bg-black text-lg font-semibold text-white dark:border-white/10 dark:bg-white dark:text-gray-950">
+                                            @if($editingAvatarPreview)
+                                                <img src="{{ $editingAvatarPreview }}" alt="Avatar preview" class="h-full w-full object-cover">
+                                            @else
+                                                <span>{{ $initials !== '' ? $initials : 'KC' }}</span>
+                                            @endif
+                                        </div>
+
+                                        <div class="min-w-0 text-xs text-gray-500 dark:text-gray-400">
+                                            <p class="font-semibold text-gray-700 dark:text-gray-300">Upload a new avatar</p>
+                                            <p class="mt-1 leading-5">PNG, JPG, WEBP, GIF. Up to 12MB.</p>
+                                        </div>
+                                    </div>
+
+                                    <input id="profile-avatar" wire:model="avatar" type="file" accept="image/*" class="mt-4 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
+                                    @error('avatar')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="profile-bio" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Bio</label>
+                                    <textarea id="profile-bio" wire:model="bio" rows="7" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Write a short bio for your storefront profile..."></textarea>
+                                    @error('bio')
+                                        <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap justify-end gap-3">
+                                <button type="submit" wire:loading.attr="disabled" wire:target="saveProfile" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                    Save profile changes
+                                </button>
+                            </div>
+                        </form>
+                    </article>
                 @endif
 
                 @if($section === 'security')
