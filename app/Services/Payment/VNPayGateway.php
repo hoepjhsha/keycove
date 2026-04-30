@@ -3,6 +3,8 @@
 namespace App\Services\Payment;
 
 use App\Contracts\PaymentGatewayInterface;
+use App\Models\Order;
+use App\Services\Shop\PaymentSettlementService;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -106,7 +108,17 @@ class VNPayGateway implements PaymentGatewayInterface
             $orderId = $requestData['vnp_TxnRef'] ?? null;
             $vnp_Amount = ($requestData['vnp_Amount'] ?? 0) / 100;
 
-            // TODO: handle logic database here
+            $order = Order::query()->where('order_code', $orderId)->first();
+
+            if ($order === null) {
+                return ['RspCode' => '01', 'Message' => 'Order not found'];
+            }
+
+            if ((float) $order->total_price !== (float) $vnp_Amount) {
+                return ['RspCode' => '04', 'Message' => 'Invalid amount'];
+            }
+
+            app(PaymentSettlementService::class)->settlePaidOrder($order, $requestData);
 
             return ['RspCode' => '00', 'Message' => 'Confirm Success'];
         } catch (Exception $e) {

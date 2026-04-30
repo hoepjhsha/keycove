@@ -210,21 +210,30 @@ class ProductSeeder extends Seeder
                 ProductListingStatus::Pending,
                 ProductListingStatus::Hidden,
             ]);
+            $displayName = $this->makeListingDisplayName($variant);
 
             $sellerId = $submittedBySellerId;
 
             if ($sellerId !== null) {
-                $listing = ProductListing::updateOrCreate(
-                    [
-                        'variant_id' => $variant->id,
-                        'seller_id'  => $sellerId,
-                    ],
-                    [
-                        'price'       => $price,
-                        'stock_count' => 0,
-                        'status'      => $status,
-                    ]
-                );
+                $listing = ProductListing::firstOrNew([
+                    'variant_id' => $variant->id,
+                    'seller_id'  => $sellerId,
+                ]);
+
+                $listing->fill([
+                    'display_name' => $listing->exists ? $listing->display_name : $displayName,
+                    'price'        => $price,
+                    'stock_count'  => 0,
+                    'status'       => $status,
+                ]);
+
+                $listing->setRelation('variant', $variant);
+
+                if (! filled($listing->slug)) {
+                    $listing->slug = ProductListing::generateSlug($listing);
+                }
+
+                $listing->save();
 
                 if ($listing->wasRecentlyCreated) {
                     $this->createKeys($listing, $status);
@@ -233,16 +242,44 @@ class ProductSeeder extends Seeder
                 continue;
             }
 
+            $listing = new ProductListing([
+                'variant_id'   => $variant->id,
+                'seller_id'    => $sellerId,
+                'display_name' => $displayName,
+            ]);
+
+            $listing->setRelation('variant', $variant);
+
             $listing = ProductListing::create([
-                'variant_id'  => $variant->id,
-                'seller_id'   => $sellerId,
-                'price'       => $price,
-                'stock_count' => 0,
-                'status'      => $status,
+                'variant_id'   => $variant->id,
+                'seller_id'    => $sellerId,
+                'display_name' => $displayName,
+                'slug'         => ProductListing::generateSlug($listing),
+                'price'        => $price,
+                'stock_count'  => 0,
+                'status'       => $status,
             ]);
 
             $this->createKeys($listing, $status);
         }
+    }
+
+    protected function makeListingDisplayName(ProductVariant $variant): ?string
+    {
+        if (! fake()->boolean(60)) {
+            return null;
+        }
+
+        $productName = $variant->product?->name ?? 'Listing';
+
+        return $productName.' - '.fake()->randomElement([
+            'Standard Pack',
+            'Starter Bundle',
+            'Premium Bundle',
+            'Deluxe Edition',
+            'Ultimate Access',
+            'Pro Account',
+        ]);
     }
 
     protected function createKeys(ProductListing $listing, ProductListingStatus $status): void

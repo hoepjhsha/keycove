@@ -19,6 +19,7 @@ class OrderItem extends Model
         'order_id',
         'listing_id',
         'seller_id',
+        'order_item_code',
         'product_name_snapshot',
         'variant_snapshot',
         'quantity',
@@ -27,18 +28,21 @@ class OrderItem extends Model
         'platform_fee',
         'seller_amount',
         'status',
+        'buyer_key_viewed_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'variant_snapshot' => 'array',
-            'quantity'         => 'integer',
-            'unit_price'       => 'decimal:2',
-            'subtotal'         => 'decimal:2',
-            'platform_fee'     => 'decimal:2',
-            'seller_amount'    => 'decimal:2',
-            'status'           => OrderStatus::class,
+            'order_item_code'     => 'string',
+            'variant_snapshot'    => 'array',
+            'quantity'            => 'integer',
+            'unit_price'          => 'decimal:2',
+            'subtotal'            => 'decimal:2',
+            'platform_fee'        => 'decimal:2',
+            'seller_amount'       => 'decimal:2',
+            'status'              => OrderStatus::class,
+            'buyer_key_viewed_at' => 'datetime',
         ];
     }
 

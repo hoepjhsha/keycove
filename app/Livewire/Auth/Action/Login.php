@@ -28,6 +28,8 @@ class Login extends Component
 
     public function render()
     {
-        return view('pages.auth.login')->layout('components.layouts.auth');
+        return view('pages.auth.login')->layout('components.layouts.shop', [
+            'offsetHeader' => false,
+        ]);
     }
 }

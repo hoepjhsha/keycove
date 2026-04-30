@@ -36,6 +36,6 @@ class ResetPassword extends Component
 
     public function render()
     {
-        return view('pages.auth.reset-password')->layout('components.layouts.auth');
+        return view('pages.auth.reset-password')->layout('components.layouts.shop');
     }
 }

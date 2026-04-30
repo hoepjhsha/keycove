@@ -6,6 +6,9 @@ use App\Livewire\Auth\Action\Login;
 use App\Livewire\Auth\Action\Register;
 use App\Livewire\Auth\Action\ResetPassword;
 use App\Livewire\Auth\Action\VerifyOtp;
+use App\Livewire\Shop\Library\MyLibrary;
+use App\Livewire\Shop\Profile\MyProfile;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')
@@ -25,3 +28,19 @@ Route::middleware('auth')
     ->group(function () {
         Route::get('/logout', [Logout::class, 'logout'])->name('logout');
     });
+
+Route::get('/my-profile', MyProfile::class)
+    ->middleware('auth')
+    ->name('app.profile.show');
+
+Route::get('/my-library', MyLibrary::class)
+    ->middleware('auth')
+    ->name('app.library.show');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect()
+        ->route('app.profile.show', ['section' => 'security'])
+        ->with('profile-status', 'Your email address has been verified.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
