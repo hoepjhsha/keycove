@@ -224,7 +224,11 @@
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Thao tác</p>
                     <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="mt-4 space-y-3">
-                        @if($canAddToCart)
+                        @if($listing->stock_count < 1)
+                            <button type="button" disabled class="w-full cursor-not-allowed rounded-md bg-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                Hết hàng
+                            </button>
+                        @elseif($canAddToCart)
                             <button type="button" x-on:click="pulse('cartPulse')" wire:click.stop.prevent="addToCart({{ $listing->id }})" x-bind:class="cartPulse ? 'scale-[1.02] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20' : ''" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-indigo-700 data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90">
                                 <span class="inline-flex items-center gap-2">
                                     <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>

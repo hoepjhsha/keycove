@@ -12,10 +12,10 @@
     </div>
 
     <div class="flex items-center gap-x-4 lg:gap-x-6 ml-4">
-        <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-            <span class="sr-only">{{ __('admin.common.view_notifications') }}</span>
-            <i class="fa-regular fa-bell text-xl"></i>
-        </button>
+{{--        <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">--}}
+{{--            <span class="sr-only">{{ __('admin.common.view_notifications') }}</span>--}}
+{{--            <i class="fa-regular fa-bell text-xl"></i>--}}
+{{--        </button>--}}
 
 {{--        <button type="button" @click="theme = theme === 'light' ? 'dark' : 'light'" class="-m-2.5 p-2.5 mr-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">--}}
 {{--            <span class="sr-only">Toggle Dark Mode</span>--}}
@@ -23,7 +23,7 @@
 {{--            <i x-show="theme === 'light'" class="fa-solid fa-moon text-xl"></i>--}}
 {{--        </button>--}}
 
-        <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" aria-hidden="true"></div>
+{{--        <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" aria-hidden="true"></div>--}}
 
         <div class="relative" x-data="{ open: false }">
             <button type="button" @click="open = !open" class="-m-1.5 flex items-center p-1.5" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
@@ -52,12 +52,6 @@
                  role="menu"
                  aria-orientation="vertical"
                  aria-labelledby="user-menu-button">
-                <a href="#"
-                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                   role="menuitem">
-                    <i class="fa-solid fa-gear w-4 text-center text-gray-400"></i>
-                    <span>{{ __('admin.common.account_settings') }}</span>
-                </a>
                 <div class="my-1 h-px bg-gray-200 dark:bg-gray-700"></div>
                 <a href="{{ route('admin.auth.logout') }}"
                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

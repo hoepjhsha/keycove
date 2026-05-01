@@ -74,6 +74,19 @@ class ProductShow extends Component
 
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $cartItem = $cart->items()->firstOrNew(['listing_id' => $listing->id]);
+
+        if ((int) $listing->stock_count < 1) {
+            session()->flash('seller-status', __('shop.checkout.item_out_of_stock'));
+
+            return;
+        }
+
+        if ($cartItem->exists && (int) $cartItem->quantity >= (int) $listing->stock_count) {
+            session()->flash('seller-status', __('shop.checkout.insufficient_available_keys'));
+
+            return;
+        }
+
         $cartItem->quantity = $cartItem->exists ? $cartItem->quantity + 1 : 1;
         $cartItem->save();
 
@@ -178,6 +191,10 @@ class ProductShow extends Component
     protected function canAddToCart(): bool
     {
         $currentSellerId = $this->currentSellerId();
+
+        if ((int) $this->listing->stock_count < 1) {
+            return false;
+        }
 
         if ($currentSellerId === null) {
             return true;

@@ -304,6 +304,43 @@ it('allows signed in users to add the detail listing to cart', function (): void
     expect(CartItem::query()->where('listing_id', $listing->id)->count())->toBe(1);
 });
 
+it('prevents signed in users from adding an out of stock detail listing to cart', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $user = User::factory()->create();
+
+    $product = Product::factory()->create([
+        'name'   => 'Out Of Stock Detail Product',
+        'slug'   => 'out-of-stock-detail-product',
+        'status' => GeneralStatus::Active,
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => null,
+        'display_name' => 'Out of stock detail listing',
+        'price'        => 223000,
+        'stock_count'  => 0,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductShow::class, ['product' => $product, 'listing' => $listing])
+        ->call('addToCart', $listing->id);
+
+    expect(CartItem::query()->where('listing_id', $listing->id)->exists())->toBeFalse();
+});
+
 it('disables the add to cart action for the owning seller', function (): void {
     $region = Region::factory()->create(['status' => GeneralStatus::Active]);
     $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);

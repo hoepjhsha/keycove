@@ -35,6 +35,7 @@ use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Seller;
+use App\Models\SystemConfig;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -540,7 +541,7 @@ it('records seller payout requests as pending against the internal wallet', func
 
     Livewire::actingAs($sellerUser)
         ->test(Withdrawals::class)
-        ->set('amount', '1000')
+        ->set('amount', '10000')
         ->set('bankName', 'Vietcombank')
         ->set('bankCode', 'VCB')
         ->set('bankAccountNumber', '0123456789')
@@ -551,8 +552,8 @@ it('records seller payout requests as pending against the internal wallet', func
     $internalWallet = Wallet::query()->where('type', WalletType::Internal)->first();
     $entries = InternalWalletEntry::query()->orderBy('id')->get();
 
-    expect($sellerWallet->fresh()->balance)->toBe('11000.00')
-        ->and($sellerWallet->fresh()->holding)->toBe('3000.00')
+    expect($sellerWallet->fresh()->balance)->toBe('2000.00')
+        ->and($sellerWallet->fresh()->holding)->toBe('12000.00')
         ->and($internalWallet?->balance)->toBe('25000.00')
         ->and($entries)->toHaveCount(1)
         ->and($entries->pluck('type')->all())->toBe([
@@ -567,6 +568,11 @@ it('keeps the internal wallet balance unchanged when an approved seller payout f
     config()->set('services.payment.default', 'vnpay');
     config()->set('services.payment.vnpay.withdraw_mock', true);
     config()->set('queue.default', 'sync');
+
+    SystemConfig::query()->updateOrCreate(
+        ['key' => 'min_withdrawal_amount'],
+        ['value' => '1', 'description' => 'Minimum amount for seller withdrawals']
+    );
 
     Wallet::query()->create([
         'seller_id' => null,

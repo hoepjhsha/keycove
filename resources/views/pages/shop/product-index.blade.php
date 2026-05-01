@@ -319,15 +319,21 @@
                                          Yêu thích
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        x-on:click="pulse('cartPulse')"
-                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
-                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
-                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                         Thêm vào giỏ
-                                    </button>
+                                    @if($listing->stock_count > 0)
+                                        <button
+                                            type="button"
+                                            x-on:click="pulse('cartPulse')"
+                                            wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                            x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                            <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                             Thêm vào giỏ
+                                        </button>
+                                    @else
+                                        <button type="button" disabled class="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-gray-300 px-3 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                            Hết hàng
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -424,15 +430,21 @@
                                          Yêu thích
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        x-on:click="pulse('cartPulse')"
-                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
-                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
-                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                         Thêm vào giỏ
-                                    </button>
+                                    @if($listing->stock_count > 0)
+                                        <button
+                                            type="button"
+                                            x-on:click="pulse('cartPulse')"
+                                            wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                            x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                            <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                             Thêm vào giỏ
+                                        </button>
+                                    @else
+                                        <button type="button" disabled class="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-gray-300 px-3 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                            Hết hàng
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach

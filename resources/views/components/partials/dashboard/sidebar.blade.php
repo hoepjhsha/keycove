@@ -165,11 +165,6 @@
     </nav>
 
     <div class="p-4 mt-auto border-t border-gray-200 dark:border-gray-800">
-        <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
-            <i class="fa-solid fa-user-gear text-lg w-5 text-center shrink-0"></i>
-            {{ __('admin.common.account_settings') }}
-        </a>
-
         <a href="{{ route('admin.auth.logout') }}" class="flex items-center gap-3 px-3 py-2 mt-1 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors">
             <i class="fa-solid fa-arrow-right-from-bracket text-lg w-5 text-center shrink-0"></i>
             {{ __('admin.common.logout') }}

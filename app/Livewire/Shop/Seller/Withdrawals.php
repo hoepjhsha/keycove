@@ -146,7 +146,7 @@ class Withdrawals extends Component
             ->where('key', 'min_withdrawal_amount')
             ->value('value');
 
-        return max(0.0, (float) ($configuredValue ?: 50));
+        return max(0.0, (float) ($configuredValue ?: 10000));
     }
 
     protected function maximumWithdrawalAmount(Seller $seller): float
@@ -155,8 +155,11 @@ class Withdrawals extends Component
             ->where('key', 'max_withdrawal_amount')
             ->value('value');
 
-        $configuredMax = max(0.0, (float) ($configuredValue ?: 10000));
         $walletBalance = (float) ($seller->wallet?->balance ?? 0);
+
+        $configuredMax = $configuredValue !== null
+            ? max(0.0, (float) $configuredValue)
+            : $walletBalance;
 
         return min($configuredMax, $walletBalance);
     }

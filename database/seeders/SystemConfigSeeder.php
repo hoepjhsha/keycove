@@ -28,7 +28,7 @@ class SystemConfigSeeder extends Seeder
             ],
             [
                 'key'         => 'min_withdrawal_amount',
-                'value'       => '200000',
+                'value'       => '10000',
                 'description' => 'Số tiền rút tối thiểu (VND) khi Seller yêu cầu rút tiền về tài khoản ngân hàng',
             ],
             [

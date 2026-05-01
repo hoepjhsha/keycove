@@ -241,3 +241,40 @@ test('authenticated users can add a listing to cart from the shop page', functio
 
     expect(CartItem::query()->where('listing_id', $listing->id)->count())->toBe(1);
 });
+
+test('authenticated users cannot add an out of stock listing to cart from the shop page', function (): void {
+    $region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $os = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $user = User::factory()->create();
+
+    $product = Product::factory()->create([
+        'name'   => 'Out Of Stock Cart Product',
+        'status' => GeneralStatus::Active,
+        'slug'   => Str::slug('out of stock cart product storefront'),
+    ]);
+
+    $variant = ProductVariant::factory()->create([
+        'product_id'  => $product->id,
+        'region_id'   => $region->id,
+        'platform_id' => $platform->id,
+        'os_id'       => $os->id,
+        'status'      => ProductVariantStatus::Active,
+        'edition'     => 'Standard Edition',
+    ]);
+
+    $listing = ProductListing::factory()->create([
+        'variant_id'   => $variant->id,
+        'seller_id'    => null,
+        'display_name' => 'Out of stock listing',
+        'price'        => 125000,
+        'stock_count'  => 0,
+        'status'       => ProductListingStatus::Active,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ProductIndex::class)
+        ->call('addToCart', $listing->id);
+
+    expect(CartItem::query()->where('listing_id', $listing->id)->exists())->toBeFalse();
+});

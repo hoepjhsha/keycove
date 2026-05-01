@@ -113,7 +113,7 @@ it('submits a withdrawal request for admin review', function (): void {
 
     Livewire::actingAs($user)
         ->test(Withdrawals::class)
-        ->set('amount', '1000')
+        ->set('amount', '10000')
         ->set('bankName', 'Vietcombank')
         ->set('bankCode', 'VCB')
         ->set('bankAccountNumber', '0123456789')
@@ -123,20 +123,20 @@ it('submits a withdrawal request for admin review', function (): void {
 
     $wallet->refresh();
 
-    expect($wallet->balance)->toBe('11000.00');
-    expect($wallet->holding)->toBe('3000.00');
+    expect($wallet->balance)->toBe('2000.00');
+    expect($wallet->holding)->toBe('12000.00');
 
     $withdrawal = Withdraw::query()->first();
 
     expect($withdrawal)->not->toBeNull();
     expect($withdrawal?->status)->toBe(WithdrawStatus::Pending);
-    expect($withdrawal?->amount)->toBe('1000.00');
+    expect($withdrawal?->amount)->toBe('10000.00');
 
     $transaction = $wallet->transactions()->latest('id')->first();
 
     expect($transaction?->type)->toBe(TransactionType::Withdraw);
     expect($transaction?->status)->toBe(TransactionStatus::Pending);
-    expect($transaction?->amount)->toBe('-1000.00');
+    expect($transaction?->amount)->toBe('-10000.00');
 });
 
 it('rejects withdrawal requests above available balance', function (): void {
