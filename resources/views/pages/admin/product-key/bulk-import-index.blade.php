@@ -25,7 +25,7 @@
                         <i class="fa-solid fa-file-import text-4xl text-slate-400 dark:text-slate-500"></i>
                     </div>
                     <p class="text-slate-600 dark:text-slate-400 mb-4">{{ __('admin.common.upload_keys_help') }}</p>
-                    <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">Maximum file size: 10MB. Required columns: listing_id, key_code. Optional: status</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">Maximum file size: 10MB. Required columns: listing_slug, key_code. Optional: status</p>
 
                     <div class="max-w-md mx-auto">
                         <label class="block">

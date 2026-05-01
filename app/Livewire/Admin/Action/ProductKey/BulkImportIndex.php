@@ -73,9 +73,9 @@ class BulkImportIndex extends Component
     public function downloadTemplate(): BinaryFileResponse
     {
         $csv = Writer::createFromString();
-        $csv->insertOne(['listing_id', 'key_code', 'status']);
-        $csv->insertOne([1, 'XXXX-YYYY-ZZZZ-AAAA', 'Available']);
-        $csv->insertOne([1, 'BBBB-CCCC-DDDD-EEEE', 'Available']);
+        $csv->insertOne(['listing_slug', 'key_code', 'status']);
+        $csv->insertOne(['example-listing-slug', 'XXXX-YYYY-ZZZZ-AAAA', 'Available']);
+        $csv->insertOne(['another-listing-slug', 'BBBB-CCCC-DDDD-EEEE', 'Available']);
 
         $tempFile = tempnam(sys_get_temp_dir(), 'template_');
         file_put_contents($tempFile, $csv->getContent());
@@ -90,14 +90,14 @@ class BulkImportIndex extends Component
         }
 
         $csv = Writer::createFromString();
-        $csv->insertOne(['Row', 'Field', 'Error', 'Listing ID', 'Key Code', 'Status']);
+        $csv->insertOne(['Row', 'Field', 'Error', 'Listing Slug', 'Key Code', 'Status']);
 
         foreach ($this->importResult['errors'] as $error) {
             $csv->insertOne([
                 $error['rowNumber'],
                 $error['field'],
                 $error['message'],
-                $error['rowData']['listing_id'] ?? '',
+                $error['rowData']['listing_slug'] ?? '',
                 $error['rowData']['key_code'] ?? '',
                 $error['rowData']['status'] ?? '',
             ]);

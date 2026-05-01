@@ -27,7 +27,7 @@ class CategoryEditForm extends Form
     #[Validate([
         'required',
         'string',
-        'regex:/^[\pL\s]+$/u',
+        'regex:/^[\pL\s()]+$/u',
     ])]
     public string $name = '';
 

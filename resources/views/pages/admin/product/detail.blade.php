@@ -198,6 +198,7 @@
                                                             <thead>
                                                                 <tr class="border-b border-slate-200 dark:border-slate-600">
                                                                     <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.seller') }}</th>
+                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.slug') }}</th>
                                                                     <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.price') }}</th>
                                                                     <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</th>
                                                                     <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.available_keys') }}</th>
@@ -208,6 +209,7 @@
                                                                 @foreach($variantListings as $listing)
                                                                     <tr class="border-b border-slate-100 dark:border-slate-700/50 {{ $listing->trashed() ? 'bg-red-50/50 dark:bg-red-950/20 opacity-75' : '' }}">
                                         <td class="px-2 py-1 text-slate-700 dark:text-slate-300">{{ $listing->seller?->shop_name ?? 'Shop Admin' }}</td>
+                                        <td class="px-2 py-1 text-slate-700 dark:text-slate-300 font-mono text-xs">{{ $listing->slug }}</td>
                                         <td class="px-2 py-1 text-slate-700 dark:text-slate-300">{{ number_format((float) $listing->price, 2) }} VND</td>
                                                                         <td class="px-2 py-1">
                                                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $listing->status->value === 2 ? 'bg-green-500/10 text-green-500' : ($listing->status->value === 1 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-500/10 text-gray-500') }}">

@@ -10,7 +10,7 @@ use App\Enums\ProductKeyStatus;
 
 class ImportValidator
 {
-    private const REQUIRED_COLUMNS = ['listing_id', 'key_code'];
+    private const REQUIRED_COLUMNS = ['listing_slug', 'key_code'];
 
     public function __construct(
         private ProductListingRepositoryInterface $listingRepository,
@@ -44,21 +44,21 @@ class ImportValidator
     public function validateRows(array $data): array
     {
         $errors = [];
-        $existingListingIds = $this->getExistingListingIds($data);
+        $existingListingSlugs = $this->getExistingListingSlugs($data);
         $existingKeyCodes = $this->getExistingKeyCodes($data);
 
         foreach ($data as $index => $row) {
             $rowNumber = $index + 2;
 
-            if (! isset($row['listing_id']) || empty($row['listing_id'])) {
-                $errors[] = new ValidationError($rowNumber, 'listing_id', 'Listing ID is required', $row);
+            $listingSlug = trim((string) ($row['listing_slug'] ?? ''));
+            if ($listingSlug === '') {
+                $errors[] = new ValidationError($rowNumber, 'listing_slug', 'Listing slug is required', $row);
 
                 continue;
             }
 
-            $listingId = (int) $row['listing_id'];
-            if (! in_array($listingId, $existingListingIds, true)) {
-                $errors[] = new ValidationError($rowNumber, 'listing_id', "Listing ID {$listingId} does not exist", $row);
+            if (! in_array($listingSlug, $existingListingSlugs, true)) {
+                $errors[] = new ValidationError($rowNumber, 'listing_slug', "Listing slug '{$listingSlug}' does not exist", $row);
 
                 continue;
             }
@@ -95,13 +95,16 @@ class ImportValidator
      * @param  array<int, array<string, mixed>>  $data
      * @return array<int>
      */
-    private function getExistingListingIds(array $data): array
+    private function getExistingListingSlugs(array $data): array
     {
-        $listingIds = array_filter(array_unique(array_column($data, 'listing_id')));
+        $listingSlugs = array_values(array_filter(array_unique(array_map(
+            fn (mixed $listingSlug): string => trim((string) $listingSlug),
+            array_column($data, 'listing_slug')
+        ))));
 
         return $this->listingRepository->getModel()
-            ->whereIn('id', $listingIds)
-            ->pluck('id')
+            ->whereIn('slug', $listingSlugs)
+            ->pluck('slug')
             ->toArray();
     }
 
@@ -115,7 +118,15 @@ class ImportValidator
             fn (mixed $keyCode): string => hash('sha256', (string) $keyCode),
             array_filter(array_unique(array_column($data, 'key_code')))
         );
-        $listingIds = array_filter(array_unique(array_column($data, 'listing_id')));
+        $listingSlugs = array_values(array_filter(array_unique(array_map(
+            fn (mixed $listingSlug): string => trim((string) $listingSlug),
+            array_column($data, 'listing_slug')
+        ))));
+
+        $listingIds = $this->listingRepository->getModel()
+            ->whereIn('slug', $listingSlugs)
+            ->pluck('id')
+            ->toArray();
 
         return $this->keyRepository->getModel()
             ->whereIn('listing_id', $listingIds)

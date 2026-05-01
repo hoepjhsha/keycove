@@ -39,12 +39,12 @@ class ImportResult
     public function getErrorReport(): array
     {
         return array_map(fn ($error) => [
-            'Row'        => $error->rowNumber,
-            'Field'      => $error->field,
-            'Error'      => $error->message,
-            'Listing ID' => $error->rowData['listing_id'] ?? '',
-            'Key Code'   => $error->rowData['key_code'] ?? '',
-            'Status'     => $error->rowData['status'] ?? '',
+            'Row'          => $error->rowNumber,
+            'Field'        => $error->field,
+            'Error'        => $error->message,
+            'Listing Slug' => $error->rowData['listing_slug'] ?? '',
+            'Key Code'     => $error->rowData['key_code'] ?? '',
+            'Status'       => $error->rowData['status'] ?? '',
         ], $this->errors);
     }
 }

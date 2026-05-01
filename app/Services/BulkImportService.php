@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Repositories\ProductKeyRepositoryInterface;
-use App\Contracts\Repositories\ProductListingRepositoryInterface;
 use App\Services\Import\FileParserFactory;
 use App\Services\Import\ImportProcessor;
 use App\Services\Import\ImportResult;
@@ -19,9 +17,7 @@ class BulkImportService
     public function __construct(
         private FileParserFactory $parserFactory,
         private ImportValidator $validator,
-        private ImportProcessor $processor,
-        private ProductKeyRepositoryInterface $keyRepository,
-        private ProductListingRepositoryInterface $listingRepository
+        private ImportProcessor $processor
     ) {}
 
     public function import(string $filePath, string $fileExtension): ImportResult
