@@ -21,7 +21,7 @@ class Login extends Component
 
         session()->regenerate();
 
-        sweetalert()->success('Chào mừng bạn quay lại!');
+        flash()->success('Chào mừng bạn quay lại!');
 
         return redirect()->intended(route('app.shop.index'));
     }

@@ -154,10 +154,19 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 @foreach($sellerListings as $listing)
-                    <article class="overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] dark:border-white/10 dark:bg-gray-900/95">
+                    <a
+                        @class([
+                            'group block overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 dark:border-white/10 dark:bg-gray-900/95',
+                            'hover:-translate-y-1.5 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)]' => $listing['url'],
+                        ])
+                        @if($listing['url'])
+                            href="{{ $listing['url'] }}"
+                            wire:navigate.hover
+                        @endif
+                    >
                         <div class="relative aspect-[5/4] overflow-hidden bg-gray-100 dark:bg-gray-800">
                             @if($listing['image'])
-                                <img src="{{ $listing['image'] }}" alt="{{ $listing['title'] }}" class="h-full w-full object-cover">
+                                <img src="{{ $listing['image'] }}" alt="{{ $listing['title'] }}" class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
                             @else
                                 <div class="flex h-full items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-[#D32F2F] text-white">
                                     <i class="fa-solid fa-store text-3xl opacity-70"></i>
@@ -195,7 +204,7 @@
                                 </div>
                             @endif
                         </div>
-                    </article>
+                    </a>
                 @endforeach
             </div>
         </section>

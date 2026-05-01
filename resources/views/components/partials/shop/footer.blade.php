@@ -1,3 +1,9 @@
+@php
+    $libraryUrl = \Illuminate\Support\Facades\Route::has('app.library.show')
+        ? route('app.library.show')
+        : route('app.shop.index');
+@endphp
+
 <footer class="bg-[#FCF9F4] border-t border-gray-200 pt-16 pb-8 dark:bg-gray-900 dark:border-gray-800 sm:pt-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -24,8 +30,8 @@
                 <ul class="space-y-3.5">
                     <li><a href="{{ route('app.shop.index') }}" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Trang chủ</a></li>
                     <li><a href="{{ route('app.products.index') }}" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Tất cả sản phẩm</a></li>
-                    <li><a href="#" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Sản phẩm mới</a></li>
-                    <li><a href="#" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Ưu đãi đặc biệt</a></li>
+                    <li><a href="{{ route('app.sellers.index') }}" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Gian hàng người bán</a></li>
+                    <li><a href="{{ $libraryUrl }}" class="text-[15px] font-medium text-black hover:text-[#D32F2F] dark:text-gray-300 transition-colors">Thư viện của tôi</a></li>
                 </ul>
             </div>
 

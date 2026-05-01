@@ -240,6 +240,9 @@ class Home extends Component
                     'product_slug' => $product?->slug,
                     'image'        => $product?->image_thumbnail_path ? StorageUtility::getUrl($product->image_thumbnail_path) : null,
                     'categories'   => $categories,
+                    'url'          => $product?->slug !== null && filled($listing->slug)
+                        ? route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug])
+                        : null,
                 ];
             });
     }
