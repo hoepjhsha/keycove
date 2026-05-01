@@ -46,4 +46,9 @@ class Wallet extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function internalEntries(): HasMany
+    {
+        return $this->hasMany(InternalWalletEntry::class);
+    }
 }

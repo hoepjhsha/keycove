@@ -15,6 +15,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use App\Services\InternalWalletService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +23,10 @@ use Throwable;
 
 class SellerWithdrawalService
 {
-    public function __construct(private PaymentManager $payments) {}
+    public function __construct(
+        private PaymentManager $payments,
+        private InternalWalletService $internalWalletService,
+    ) {}
 
     /**
      * @param  array{amount: float|int|string, bank_name: string, bank_code: string, bank_account_number: string, bank_account_name: string}  $data
@@ -88,6 +92,10 @@ class SellerWithdrawalService
             ]);
         });
 
+        if ($withdraw !== null) {
+            $this->internalWalletService->sellerPayoutRequested($withdraw);
+        }
+
         $response = $this->performWithdrawal($data, $withdraw);
 
         $this->finalizeWithdrawal($withdraw, $transaction, $amount, $response);
@@ -151,6 +159,8 @@ class SellerWithdrawalService
                     'metadata' => array_merge($lockedTransaction->metadata ?? [], $metadata),
                 ])->save();
 
+                $this->internalWalletService->sellerPayoutCompleted($lockedWithdraw, $lockedWithdraw->processed_at ?? now(), $metadata);
+
                 return;
             }
 
@@ -169,6 +179,8 @@ class SellerWithdrawalService
                 'status'   => TransactionStatus::Failed,
                 'metadata' => array_merge($lockedTransaction->metadata ?? [], $metadata),
             ])->save();
+
+            $this->internalWalletService->sellerPayoutFailed($lockedWithdraw, $lockedWithdraw->processed_at ?? now(), $metadata);
         });
     }
 }

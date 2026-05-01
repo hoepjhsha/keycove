@@ -12,14 +12,18 @@ use App\Enums\TransactionBalanceType;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Enums\WalletType;
+use App\Models\Escrow;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Wallet;
+use App\Services\InternalWalletService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PaymentSettlementService
 {
+    public function __construct(private InternalWalletService $internalWalletService) {}
+
     public function settlePaidOrder(Order $order, array $paymentData = []): void
     {
         DB::transaction(function () use ($order, $paymentData): void {
@@ -47,6 +51,15 @@ class PaymentSettlementService
                     'response_payload' => $paymentData,
                 ]);
 
+            $paymentTransaction = PaymentTransaction::query()
+                ->where('order_id', $order->id)
+                ->latest('id')
+                ->first();
+
+            if ($paymentTransaction !== null) {
+                $this->internalWalletService->paymentReceived($order, $paymentTransaction, $paymentTransaction->paid_at ?? now());
+            }
+
             foreach ($order->items as $item) {
                 $item->forceFill([
                     'status' => OrderStatus::Delivered,
@@ -62,6 +75,10 @@ class PaymentSettlementService
                     $item->escrow->forceFill([
                         'status' => EscrowStatus::Holding,
                     ])->save();
+
+                    $this->internalWalletService->escrowHeld($item->escrow, $item->escrow->created_at ?? now(), [
+                        'order_item_id' => $item->id,
+                    ]);
                 }
 
                 if ($item->seller_id !== null) {

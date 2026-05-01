@@ -115,6 +115,23 @@ return [
         'Internal' => 'Nội bộ',
     ],
 
+    'internal_wallet_direction' => [
+        'Inflow'  => 'Tiền vào',
+        'Outflow' => 'Tiền ra',
+        'Neutral' => 'Đối soát',
+    ],
+
+    'internal_wallet_entry_type' => [
+        'PaymentReceived'       => 'Nhận thanh toán',
+        'EscrowHeld'            => 'Ghi nhận ký quỹ',
+        'EscrowReleased'        => 'Giải ngân ký quỹ',
+        'RefundPaid'            => 'Hoàn tiền',
+        'SellerPayoutRequested' => 'Yêu cầu trả seller',
+        'SellerPayoutCompleted' => 'Đã trả seller',
+        'SellerPayoutFailed'    => 'Trả seller thất bại',
+        'Adjustment'            => 'Điều chỉnh',
+    ],
+
     'withdraw_status' => [
         'Pending'    => 'Đang chờ',
         'Processing' => 'Đang xử lý',

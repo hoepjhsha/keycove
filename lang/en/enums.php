@@ -115,6 +115,23 @@ return [
         'Internal' => 'Internal',
     ],
 
+    'internal_wallet_direction' => [
+        'Inflow'  => 'Inflow',
+        'Outflow' => 'Outflow',
+        'Neutral' => 'Neutral',
+    ],
+
+    'internal_wallet_entry_type' => [
+        'PaymentReceived'       => 'Payment Received',
+        'EscrowHeld'            => 'Escrow Held',
+        'EscrowReleased'        => 'Escrow Released',
+        'RefundPaid'            => 'Refund Paid',
+        'SellerPayoutRequested' => 'Seller Payout Requested',
+        'SellerPayoutCompleted' => 'Seller Payout Completed',
+        'SellerPayoutFailed'    => 'Seller Payout Failed',
+        'Adjustment'            => 'Adjustment',
+    ],
+
     'withdraw_status' => [
         'Pending'    => 'Pending',
         'Processing' => 'Processing',

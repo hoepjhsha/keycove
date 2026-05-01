@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\Complaint\ComplaintIndex;
 use App\Livewire\Admin\Action\Escrow\EscrowIndex;
+use App\Livewire\Admin\Action\InternalWallet\InternalWalletIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Order\OrderDetail;
 use App\Livewire\Admin\Action\Order\OrderIndex;
@@ -21,7 +22,7 @@ use App\Livewire\Admin\Auth\Action\Login;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')
+Route::middleware('guest:admin')
     ->prefix('/admin/auth')
     ->name('admin.auth.')
     ->group(function () {
@@ -103,6 +104,12 @@ Route::middleware('auth:admin')
             ->name('transactions.')
             ->group(function () {
                 Route::get('/', TransactionIndex::class)->name('index');
+            });
+
+        Route::prefix('/internal-wallet')
+            ->name('internal_wallet.')
+            ->group(function () {
+                Route::get('/', InternalWalletIndex::class)->name('index');
             });
 
         Route::prefix('/orders')

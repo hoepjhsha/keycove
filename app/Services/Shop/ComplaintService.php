@@ -20,6 +20,7 @@ use App\Models\OrderItem;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Notifications\ComplaintActivityNotification;
+use App\Services\InternalWalletService;
 use App\Utilities\StorageUtility;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -28,6 +29,8 @@ use Illuminate\Support\Str;
 
 class ComplaintService
 {
+    public function __construct(private InternalWalletService $internalWalletService) {}
+
     public function openComplaint(OrderItem $item, User $actor, string $reason, array $evidence = []): Complaint
     {
         $complaint = DB::transaction(function () use ($item, $actor, $reason, $evidence): Complaint {
@@ -156,6 +159,8 @@ class ComplaintService
                             'order_item_id' => $complaint->orderItem->id,
                         ],
                     ]);
+
+                    $this->internalWalletService->refundPaid($complaint, $complaint->resolved_at ?? now());
                 } else {
                     $wallet->forceFill([
                         'holding' => round((float) $wallet->holding - $amount, 2),
@@ -178,6 +183,12 @@ class ComplaintService
                             'complaint_id'  => $complaint->id,
                             'order_item_id' => $complaint->orderItem->id,
                         ],
+                    ]);
+
+                    $this->internalWalletService->escrowReleased($complaint->orderItem->escrow, $complaint->resolved_at ?? now(), [
+                        'complaint_id'  => $complaint->id,
+                        'order_item_id' => $complaint->orderItem->id,
+                        'resolution'    => 'release',
                     ]);
                 }
             }

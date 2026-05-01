@@ -14,6 +14,7 @@ use App\Exceptions\Admin\EscrowException;
 use App\Models\AuditLog;
 use App\Models\Escrow;
 use App\Models\Wallet;
+use App\Services\InternalWalletService;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -229,7 +230,7 @@ final class EscrowTable extends PowerGridComponent
     }
 
     #[On('performReleaseEscrow')]
-    public function performReleaseEscrow($id): void
+    public function performReleaseEscrow($id, InternalWalletService $internalWalletService): void
     {
         try {
             DB::transaction(function () use ($id) {
@@ -295,6 +296,12 @@ final class EscrowTable extends PowerGridComponent
                     'created_at'     => now(),
                 ]);
             });
+
+            $escrow = Escrow::query()->with('orderItem')->findOrFail($id);
+            $internalWalletService->escrowReleased($escrow, $escrow->updated_at ?? now(), [
+                'escrow_id' => $escrow->id,
+                'source'    => 'admin_release',
+            ]);
 
             $this->dispatch('swal:success', [
                 'message' => __('admin.messages.escrow_released'),
