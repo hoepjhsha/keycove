@@ -46,10 +46,10 @@ class RegionIndex extends Component
         $result = $this->createForm->store();
         if ($result) {
             $this->reset('createForm');
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Region created successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.regions')]));
             $this->dispatch('pg:eventRefresh-regionTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to create region');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.regions')]));
         }
 
         $this->showCreateModal = false;
@@ -59,10 +59,10 @@ class RegionIndex extends Component
     {
         $result = $this->editForm->update();
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Region updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.regions')]));
             $this->dispatch('pg:eventRefresh-regionTable');
         } else {
-            sweetalert()->error('Failed to update region');
+            sweetalert()->error(__('admin.messages.update_failed', ['name' => __('admin.nav.regions')]));
         }
         $this->showEditModal = false;
     }
@@ -74,7 +74,7 @@ class RegionIndex extends Component
             ->where('status', GeneralStatus::Deleted)
             ->exists()
         ) {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Cannot change status of deleted items.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
             return;
@@ -83,14 +83,14 @@ class RegionIndex extends Component
         $result = $this->bulkChangeStatusForm->setStatus($this->bulkSelectedIds);
 
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Status updated successfully for selected items.');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.status_updated_selected'));
 
             $this->bulkChangeStatusForm->reset();
             $this->bulkSelectedIds = [];
 
             $this->dispatch('pg:eventRefresh-regionTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update status.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.failed_update_status'));
         }
 
         $this->showBulkStatusModal = false;
@@ -128,7 +128,7 @@ class RegionIndex extends Component
                 'name'         => $region->name,
                 'slug'         => $region->slug,
                 'flag_code'    => $region->flag_code,
-                'parent_name'  => $region->parent->name ?? '--None--',
+                'parent_name'  => $region->parent->name ?? __('admin.common.none'),
                 'status_label' => $statusLabel,
                 'created_at'   => $region->created_at->format('d/m/Y H:i:s'),
                 'updated_at'   => $region->updated_at->format('d/m/Y H:i:s'),

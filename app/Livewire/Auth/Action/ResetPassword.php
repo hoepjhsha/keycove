@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Reset Password')]
+#[Title('Đặt lại mật khẩu')]
 class ResetPassword extends Component
 {
     public ResetPasswordForm $form;
@@ -18,7 +18,7 @@ class ResetPassword extends Component
     public function mount(): void
     {
         if (! session()->has('reset_password_email') || ! session('otp_verified')) {
-            flash()->use('theme.aurora')->error('Invalid password reset request. Please try again.');
+            flash()->use('theme.aurora')->error('Yêu cầu đặt lại mật khẩu không hợp lệ. Vui lòng thử lại.');
 
             $this->redirect(route('app.auth.login'));
         }
@@ -29,7 +29,7 @@ class ResetPassword extends Component
         $this->form->updatePassword();
 
         session()->forget(['reset_password_email', 'otp_verified']);
-        flash()->use('theme.aurora')->success('Your password has been reset successfully.');
+        flash()->use('theme.aurora')->success('Mật khẩu của bạn đã được đặt lại thành công.');
 
         return redirect()->route('app.auth.login');
     }

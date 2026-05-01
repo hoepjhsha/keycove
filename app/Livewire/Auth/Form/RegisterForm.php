@@ -45,7 +45,7 @@ class RegisterForm extends Form
     ])]
     public string $passwordConfirmation = '';
 
-    #[Validate('accepted', message: 'You must accept the terms and conditions.')]
+    #[Validate('accepted', message: 'Bạn phải đồng ý với điều khoản và điều kiện.')]
     public bool $terms = false;
 
     public function storeUser(): User

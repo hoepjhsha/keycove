@@ -257,8 +257,8 @@ it('shows reviews for the current product on the detail page', function (): void
     $response = $this->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]));
 
     $response->assertOk();
-    $response->assertSee('Reviews');
-    $response->assertSee('2 reviews');
+    $response->assertSee('Đánh giá');
+    $response->assertSee('2 đánh giá');
     $response->assertSee('4.5');
     $response->assertSee('Perfect delivery.');
     $response->assertSee('Worked as expected.');
@@ -346,7 +346,7 @@ it('disables the add to cart action for the owning seller', function (): void {
     $this->actingAs($sellerUser)
         ->get(route('app.products.show', ['product' => $product->slug, 'listing' => $listing->slug]))
         ->assertOk()
-        ->assertSee('Owned by your shop');
+        ->assertSee('Sản phẩm thuộc cửa hàng của bạn');
 });
 
 it('returns 404 when product and listing do not match', function (): void {

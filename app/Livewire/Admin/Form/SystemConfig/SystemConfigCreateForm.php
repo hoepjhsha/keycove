@@ -41,7 +41,7 @@ class SystemConfigCreateForm extends Form
 
         if (SystemConfig::where('key', $this->key)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.key' => 'System setting already exists. Use a different key.',
+                'createForm.key' => __('admin.validation.duplicate_system_config_key'),
             ]);
         }
 

@@ -61,7 +61,7 @@ class CartItemController extends Controller
             'id'         => $cartItem->id,
             'code'       => $cartItem->cart_item_code,
             'listing_id' => $listing?->id,
-            'title'      => $listing?->display_name ?: ($product?->name ?? 'Unknown item'),
+            'title'      => $listing?->display_name ?: ($product?->name ?? 'Sản phẩm chưa xác định'),
             'subtitle'   => collect([$product?->name, $listing?->variant?->edition])->filter()->implode(' • '),
             'quantity'   => (int) $cartItem->quantity,
             'price'      => (float) ($listing?->price ?? 0),

@@ -1,38 +1,38 @@
 <div>
-    @section('pageTitle', 'Manage Products')
+    @section('pageTitle', __('admin.titles.manage_products'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
             ['label' => 'Products List', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 
     <div class="bg-white dark:bg-slate-800 shadow  rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-            <h4 class="font-medium">Manage</h4>
+            <h4 class="font-medium">{{ __('admin.common.manage') }}</h4>
         </div>
         <div class="flex-auto p-4">
             <livewire:admin.table.product.product-table />
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showCreateModal" title="Create new Product" max-width="4xl">
+    <x-reusable.modal wire:model="showCreateModal" :title="__('admin.modal.create_product')" max-width="4xl">
         <form id="createProductForm" class="space-y-4" wire:submit="createProduct">
             <!-- Name & Slug Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
+                    <label for="name" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.name') }}<span class="text-red-400">*</span></label>
                     <input wire:model="createForm.name" type="text" id="name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter product name" required>
+                           placeholder="{{ __('admin.placeholders.product_name') }}" required>
                     @error('createForm.name')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
+                    <label for="slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.slug') }}</label>
                     <input wire:model="createForm.slug" type="text" id="slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter slug or leave blank for auto-generation">
+                           placeholder="{{ __('admin.placeholders.slug_auto') }}">
                     @error('createForm.slug')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
@@ -42,17 +42,17 @@
             <!-- Publisher & Developer Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="publisher" class="font-medium text-sm text-slate-600 dark:text-slate-400">Publisher</label>
+                    <label for="publisher" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.publisher') }}</label>
                     <input wire:model="createForm.publisher" type="text" id="publisher" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter publisher name">
+                           placeholder="{{ __('admin.placeholders.publisher_name') }}">
                     @error('createForm.publisher')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="developer" class="font-medium text-sm text-slate-600 dark:text-slate-400">Developer</label>
+                    <label for="developer" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.developer') }}</label>
                     <input wire:model="createForm.developer" type="text" id="developer" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter developer name">
+                           placeholder="{{ __('admin.placeholders.developer_name') }}">
                     @error('createForm.developer')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
@@ -62,14 +62,14 @@
             <!-- Release Date & Status Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="release_date" class="font-medium text-sm text-slate-600 dark:text-slate-400">Release Date</label>
+                    <label for="release_date" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.release_date_full') }}</label>
                     <input wire:model="createForm.release_date" type="date" id="release_date" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
                     @error('createForm.release_date')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="create_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                    <label for="create_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                     <select wire:model="createForm.status" id="create_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
                         @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
                             @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
@@ -85,9 +85,9 @@
 
             <!-- Description -->
             <div class="mb-2">
-                <label for="description" class="font-medium text-sm text-slate-600 dark:text-slate-400">Description</label>
+                <label for="description" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.description') }}</label>
                 <textarea wire:model="createForm.description" id="description" rows="3" class="form-textarea w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                          placeholder="Enter product description"></textarea>
+                          placeholder="{{ __('admin.placeholders.product_description') }}"></textarea>
                 @error('createForm.description')
                     <small class="error block text-red-500 text-xs">{{ $message }}</small>
                 @enderror
@@ -95,7 +95,7 @@
 
             <!-- Image Upload with Preview -->
             <div class="mb-2">
-                <label for="image" class="font-medium text-sm text-slate-600 dark:text-slate-400">Thumbnail Image</label>
+                <label for="image" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.thumbnail_image') }}</label>
                 <div class="mt-2 flex items-start gap-4">
                     <div class="flex-1">
                         <input wire:model.live="createForm.image" type="file" id="image" accept="image/*" class="form-input w-full rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
@@ -104,7 +104,7 @@
                     @if($createForm->image)
                         <div class="flex flex-col items-center gap-2">
                             <img src="{{ $createForm->image?->temporaryUrl() ?? '' }}" alt="preview" class="w-24 h-24 object-cover rounded-md border border-slate-200 dark:border-slate-700">
-                            <button type="button" wire:click="$set('createForm.image', null)" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+                            <button type="button" wire:click="$set('createForm.image', null)" class="text-xs text-red-500 hover:text-red-700 font-medium">{{ __('admin.common.remove') }}</button>
                         </div>
                     @endif
                 </div>
@@ -115,7 +115,7 @@
 
             <!-- Categories Multi-Select -->
             <div class="mb-2">
-                <label for="categories" class="font-medium text-sm text-slate-600 dark:text-slate-400">Categories</label>
+                <label for="categories" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.categories') }}</label>
                 <select wire:model="createForm.categories" id="categories" multiple class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700 min-h-[120px]">
                     <!-- Parent categories (allow selection) -->
                     @foreach($categoriesGrouped as $parentId => $parentData)
@@ -133,18 +133,18 @@
 
             <!-- System Requirements Key-Value -->
             <div class="mb-4">
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">System Requirements</label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.system_requirements') }}</label>
                 <div class="mt-2 space-y-2">
                     @foreach($createForm->systemRequirements as $index => $item)
                         <div class="flex gap-2 items-start" wire:key="sys-req-{{ $index }}">
                             <input type="text"
                                    wire:model.live="createForm.systemRequirements.{{ $index }}.key"
-                                   placeholder="Key (e.g., os, ram, storage)"
+                                   placeholder="{{ __('admin.placeholders.system_requirement_key') }}"
                                    class="flex-1 form-input rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
                                    x-ref="key_{{ $index }}">
                             <input type="text"
                                    wire:model.live="createForm.systemRequirements.{{ $index }}.value"
-                                   placeholder="Value (e.g., Windows 10, 8GB, 50GB)"
+                                   placeholder="{{ __('admin.placeholders.system_requirement_value') }}"
                                    class="flex-1 form-input rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
                             @if(count($createForm->systemRequirements) > 1)
                                 <button type="button"
@@ -166,23 +166,23 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <button wire:target="createProduct" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">Submit</button>
-                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="createProduct" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.submit') }}</button>
+                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showViewModal" title="Product Details" max-width="4xl">
+    <x-reusable.modal wire:model="showViewModal" :title="__('admin.titles.product_details')" max-width="4xl">
         @if($viewData)
             <div class="space-y-6">
                 <!-- Header Section: ID & Status -->
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Product ID</p>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.product_id') }}</p>
                         <p class="text-lg font-semibold text-slate-900 dark:text-white">#{{ $viewData['id'] }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Status</p>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</p>
                         <div class="mt-1">{!! $viewData['status_label'] !!}</div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Product Image -->
                      <div class="md:col-span-1">
-                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Product Image</p>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">{{ __('admin.common.product_image') }}</p>
                         @if($viewData['image_url'])
                             <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 flex items-center justify-center min-h-[200px] overflow-auto">
                                 <img src="{{ $viewData['image_url'] }}" alt="{{ $viewData['name'] }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" class="rounded">
@@ -200,7 +200,7 @@
                             <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 flex items-center justify-center min-h-[200px]">
                                 <div class="text-center">
                                     <i class="fa-solid fa-image text-4xl text-slate-300 dark:text-slate-600 mb-2"></i>
-                                    <p class="text-slate-500 dark:text-slate-400 text-xs">No Image</p>
+                                    <p class="text-slate-500 dark:text-slate-400 text-xs">{{ __('admin.common.no_image') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -209,33 +209,33 @@
                     <!-- Basic Info -->
                     <div class="md:col-span-2 space-y-4">
                         <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Name</p>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.name') }}</p>
                             <p class="text-slate-900 dark:text-white font-medium">{{ $viewData['name'] }}</p>
                         </div>
 
                         <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Slug</p>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.slug') }}</p>
                             <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['slug'] }}</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Publisher</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.publisher') }}</p>
                                 <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['publisher'] }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Developer</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.developer') }}</p>
                                 <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['developer'] }}</p>
                             </div>
                         </div>
 
                         <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Release Date</p>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.release_date_full') }}</p>
                             <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['release_date'] }}</p>
                         </div>
 
                         <div>
-                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Submitted By</p>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.submitted_by') }}</p>
                             <p class="text-slate-900 dark:text-white text-sm">{{ $viewData['submitted_by'] ?? 'Shop Admin' }}</p>
                         </div>
                     </div>
@@ -246,7 +246,7 @@
 
                 <!-- Categories Section -->
                 <div>
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Categories</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">{{ __('admin.nav.categories') }}</p>
                     @if($viewData['categories']->isNotEmpty())
                         <div class="flex flex-wrap gap-2">
                             @foreach($viewData['categories'] as $category)
@@ -256,25 +256,25 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">No categories assigned</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('admin.common.no_categories_assigned') }}</p>
                     @endif
                 </div>
 
                 <!-- Description Section -->
                 <div>
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Description</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">{{ __('admin.common.description') }}</p>
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm text-slate-900 dark:text-slate-300 max-h-48 overflow-y-auto border border-slate-200 dark:border-slate-700">
                         @if($viewData['description'] !== '--N/A--')
                             {!! nl2br(e($viewData['description'])) !!}
                         @else
-                            <span class="text-slate-500 dark:text-slate-400 italic">No description provided</span>
+                            <span class="text-slate-500 dark:text-slate-400 italic">{{ __('admin.common.no_description') }}</span>
                         @endif
                     </div>
                 </div>
 
                 <!-- System Requirements Section -->
                 <div>
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">System Requirements</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">{{ __('admin.common.system_requirements') }}</p>
                     @if(!empty($viewData['system_requirement']))
                         <div class="space-y-2">
                             @foreach($viewData['system_requirement'] as $key => $value)
@@ -285,29 +285,29 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">No system requirements specified</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm">{{ __('admin.common.no_system_requirements') }}</p>
                     @endif
                 </div>
 
                 <!-- Metadata Section -->
                 <div class="bg-slate-50 dark:bg-slate-800/30 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Metadata</p>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">{{ __('admin.common.metadata') }}</p>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                         <div>
-                            <p class="text-slate-500 dark:text-slate-400 mb-1">Created</p>
+                            <p class="text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.created_at') }}</p>
                             <p class="text-slate-900 dark:text-white font-medium">{{ $viewData['created_at'] }}</p>
                         </div>
                         <div>
-                            <p class="text-slate-500 dark:text-slate-400 mb-1">Updated</p>
+                            <p class="text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.updated_at') }}</p>
                             <p class="text-slate-900 dark:text-white font-medium">{{ $viewData['updated_at'] }}</p>
                         </div>
                         <div>
-                            <p class="text-slate-500 dark:text-slate-400 mb-1">Deleted</p>
+                            <p class="text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.deleted') }}</p>
                             <p class="text-slate-900 dark:text-white font-medium">
                                 @if($viewData['deleted_at'])
                                     {{ $viewData['deleted_at'] }}
                                 @else
-                                    <span class="text-green-600 dark:text-green-400">Active</span>
+                                    <span class="text-green-600 dark:text-green-400">{{ __('admin.common.active') }}</span>
                                 @endif
                             </p>
                         </div>
@@ -329,22 +329,22 @@
         </x-slot:footer>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showEditModal" title="Edit Product #{{ $editForm->product?->id }}" max-width="4xl">
+    <x-reusable.modal wire:model="showEditModal" :title="__('admin.modal.edit_product', ['id' => $editForm->product?->id])" max-width="4xl">
         <form id="editProductForm" class="space-y-4" wire:submit="updateProduct">
             <!-- Name & Slug Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="edit_name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
+                    <label for="edit_name" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.name') }}<span class="text-red-400">*</span></label>
                     <input wire:model="editForm.name" type="text" id="edit_name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter product name" required>
+                           placeholder="{{ __('admin.placeholders.product_name') }}" required>
                     @error('editForm.name')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="edit_slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
+                    <label for="edit_slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.slug') }}</label>
                     <input wire:model="editForm.slug" type="text" id="edit_slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter slug or leave blank for auto-generation">
+                           placeholder="{{ __('admin.placeholders.slug_auto') }}">
                     @error('editForm.slug')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
@@ -354,17 +354,17 @@
             <!-- Publisher & Developer Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="edit_publisher" class="font-medium text-sm text-slate-600 dark:text-slate-400">Publisher</label>
+                    <label for="edit_publisher" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.publisher') }}</label>
                     <input wire:model="editForm.publisher" type="text" id="edit_publisher" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter publisher name">
+                           placeholder="{{ __('admin.placeholders.publisher_name') }}">
                     @error('editForm.publisher')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="edit_developer" class="font-medium text-sm text-slate-600 dark:text-slate-400">Developer</label>
+                    <label for="edit_developer" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.developer') }}</label>
                     <input wire:model="editForm.developer" type="text" id="edit_developer" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                           placeholder="Enter developer name">
+                           placeholder="{{ __('admin.placeholders.developer_name') }}">
                     @error('editForm.developer')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
@@ -374,14 +374,14 @@
             <!-- Release Date & Status Row -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-2">
-                    <label for="edit_release_date" class="font-medium text-sm text-slate-600 dark:text-slate-400">Release Date</label>
+                    <label for="edit_release_date" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.release_date_full') }}</label>
                     <input wire:model="editForm.release_date" type="date" id="edit_release_date" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
                     @error('editForm.release_date')
                         <small class="error block text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
                 <div class="mb-2">
-                    <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                    <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                     <select wire:model="editForm.status" id="edit_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
                         @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
                             @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
@@ -397,9 +397,9 @@
 
             <!-- Description -->
             <div class="mb-2">
-                <label for="edit_description" class="font-medium text-sm text-slate-600 dark:text-slate-400">Description</label>
+                <label for="edit_description" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.description') }}</label>
                 <textarea wire:model="editForm.description" id="edit_description" rows="3" class="form-textarea w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                          placeholder="Enter product description"></textarea>
+                          placeholder="{{ __('admin.placeholders.product_description') }}"></textarea>
                 @error('editForm.description')
                     <small class="error block text-red-500 text-xs">{{ $message }}</small>
                 @enderror
@@ -407,7 +407,7 @@
 
             <!-- Image Upload with Preview -->
             <div class="mb-2">
-                <label for="edit_image" class="font-medium text-sm text-slate-600 dark:text-slate-400">Thumbnail Image</label>
+                <label for="edit_image" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.thumbnail_image') }}</label>
                 <div class="mt-2 flex items-start gap-4">
                     <div class="flex-1">
                         <input wire:model.live="editForm.image" type="file" id="edit_image" accept="image/*" class="form-input w-full rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
@@ -416,12 +416,12 @@
                     @if($editForm->image)
                         <div class="flex flex-col items-center gap-2">
                             <img src="{{ $editForm->image?->temporaryUrl() ?? '' }}" alt="preview" class="w-24 h-24 object-cover rounded-md border border-slate-200 dark:border-slate-700">
-                            <button type="button" wire:click="$set('editForm.image', null)" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+                            <button type="button" wire:click="$set('editForm.image', null)" class="text-xs text-red-500 hover:text-red-700 font-medium">{{ __('admin.common.remove') }}</button>
                         </div>
                     @elseif($editForm->product?->image_thumbnail_path)
                         <div class="flex flex-col items-center gap-2">
                             <img src="{{ \App\Utilities\StorageUtility::getUrl($editForm->product->image_thumbnail_path) }}" alt="current" class="w-24 h-24 object-cover rounded-md border border-slate-200 dark:border-slate-700">
-                            <small class="text-slate-500 dark:text-slate-400 text-xs">Current Image</small>
+                            <small class="text-slate-500 dark:text-slate-400 text-xs">{{ __('admin.common.current_image') }}</small>
                         </div>
                     @endif
                 </div>
@@ -432,7 +432,7 @@
 
             <!-- Categories Multi-Select -->
             <div class="mb-2">
-                <label for="edit_categories" class="font-medium text-sm text-slate-600 dark:text-slate-400">Categories</label>
+                <label for="edit_categories" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.categories') }}</label>
                 <select wire:model="editForm.categories" id="edit_categories" multiple class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700 min-h-[120px]">
                     <!-- Parent categories (allow selection) -->
                     @foreach($categoriesGrouped as $parentId => $parentData)
@@ -450,18 +450,18 @@
 
             <!-- System Requirements Key-Value -->
             <div class="mb-4">
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">System Requirements</label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.system_requirements') }}</label>
                 <div class="mt-2 space-y-2">
                     @foreach($editForm->systemRequirements as $index => $item)
                         <div class="flex gap-2 items-start" wire:key="edit-sys-req-{{ $index }}">
                             <input type="text"
                                    wire:model.live="editForm.systemRequirements.{{ $index }}.key"
-                                   placeholder="Key (e.g., os, ram, storage)"
+                                   placeholder="{{ __('admin.placeholders.system_requirement_key') }}"
                                    class="flex-1 form-input rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
                                    x-ref="key_{{ $index }}">
                             <input type="text"
                                    wire:model.live="editForm.systemRequirements.{{ $index }}.value"
-                                   placeholder="Value (e.g., Windows 10, 8GB, 50GB)"
+                                   placeholder="{{ __('admin.placeholders.system_requirement_value') }}"
                                    class="flex-1 form-input rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
                             @if(count($editForm->systemRequirements) > 1)
                                 <button type="button"
@@ -483,13 +483,13 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <button wire:target="updateProduct" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">Update</button>
-                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="updateProduct" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.update') }}</button>
+                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showBulkStatusModal" title="Change Status for Selected Products" max-width="md">
+    <x-reusable.modal wire:model="showBulkStatusModal" :title="__('admin.modal.change_product_status')" max-width="md">
         <form id="bulkStatusForm" class="space-y-4" wire:submit="bulkChangeStatusProduct">
 
             <div class="mb-2">
@@ -498,7 +498,7 @@
                 </label>
 
                 <select wire:model="bulkChangeStatusForm.status" id="bulk_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
 
                     @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)

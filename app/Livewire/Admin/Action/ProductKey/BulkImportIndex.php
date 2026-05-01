@@ -59,7 +59,7 @@ class BulkImportIndex extends Component
                     [
                         'rowNumber' => 0,
                         'field'     => 'import',
-                        'message'   => 'Import failed: '.$e->getMessage(),
+                        'message'   => __('admin.messages.import_failed', ['error' => $e->getMessage()]),
                         'rowData'   => [],
                     ],
                 ],
@@ -86,7 +86,7 @@ class BulkImportIndex extends Component
     public function downloadErrorReport(): BinaryFileResponse
     {
         if (! $this->importResult || empty($this->importResult['errors'])) {
-            abort(400, 'No errors to download');
+            abort(400, __('admin.validation.no_errors_to_download'));
         }
 
         $csv = Writer::createFromString();

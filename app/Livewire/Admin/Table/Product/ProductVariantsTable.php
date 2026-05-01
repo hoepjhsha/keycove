@@ -103,30 +103,30 @@ final class ProductVariantsTable extends PowerGridComponent
             Column::make('#', 'id')
                 ->index(),
 
-            Column::make('Region', 'region_name')
+            Column::make(__('admin.common.region'), 'region_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Platform', 'platform_name')
+            Column::make(__('admin.nav.platforms'), 'platform_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('OS', 'os_name')
+            Column::make(__('admin.common.os'), 'os_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Edition', 'edition')
+            Column::make(__('admin.common.edition'), 'edition')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Listings', 'listings_count')
+            Column::make(__('admin.common.listings'), 'listings_count')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -148,17 +148,17 @@ final class ProductVariantsTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm transition-colors duration-200')
                 ->dispatch('openVariantModal', []),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('bulkDeleteVariant', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-2 px-4 border border-yellow-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('triggerBulkStatusVariant', []),
         ];
@@ -176,7 +176,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === ProductVariantStatus::Active ? 'Deactivate Now' : 'Activate Now',
+                    'x-tooltip' => $row->status === ProductVariantStatus::Active ? __('admin.common.deactivate_now') : __('admin.common.activate_now'),
                 ])
                 ->dispatch('toggleVariantStatus', ['rowId' => $row->id]),
 
@@ -185,7 +185,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Variant',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('openVariantModal', ['variantId' => $row->id]),
 
@@ -194,7 +194,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deleteVariant', ['rowId' => $row->id]),
 
@@ -203,7 +203,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === ProductVariantStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('restoreVariant', ['rowId' => $row->id]),
         ];
@@ -222,8 +222,8 @@ final class ProductVariantsTable extends PowerGridComponent
     public function toggleVariantStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the status of this variant?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.common.variant')]),
             'method' => 'performToggleVariantStatus',
             'id'     => $rowId,
         ]);
@@ -244,15 +244,15 @@ final class ProductVariantsTable extends PowerGridComponent
         $variant->status = $newStatus;
         $variant->save();
 
-        $this->dispatch('swal:success', ['message' => 'Variant Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.common.variant')])]);
     }
 
     #[On('deleteVariant')]
     public function deleteVariant($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Variant?',
-            'text'   => 'Are you sure you want to delete this variant? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.variant')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.common.variant')]),
             'method' => 'performDeleteVariant',
             'id'     => $rowId,
         ]);
@@ -266,7 +266,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 $variant = ProductVariant::findOrFail($id);
 
                 if ($variant->listings()->where('status', '!=', ProductListingStatus::Deleted)->exists()) {
-                    throw new \Exception('Cannot delete variant with active listings.');
+                    throw new \Exception(__('admin.validation.variant_delete_active_listings'));
                 }
 
                 $variant->status = ProductVariantStatus::Deleted;
@@ -274,7 +274,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 $variant->delete();
             });
 
-            $this->dispatch('swal:success', ['message' => 'Variant Deleted Successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.common.variant')])]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -284,8 +284,8 @@ final class ProductVariantsTable extends PowerGridComponent
     public function restoreVariant($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Variant?',
-            'text'   => 'Are you sure you want to restore this variant?',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.common.variant')]),
+            'text'   => __('admin.swal.restore_text', ['name' => __('admin.common.variant')]),
             'method' => 'performRestoreVariant',
             'id'     => $rowId,
         ]);
@@ -299,20 +299,20 @@ final class ProductVariantsTable extends PowerGridComponent
         $variant->status = ProductVariantStatus::Draft;
         $variant->save();
 
-        $this->dispatch('swal:success', ['message' => 'Variant Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.common.variant')])]);
     }
 
     #[On('bulkDeleteVariant')]
     public function bulkDeleteVariant(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one variant!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.variant')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected variants?',
+            'title'  => __('admin.swal.delete_selected_named', ['count' => count($this->checkboxValues), 'name' => __('admin.common.variants')]),
             'method' => 'performBulkDeleteVariant',
             'id'     => null,
         ]);
@@ -336,7 +336,7 @@ final class ProductVariantsTable extends PowerGridComponent
                 }
             });
 
-            $this->dispatch('swal:success', ['message' => 'Bulk delete completed.']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed_short')]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -346,7 +346,7 @@ final class ProductVariantsTable extends PowerGridComponent
     public function triggerBulkStatusVariant(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one variant!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.variant')])]);
 
             return;
         }

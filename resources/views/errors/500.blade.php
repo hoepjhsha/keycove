@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>500 - Server Error</title>
+        <title>500 - Lỗi máy chủ</title>
 
         @vite(['resources/css/app.css'])
         <style>
@@ -40,26 +40,26 @@
                 </div>
 
                 <!-- Title -->
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">Server Error</h1>
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Lỗi máy chủ</h1>
 
                 <!-- Description -->
                 <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg mb-8">
-                    Oops! Something went wrong on our server. Our team has been notified and is working to fix it.
+                    Đã có lỗi xảy ra trên máy chủ. Đội ngũ của chúng tôi đã được thông báo và đang xử lý.
                 </p>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-colors duration-200">
-                        Go Home
+                        Về trang chủ
                     </a>
                     <button onclick="window.location.reload()" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-                        Retry
+                        Thử lại
                     </button>
                 </div>
 
                 <!-- Footer Message -->
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-12">
-                    Error Code: 500
+                    Mã lỗi: 500
                 </p>
             </div>
         </div>

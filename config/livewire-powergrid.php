@@ -84,7 +84,9 @@ return [
              */
             'slim' => [
                 'settings' => [
-                    'alwaysOpen' => false,
+                    'alwaysOpen'        => false,
+                    'placeholderText'   => 'Chọn giá trị',
+                    'searchPlaceholder' => 'Tìm kiếm...',
                 ],
             ],
         ],

@@ -63,7 +63,7 @@ class CheckoutService
                 })
                 ->values();
 
-            abort_if($items->isEmpty(), 422, 'Your cart is empty.');
+            abort_if($items->isEmpty(), 422, 'Giỏ hàng của bạn đang trống.');
 
             $order = Order::create([
                 'buyer_id'       => (int) $cart->user_id,
@@ -109,7 +109,7 @@ class CheckoutService
                     'order_id'              => $order->id,
                     'listing_id'            => $listing->id,
                     'seller_id'             => $listing->seller_id,
-                    'product_name_snapshot' => $listing->display_name ?: ($listing->variant?->product?->name ?? 'Unknown item'),
+                    'product_name_snapshot' => $listing->display_name ?: ($listing->variant?->product?->name ?? 'Sản phẩm chưa xác định'),
                     'variant_snapshot'      => [
                         'variant_id'       => $listing->variant_id,
                         'product_id'       => $listing->variant?->product_id,

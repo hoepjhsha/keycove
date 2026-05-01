@@ -9,7 +9,7 @@
                 </li>
                 <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
                 <li>
-                    <a href="{{ route('app.products.index') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Products</a>
+                    <a href="{{ route('app.products.index') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sản phẩm</a>
                 </li>
                 <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
                 <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">{{ $displayTitle }}</li>
@@ -33,36 +33,36 @@
                         <div class="p-5 sm:p-6 space-y-5">
                             <div class="space-y-2">
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="rounded-full bg-gray-900 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Shop</span>
+                                    <span class="rounded-full bg-gray-900 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">Cửa hàng</span>
                                     @if($listing->stock_count > 0)
-                                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">In stock</span>
+                                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Còn hàng</span>
                                     @else
-                                        <span class="rounded-full bg-rose-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-700 dark:text-rose-300">Sold out</span>
+                                        <span class="rounded-full bg-rose-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-700 dark:text-rose-300">Hết hàng</span>
                                     @endif
                                 </div>
 
                                 <h1 class="text-2xl font-semibold text-gray-900 dark:text-white sm:text-3xl">{{ $displayTitle }}</h1>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $product->name }} • {{ $listing->variant?->edition ?? 'Standard' }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $product->name }} • {{ $listing->variant?->edition ?? 'Bản tiêu chuẩn' }}</p>
                             </div>
 
                             <div class="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
                                 <div>
-                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Price</p>
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Giá</p>
                                     <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ number_format((float) $listing->price, 0, ',', '.') }} VND</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Available keys</p>
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Key khả dụng</p>
                                     <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{{ number_format((int) ($listing->available_keys_count ?? 0)) }}</p>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                                 <div class="rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Khu vực</div>
                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
                                 </div>
                                 <div class="rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Platform</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Nền tảng</div>
                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->platform?->name ?? '--' }}</div>
                                 </div>
                                 <div class="rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
@@ -70,14 +70,14 @@
                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->operatingSystem?->name ?? '--' }}</div>
                                 </div>
                                 <div class="rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                    <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Tồn kho</div>
+                                    <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' key' : 'Hết hàng' }}</div>
                                 </div>
                             </div>
 
                             @if(! empty($product->system_requirement))
                                 <div class="space-y-3">
-                                    <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">System requirements</h2>
+                                    <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Yêu cầu hệ thống</h2>
                                     <dl class="grid gap-3 sm:grid-cols-2">
                                         @foreach($product->system_requirement as $key => $value)
                                             <div class="rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
@@ -94,21 +94,21 @@
 
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <div class="space-y-3">
-                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Description</h2>
-                        <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">{{ $product->description ?? 'No description available.' }}</p>
+                        <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Mô tả</h2>
+                        <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">{{ $product->description ?? 'Chưa có mô tả.' }}</p>
                     </div>
                 </div>
 
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <div class="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Reviews</h2>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">What buyers said after completing their order.</p>
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Đánh giá</h2>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Nhận xét của người mua sau khi hoàn tất đơn hàng.</p>
                         </div>
 
                         <div class="text-right">
                             <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ number_format($productReviewAverage, 1) }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $productReviewCount }} review{{ $productReviewCount === 1 ? '' : 's' }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $productReviewCount }} đánh giá</div>
                         </div>
                     </div>
 
@@ -135,7 +135,7 @@
 
                                     @if(($review['media'] ?? []) !== [])
                                         <div x-data="{ previewUrl: null }" class="mt-4 space-y-2 border-t border-gray-200 pt-4 dark:border-gray-800">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Media</p>
+                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tệp đính kèm</p>
                                             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                                 @foreach($review['media'] as $media)
                                                     @php
@@ -158,7 +158,7 @@
                                                                 </div>
                                                             </div>
                                                             <object data="{{ $media['url'] }}" type="application/pdf" class="h-64 w-full">
-                                                                <div class="p-3 text-sm text-gray-500 dark:text-gray-400">PDF preview unavailable.</div>
+                                                                 <div class="p-3 text-sm text-gray-500 dark:text-gray-400">Không thể xem trước PDF.</div>
                                                             </object>
                                                         </a>
                                                     @elseif($media['url'])
@@ -180,7 +180,7 @@
                                                 x-on:click.self="previewUrl = null"
                                                 class="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4"
                                             >
-                                                <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Close preview"></button>
+                                                 <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Đóng xem trước"></button>
                                                 <div class="relative z-10 max-h-[90vh] max-w-[92vw] overflow-hidden rounded-2xl bg-black shadow-2xl">
                                                     <img :src="previewUrl" alt="" class="max-h-[90vh] max-w-[92vw] object-contain">
                                                 </div>
@@ -192,7 +192,7 @@
                         </div>
                     @else
                         <div class="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400">
-                            No reviews yet.
+                            Chưa có đánh giá.
                         </div>
                     @endif
                 </div>
@@ -200,40 +200,40 @@
 
             <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Meta</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Thông tin</p>
                     <div class="mt-4 space-y-3 text-sm">
                         <div class="flex items-center justify-between gap-4">
-                            <span class="text-gray-500 dark:text-gray-400">Publisher</span>
+                            <span class="text-gray-500 dark:text-gray-400">Nhà phát hành</span>
                             <span class="font-medium text-gray-900 dark:text-white">{{ $product->publisher ?? '--' }}</span>
                         </div>
                         <div class="flex items-center justify-between gap-4">
-                            <span class="text-gray-500 dark:text-gray-400">Developer</span>
+                            <span class="text-gray-500 dark:text-gray-400">Nhà phát triển</span>
                             <span class="font-medium text-gray-900 dark:text-white">{{ $product->developer ?? '--' }}</span>
                         </div>
                         <div class="flex items-center justify-between gap-4">
-                            <span class="text-gray-500 dark:text-gray-400">Release date</span>
+                            <span class="text-gray-500 dark:text-gray-400">Ngày phát hành</span>
                             <span class="font-medium text-gray-900 dark:text-white">{{ $product->release_date?->format('d/m/Y') ?? '--' }}</span>
                         </div>
                         <div class="flex items-center justify-between gap-4">
-                            <span class="text-gray-500 dark:text-gray-400">Categories</span>
+                            <span class="text-gray-500 dark:text-gray-400">Danh mục</span>
                             <span class="font-medium text-gray-900 dark:text-white text-right">{{ $product->display_categories->pluck('name')->join(', ') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Actions</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Thao tác</p>
                     <div x-data="{ wishlistPulse: false, cartPulse: false, pulse(key) { this[key] = false; requestAnimationFrame(() => { this[key] = true; window.setTimeout(() => this[key] = false, 550); }); } }" class="mt-4 space-y-3">
                         @if($canAddToCart)
                             <button type="button" x-on:click="pulse('cartPulse')" wire:click.stop.prevent="addToCart({{ $listing->id }})" x-bind:class="cartPulse ? 'scale-[1.02] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20' : ''" class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-indigo-700 data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90">
                                 <span class="inline-flex items-center gap-2">
                                     <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                    Add to cart
+                                    Thêm vào giỏ
                                 </span>
                             </button>
                         @else
                             <button type="button" disabled class="w-full cursor-not-allowed rounded-md bg-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                                Owned by your shop
+                                Sản phẩm thuộc cửa hàng của bạn
                             </button>
                         @endif
                         <button
@@ -250,7 +250,7 @@
                             class="w-full rounded-md border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all duration-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
                             <span class="inline-flex items-center gap-2">
                                 <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
-                                Wishlist
+                                Yêu thích
                             </span>
                         </button>
                     </div>
@@ -261,14 +261,14 @@
         @if($relatedListings->isNotEmpty())
             <section class="space-y-4">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Related listings</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Listing liên quan</h2>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     @foreach($relatedListings as $related)
                         @php
                             $relatedProduct = $related->variant?->product;
-                            $relatedTitle = data_get($related, 'display_name') ?: ($relatedProduct?->name ?? 'Untitled listing');
+                            $relatedTitle = data_get($related, 'display_name') ?: ($relatedProduct?->name ?? 'Listing chưa có tên');
                             $relatedImage = $relatedProduct?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($relatedProduct->image_thumbnail_path) : null;
                         @endphp
 

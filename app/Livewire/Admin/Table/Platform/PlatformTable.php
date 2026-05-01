@@ -92,33 +92,33 @@ final class PlatformTable extends PowerGridComponent
         return [
             Column::make('#', 'id')
                 ->index(),
-            Column::make('Name', 'name')
+            Column::make(__('admin.common.name'), 'name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Slug', 'slug')
+            Column::make(__('admin.common.slug'), 'slug')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Icon', 'icon_display', 'icon_path')
+            Column::make(__('admin.common.icon'), 'icon_display', 'icon_path')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Base URL', 'base_url')
+            Column::make(__('admin.common.base_url'), 'base_url')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Created at', 'created_at_formatted', 'created_at')
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-            Column::make('Updated at', 'updated_at_formatted', 'updated_at')
+            Column::make(__('admin.common.updated_at_short'), 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -147,17 +147,17 @@ final class PlatformTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm transition-colors duration-200')
                 ->dispatch('openCreateModal', []),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('bulkDelete', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-2 px-4 border border-yellow-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('triggerBulkStatus', []),
         ];
@@ -173,7 +173,7 @@ final class PlatformTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewPlatform', ['rowId' => $row->id]),
 
@@ -182,7 +182,7 @@ final class PlatformTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Platform',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('editPlatform', ['rowId' => $row->id]),
 
@@ -193,7 +193,7 @@ final class PlatformTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === GeneralStatus::Active ? 'Deactivate Now' : 'Activate Now',
+                    'x-tooltip' => $row->status === GeneralStatus::Active ? __('admin.common.deactivate_now') : __('admin.common.activate_now'),
                 ])
                 ->dispatch('toggleStatus', ['rowId' => $row->id]),
 
@@ -202,7 +202,7 @@ final class PlatformTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deletePlatform', ['rowId' => $row->id]),
 
@@ -211,7 +211,7 @@ final class PlatformTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === GeneralStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('revertDelete', ['rowId' => $row->id]),
         ];
@@ -221,8 +221,8 @@ final class PlatformTable extends PowerGridComponent
     public function toggleStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the status of this platform?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.nav.platforms')]),
             'method' => 'performToggleStatus',
             'id'     => $rowId,
         ]);
@@ -238,15 +238,15 @@ final class PlatformTable extends PowerGridComponent
         };
         $platform->save();
 
-        $this->dispatch('swal:success', ['message' => 'Platform Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.platforms')])]);
     }
 
     #[On('deletePlatform')]
     public function deletePlatform($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Platform?',
-            'text'   => 'Are you sure you want to delete this platform? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.nav.platforms')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.nav.platforms')]),
             'method' => 'performDelete',
             'id'     => $rowId,
         ]);
@@ -264,15 +264,15 @@ final class PlatformTable extends PowerGridComponent
             $platform->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Platform Deleted Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.nav.platforms')])]);
     }
 
     #[On('revertDelete')]
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Platform?',
-            'text'   => 'Are you sure you want to restore this platform? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.nav.platforms')]),
+            'text'   => __('admin.swal.restore_text_irreversible', ['name' => __('admin.nav.platforms')]),
             'method' => 'performRevertDelete',
             'id'     => $rowId,
         ]);
@@ -288,20 +288,20 @@ final class PlatformTable extends PowerGridComponent
         $platform->status = GeneralStatus::Inactive;
         $platform->save();
 
-        $this->dispatch('swal:success', ['message' => 'Platform Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.platforms')])]);
     }
 
     #[On('bulkDelete')]
     public function bulkDelete(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one platform!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.platforms')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => __('admin.swal.delete_selected', ['count' => count($this->checkboxValues)]),
             'method' => 'performBulkDelete',
             'id'     => null,
         ]);
@@ -316,7 +316,7 @@ final class PlatformTable extends PowerGridComponent
 
         if ($alreadyDeletedExists) {
             $this->dispatch('swal:error', [
-                'message' => 'Some selected items are already deleted or in the trash.',
+                'message' => __('admin.messages.cannot_change_deleted_status'),
             ]);
 
             return;
@@ -332,14 +332,14 @@ final class PlatformTable extends PowerGridComponent
             Platform::whereIn('id', $this->checkboxValues)->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed')]);
     }
 
     #[On('triggerBulkStatus')]
     public function triggerBulkStatus(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one platform!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.platforms')])]);
 
             return;
         }

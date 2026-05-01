@@ -36,7 +36,7 @@ test('authenticated user can access the my library page', function (): void {
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertSee('My Library');
+        ->assertSee('Thư viện của tôi');
 });
 
 test('verified users can start seller onboarding from my library', function (): void {
@@ -44,7 +44,7 @@ test('verified users can start seller onboarding from my library', function (): 
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertSee('Become a seller')
+        ->assertSee('Trở thành người bán')
         ->assertSee(route('seller.apply'));
 });
 
@@ -62,7 +62,7 @@ test('approved sellers can open the seller dashboard from my library', function 
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertSee('Open dashboard')
+        ->assertSee('Mở bảng điều khiển')
         ->assertSee(route('seller.dashboard.index'));
 });
 
@@ -72,7 +72,7 @@ test('seller dashboard redirects unverified users back to profile verification',
     $this->actingAs($user)
         ->get('/seller/dashboard')
         ->assertRedirect('/my-profile?section=security')
-        ->assertSessionHas('profile-status', 'Verify your email first to unlock seller onboarding.');
+        ->assertSessionHas('profile-status', 'Vui lòng xác minh email trước để mở đăng ký người bán.');
 });
 
 test('legacy orders route redirects to my library', function (): void {
@@ -145,7 +145,7 @@ test('authenticated user can open a variant details modal from my library', func
         ->test(MyLibrary::class)
         ->call('openItemDetails', $orderItem->id)
         ->assertSet('viewingOrderItemId', $orderItem->id)
-        ->assertSee('Variant details')
+        ->assertSee('Chi tiết biến thể')
         ->assertSee('Standard Edition')
         ->assertSee('Library Listing')
         ->assertSee('OI-20260430-LIBMOD');
@@ -174,10 +174,10 @@ test('items without first key reveal do not show confirmation or complaint actio
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertDontSee('Confirm received')
-        ->assertDontSee('Open complaint')
+        ->assertDontSee('Xác nhận đã nhận')
+        ->assertDontSee('Mở khiếu nại')
         ->call('confirmReceived', $orderItem->id)
-        ->assertSee('Open the key once before confirming receipt.');
+        ->assertSee('Vui lòng mở key một lần trước khi xác nhận đã nhận.');
 
     expect($orderItem->refresh()->status)->toBe(OrderStatus::Delivered);
 });
@@ -205,10 +205,10 @@ test('completed items cannot open a new complaint', function (): void {
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertDontSee('Open complaint')
+        ->assertDontSee('Mở khiếu nại')
         ->call('openComplaintForm', $orderItem->id)
         ->assertSet('complaintOrderItemId', null)
-        ->assertSee('Complaints can only be opened for delivered or disputing items.');
+        ->assertSee('Chỉ có thể mở khiếu nại cho sản phẩm đã giao hoặc đang khiếu nại.');
 });
 
 test('authenticated user can confirm received through a modal', function (): void {
@@ -245,10 +245,10 @@ test('authenticated user can confirm received through a modal', function (): voi
         ->assertSee($productKey->key_code)
         ->call('openConfirmReceivedModal', $orderItem->id)
         ->assertSet('confirmReceivedOrderItemId', $orderItem->id)
-        ->assertSee('Mark this order as completed?')
+        ->assertSee('Đánh dấu đơn này là hoàn tất?')
         ->call('confirmReceived', $orderItem->id)
         ->assertSet('confirmReceivedOrderItemId', null)
-        ->assertSee('Write review');
+        ->assertSee('Viết đánh giá');
 
     expect($orderItem->refresh()->status)->toBe(OrderStatus::Completed);
 });
@@ -281,7 +281,7 @@ test('authenticated user can leave a review for a completed order item', functio
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
-        ->assertSee('Write review')
+        ->assertSee('Viết đánh giá')
         ->call('openReviewForm', $orderItem->id)
         ->assertSet('reviewOrderItemId', $orderItem->id)
         ->set('reviewRating', '4')
@@ -290,7 +290,7 @@ test('authenticated user can leave a review for a completed order item', functio
         ->call('submitReview')
         ->assertHasNoErrors()
         ->assertSet('reviewOrderItemId', null)
-        ->assertSee('Your review has been submitted.')
+        ->assertSee('Đánh giá của bạn đã được gửi.')
         ->assertSee('Reviewed');
 
     $review = Review::query()->where('order_item_id', $orderItem->id)->first();
@@ -334,7 +334,7 @@ test('authenticated user cannot submit a second review for the same order item',
         ->set('reviewComment', 'Great purchase.')
         ->call('submitReview')
         ->assertHasNoErrors()
-        ->assertSee('Your review has been submitted.');
+        ->assertSee('Đánh giá của bạn đã được gửi.');
 
     Livewire::actingAs($user)
         ->test(MyLibrary::class)
@@ -343,7 +343,7 @@ test('authenticated user cannot submit a second review for the same order item',
         ->set('reviewComment', 'Trying to edit the review.')
         ->call('submitReview')
         ->assertHasNoErrors()
-        ->assertSee('You have already reviewed this item.');
+        ->assertSee('Bạn đã đánh giá sản phẩm này.');
 
     $reviews = Review::query()->where('order_item_id', $orderItem->id)->get();
 
@@ -402,12 +402,12 @@ test('authenticated user can view and reply to an existing complaint thread', fu
 
     Livewire::actingAs($user)
         ->test(ComplaintThread::class, ['complaint' => $complaint])
-        ->assertSee('Complaint thread')
+        ->assertSee('Hội thoại khiếu nại')
         ->set('replyMessage', 'I have another screenshot showing the mismatch.')
         ->set('replyAttachments', [$replyFile])
         ->call('reply')
         ->assertHasNoErrors()
-        ->assertSee('Your message has been added to the complaint thread.');
+        ->assertSee('Tin nhắn của bạn đã được thêm vào hội thoại khiếu nại.');
 
     Event::assertDispatched(ComplaintThreadUpdated::class, function (ComplaintThreadUpdated $event) use ($complaint): bool {
         return $event->complaintId === $complaint->id

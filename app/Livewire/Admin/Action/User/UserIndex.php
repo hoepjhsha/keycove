@@ -40,7 +40,7 @@ class UserIndex extends Component
         $result = $this->createForm->store();
         if ($result) {
             $this->reset('createForm');
-            $this->dispatch('swal:success', ['message' => 'User created successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.created', ['Name' => __('admin.common.user')])]);
         }
 
         $this->showCreateModal = false;
@@ -50,7 +50,7 @@ class UserIndex extends Component
     {
         $result = $this->editForm->update();
         if ($result) {
-            $this->dispatch('swal:success', ['message' => 'User updated successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.updated', ['Name' => __('admin.common.user')])]);
         }
         $this->showEditModal = false;
     }
@@ -62,7 +62,7 @@ class UserIndex extends Component
             ->where('status', UserStatus::Deleted)
             ->exists()
         ) {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Cannot change status of deleted items.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
             return;
@@ -71,13 +71,13 @@ class UserIndex extends Component
         $result = $this->bulkChangeStatusForm->setStatus($this->bulkSelectedIds);
 
         if ($result) {
-            $this->dispatch('swal:success', ['message' => 'Status updated successfully for selected users.']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.status_updated_selected')]);
 
             $this->bulkChangeStatusForm->reset();
             $this->bulkSelectedIds = [];
             $this->dispatch('pg:eventRefresh-userTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update status.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.failed_update_status'));
         }
 
         $this->showBulkStatusModal = false;
@@ -140,14 +140,14 @@ class UserIndex extends Component
         $currentUserRole = auth('admin')->user()->role;
 
         if ($user && $user->role === UserRole::SuperAdmin) {
-            $this->dispatch('swal:error', ['message' => 'Super Admin cannot be edited.']);
+            $this->dispatch('swal:error', ['message' => __('admin.validation.user_cannot_edit_super_admin')]);
 
             return;
         }
 
         // Prevent editing Admin or SuperAdmin as Admin
         if ($currentUserRole !== UserRole::SuperAdmin && in_array($user->role, [UserRole::SuperAdmin, UserRole::Admin], true)) {
-            $this->dispatch('swal:error', ['message' => 'You do not have permission to edit this user.']);
+            $this->dispatch('swal:error', ['message' => __('admin.validation.user_no_permission_edit')]);
 
             return;
         }

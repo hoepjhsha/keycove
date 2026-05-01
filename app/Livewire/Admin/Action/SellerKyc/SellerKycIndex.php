@@ -26,10 +26,10 @@ class SellerKycIndex extends Component
     {
         $result = $this->processForm->update();
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('KYC Status updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => 'KYC']));
             $this->dispatch('pg:eventRefresh-sellerKycTable');
         } else {
-            sweetalert()->error('Failed to update KYC Status');
+            sweetalert()->error(__('admin.messages.update_failed', ['name' => 'KYC']));
         }
         $this->showProcessModal = false;
     }
@@ -64,16 +64,16 @@ class SellerKycIndex extends Component
 
             $this->viewData = [
                 'id'                  => $seller->id,
-                'user_name'           => $seller->user?->username ?? 'Unknown',
-                'user_email'          => $seller->user?->email ?? 'Unknown',
+                'user_name'           => $seller->user?->username ?? __('admin.common.unknown'),
+                'user_email'          => $seller->user?->email ?? __('admin.common.unknown'),
                 'shop_name'           => $seller->shop_name,
                 'cccd_number'         => $seller->cccd_number,
                 'cccd_front_image'    => $getImgUrl($seller->cccd_front_image, 'front', $seller->id),
                 'cccd_back_image'     => $getImgUrl($seller->cccd_back_image, 'back', $seller->id),
                 'status_label'        => $statusLabel,
                 'kyc_rejected_reason' => $seller->kyc_rejected_reason,
-                'created_at'          => $seller->created_at ? $seller->created_at->format('d/m/Y H:i:s') : 'N/A',
-                'updated_at'          => $seller->updated_at ? $seller->updated_at->format('d/m/Y H:i:s') : 'N/A',
+                'created_at'          => $seller->created_at ? $seller->created_at->format('d/m/Y H:i:s') : __('admin.common.n_a'),
+                'updated_at'          => $seller->updated_at ? $seller->updated_at->format('d/m/Y H:i:s') : __('admin.common.n_a'),
             ];
 
             $this->showViewModal = true;
@@ -89,7 +89,7 @@ class SellerKycIndex extends Component
             $this->processForm->setSeller($seller);
             $this->showProcessModal = true;
         } else {
-            sweetalert()->error('Seller KYC is already processed or not found.');
+            sweetalert()->error(__('admin.validation.seller_kyc_processed'));
         }
     }
 }

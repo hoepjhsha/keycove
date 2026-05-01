@@ -44,10 +44,10 @@ class PlatformIndex extends Component
         if ($result) {
             $this->createForm->reset();
 
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Platform created successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.platforms')]));
             $this->dispatch('pg:eventRefresh-platformTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to create platform');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.platforms')]));
         }
 
         $this->showCreateModal = false;
@@ -58,10 +58,10 @@ class PlatformIndex extends Component
         $result = $this->editForm->update();
         if ($result) {
             $this->editForm->reset();
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Platform updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.platforms')]));
             $this->dispatch('pg:eventRefresh-platformTable');
         } else {
-            sweetalert()->error('Failed to update platform');
+            sweetalert()->error(__('admin.messages.update_failed', ['name' => __('admin.nav.platforms')]));
         }
         $this->showEditModal = false;
     }
@@ -73,7 +73,7 @@ class PlatformIndex extends Component
             ->where('status', GeneralStatus::Deleted)
             ->exists()
         ) {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Cannot change status of deleted items.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
             return;
@@ -82,14 +82,14 @@ class PlatformIndex extends Component
         $result = $this->bulkChangeStatusForm->setStatus($this->bulkSelectedIds);
 
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Status updated successfully for selected items.');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.status_updated_selected'));
 
             $this->bulkChangeStatusForm->reset();
             $this->bulkSelectedIds = [];
 
             $this->dispatch('pg:eventRefresh-platformTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update status.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.failed_update_status'));
         }
 
         $this->showBulkStatusModal = false;

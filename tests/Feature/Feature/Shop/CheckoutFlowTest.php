@@ -96,10 +96,10 @@ it('shows a checkout review page for selected cart items', function (): void {
 
     $response->assertOk();
     $response->assertSeeLivewire(CheckoutReview::class);
-    $response->assertSee('Review your order');
-    $response->assertSee('Checkout review');
+    $response->assertSee('Kiểm tra đơn hàng');
+    $response->assertSee('Kiểm tra thanh toán');
     $response->assertSee($listing->display_name);
-    $response->assertSee('Confirm');
+    $response->assertSee('Xác nhận');
 });
 
 it('settles paid orders when vnpay returns success', function (): void {

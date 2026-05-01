@@ -61,7 +61,7 @@ final class ComplaintTable extends PowerGridComponent
             ->add('complaint_id', fn (Complaint $model) => '#'.$model->id)
             ->add('order_code', fn (Complaint $model) => $model->orderItem?->order?->order_code ?? '-')
             ->add('buyer_name', fn (Complaint $model) => $model->orderItem?->order?->buyer?->username ?? '-')
-            ->add('seller_name', fn (Complaint $model) => $model->orderItem?->listing?->seller?->user?->username ?? 'Shop Admin')
+            ->add('seller_name', fn (Complaint $model) => $model->orderItem?->listing?->seller?->user?->username ?? __('admin.common.shop_admin'))
             ->add('reason')
             ->add('message_count', fn (Complaint $model) => $model->messages()->count())
             ->add('status_label', function (Complaint $model) {
@@ -86,14 +86,14 @@ final class ComplaintTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'complaint_id', 'id')->index(),
-            Column::make('Order Code', 'order_code', 'orderItem.order.order_code')->sortable()->searchable(),
-            Column::make('Buyer', 'buyer_name', 'orderItem.order.buyer.username')->sortable()->searchable(),
-            Column::make('Seller', 'seller_name', 'orderItem.listing.seller.user.username')->sortable()->searchable(),
-            Column::make('Reason', 'reason')->sortable()->searchable(),
-            Column::make('Messages', 'message_count')->sortable(),
-            Column::make('Status', 'status_label', 'status')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::make(__('admin.common.order_code'), 'order_code', 'orderItem.order.order_code')->sortable()->searchable(),
+            Column::make(__('admin.common.buyer'), 'buyer_name', 'orderItem.order.buyer.username')->sortable()->searchable(),
+            Column::make(__('admin.common.seller'), 'seller_name', 'orderItem.listing.seller.user.username')->sortable()->searchable(),
+            Column::make(__('admin.common.reason'), 'reason')->sortable()->searchable(),
+            Column::make(__('admin.common.messages'), 'message_count')->sortable(),
+            Column::make(__('admin.common.status'), 'status_label', 'status')->sortable(),
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')->sortable(),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -128,7 +128,7 @@ final class ComplaintTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewComplaint', ['rowId' => $row->id]),
         ];

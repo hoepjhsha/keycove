@@ -3,11 +3,11 @@
 
         <div class="hidden lg:flex lg:w-1/2 bg-[#F6EBD9] dark:bg-gray-900 relative flex-col pt-32 px-16 lg:px-24 overflow-hidden border-r border-gray-200 dark:border-gray-800">
             <div class="relative z-20">
-                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Verify</h1>
+                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Xác minh</h1>
                 <div class="flex items-center text-[15px] font-medium text-black/70 dark:text-gray-400 space-x-3">
-                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Home</a>
+                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Trang chủ</a>
                     <i class="fa-solid fa-angle-right text-[12px]"></i>
-                    <span class="text-black dark:text-white">OTP Verification</span>
+                    <span class="text-black dark:text-white">Xác minh OTP</span>
                 </div>
             </div>
 
@@ -21,8 +21,8 @@
             <div class="w-full max-w-[500px] bg-white dark:bg-gray-900 border border-gray-400 dark:border-gray-700 rounded-[2rem] p-8 sm:p-12">
 
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Enter OTP</h2>
-                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Type the 6-digit code sent to your email.</p>
+                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Nhập mã OTP</h2>
+                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Nhập mã 6 chữ số đã gửi đến email của bạn.</p>
                 </div>
 
                 <form wire:submit="verify" x-data="{
@@ -55,7 +55,7 @@
                 }" class="space-y-6">
 
                     <div class="text-center p-4 bg-[#FCF9F4] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Time Remaining</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Thời gian còn lại</p>
                         <p class="text-3xl font-bold" :class="remainingTime <= 30 ? 'text-[#D32F2F]' : 'text-black dark:text-white'">
                             <span x-text="String(Math.floor(remainingTime / 60)).padStart(2, '0')"></span>:<span x-text="String(remainingTime % 60).padStart(2, '0')"></span>
                         </p>
@@ -79,22 +79,22 @@
                     <button type="submit"
                             :disabled="timerExpired || otp.length !== 6"
                             class="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:bg-gray-800 transition-colors text-[14px] tracking-wide uppercase disabled:opacity-50 disabled:cursor-not-allowed">
-                        Verify Code
+                        Xác minh mã
                     </button>
                 </form>
 
                 <div x-show="timerExpired" class="mt-6 p-5 bg-[#F6EBD9] dark:bg-gray-800 border border-black/10 dark:border-gray-700 rounded-xl">
                     <p class="text-[14px] font-medium text-black dark:text-white mb-4 text-center">
-                        The OTP code has expired. Please request a new one.
+                        Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.
                     </p>
                     <button wire:click="resend"
                             class="w-full py-3.5 bg-white dark:bg-gray-900 border border-black dark:border-gray-600 text-black dark:text-white font-bold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-[14px] tracking-wide uppercase">
-                        Resend OTP Code
+                        Gửi lại mã OTP
                     </button>
                 </div>
 
                 <p class="text-center text-[15px] font-medium text-gray-600 dark:text-gray-400 mt-8">
-                    Didn't receive code? <button wire:click="resend" type="button" class="text-black dark:text-white hover:text-[#D32F2F] dark:hover:text-[#D32F2F] font-bold transition-colors">Resend</button>
+                    Chưa nhận được mã? <button wire:click="resend" type="button" class="text-black dark:text-white hover:text-[#D32F2F] dark:hover:text-[#D32F2F] font-bold transition-colors">Gửi lại</button>
                 </p>
             </div>
         </div>

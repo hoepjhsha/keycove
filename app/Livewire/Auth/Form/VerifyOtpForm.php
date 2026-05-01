@@ -27,7 +27,7 @@ class VerifyOtpForm extends Form
         if (! $cachedOtp || $cachedOtp != $this->otp_code) {
             RateLimiter::hit($this->throttleKey(), 300);
             throw ValidationException::withMessages([
-                'otp_code' => 'Invalid or expired OTP code.',
+                'otp_code' => 'Mã OTP không hợp lệ hoặc đã hết hạn.',
             ]);
         }
 
@@ -55,7 +55,7 @@ class VerifyOtpForm extends Form
         $email = session('reset_password_email');
         if (! $email) {
             throw ValidationException::withMessages([
-                'otp_code' => 'Session expired. Please start over.',
+                'otp_code' => 'Phiên đã hết hạn. Vui lòng bắt đầu lại.',
             ]);
         }
 
@@ -77,7 +77,7 @@ class VerifyOtpForm extends Form
         }
 
         throw ValidationException::withMessages([
-            'otp_code' => 'Too many attempts. Please try again in 5 minutes.',
+            'otp_code' => 'Bạn thử quá nhiều lần. Vui lòng thử lại sau 5 phút.',
         ]);
     }
 

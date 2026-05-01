@@ -1,5 +1,5 @@
-<x-layouts.app :title="$title ?? 'Dashboard'">
-    @section('pre-app-name', 'Admin')
+<x-layouts.app :title="$title ?? __('admin.titles.dashboard')">
+    @section('pre-app-name', __('admin.brand.admin'))
 
     <div class="flex h-screen overflow-hidden">
 
@@ -14,7 +14,7 @@
                 <main class="flex-1 p-2 sm:p-4 lg:p-6">
                     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ $pageTitle ?? 'Dashboard' }}
+                            {{ $pageTitle ?? __('admin.titles.dashboard') }}
                         </h1>
 
                         @stack('breadcrumbs')

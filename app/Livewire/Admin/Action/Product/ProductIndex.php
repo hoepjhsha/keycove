@@ -54,10 +54,10 @@ class ProductIndex extends Component
         $result = $this->createForm->store();
         if ($result) {
             $this->createForm->reset();
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Product created successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.products_list')]));
             $this->dispatch('pg:eventRefresh-productTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to create product');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.products_list')]));
         }
 
         $this->showCreateModal = false;
@@ -67,10 +67,10 @@ class ProductIndex extends Component
     {
         $result = $this->editForm->update();
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Product updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.products_list')]));
             $this->dispatch('pg:eventRefresh-productTable');
         } else {
-            sweetalert()->error('Failed to update product');
+            sweetalert()->error(__('admin.messages.update_failed', ['name' => __('admin.nav.products_list')]));
         }
         $this->showEditModal = false;
     }
@@ -82,7 +82,7 @@ class ProductIndex extends Component
             ->where('status', GeneralStatus::Deleted)
             ->exists()
         ) {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Cannot change status of deleted items.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
             return;
@@ -91,14 +91,14 @@ class ProductIndex extends Component
         $result = $this->bulkChangeStatusForm->setStatus($this->bulkSelectedIds);
 
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Status updated successfully for selected items.');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.status_updated_selected'));
 
             $this->bulkChangeStatusForm->reset();
             $this->bulkSelectedIds = [];
 
             $this->dispatch('pg:eventRefresh-productTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update status.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.failed_update_status'));
         }
 
         $this->showBulkStatusModal = false;
@@ -167,7 +167,7 @@ class ProductIndex extends Component
                 'description'        => $product->description ?? '--N/A--',
                 'system_requirement' => $product->system_requirement ?? [],
                 'categories'         => $categories,
-                'submitted_by'       => $product->submittedBySeller?->shop_name ?? 'Shop Admin',
+                'submitted_by'       => $product->submittedBySeller?->shop_name ?? __('admin.common.shop_admin'),
                 'submitted_by_email' => $product->submittedBySeller?->user?->email ?? 'KeyCove',
                 'status_label'       => $statusLabel,
                 'created_at'         => $product->created_at->format('d/m/Y H:i:s'),

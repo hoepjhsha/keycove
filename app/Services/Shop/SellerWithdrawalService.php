@@ -107,7 +107,7 @@ class SellerWithdrawalService
                 'bank_code'      => $data['bank_code'],
                 'account_number' => $data['bank_account_number'],
                 'account_name'   => $data['bank_account_name'],
-                'order_info'     => 'Seller withdrawal request'.($withdraw ? ' #'.$withdraw->id : ''),
+                'order_info'     => 'Yêu cầu rút tiền người bán'.($withdraw ? ' #'.$withdraw->id : ''),
                 'txn_ref'        => $withdraw ? 'WD-'.$withdraw->id : null,
                 'request_id'     => $withdraw ? 'WDREQ-'.$withdraw->id : null,
             ]);

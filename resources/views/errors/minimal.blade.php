@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>{{ $__status ?? 'Error' }}</title>
+        <title>{{ $__status ?? 'Lỗi' }}</title>
 
         @vite(['resources/css/app.css'])
     </head>
@@ -33,34 +33,34 @@
                 <!-- Title -->
                 <h1 class="text-3xl md:text-4xl font-bold mb-4">
                     @if ($__status === 400)
-                        Bad Request
+                        Yêu cầu không hợp lệ
                     @elseif ($__status === 401)
-                        Unauthorized
+                        Chưa được xác thực
                     @elseif ($__status === 503)
-                        Service Unavailable
+                        Dịch vụ tạm thời không khả dụng
                     @else
-                        Error Occurred
+                        Đã xảy ra lỗi
                     @endif
                 </h1>
 
                 <!-- Description -->
                 <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg mb-8">
-                    {{ $message ?? 'Sorry, an error occurred while processing your request. Please try again later.' }}
+                    {{ $message ?? 'Rất tiếc, đã xảy ra lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.' }}
                 </p>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-600 hover:bg-slate-700 dark:bg-slate-500 dark:hover:bg-slate-600 transition-colors duration-200">
-                        Go Home
+                        Về trang chủ
                     </a>
                     <button onclick="window.history.back()" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-                        Go Back
+                        Quay lại
                     </button>
                 </div>
 
                 <!-- Footer Message -->
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-12">
-                    Error Code: {{ $__status ?? 500 }}
+                    Mã lỗi: {{ $__status ?? 500 }}
                 </p>
             </div>
         </div>

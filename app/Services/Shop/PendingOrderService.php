@@ -21,7 +21,7 @@ class PendingOrderService
         return $paymentManager->driver('vnpay')->createPayment([
             'txn_ref'    => $order->order_code,
             'amount'     => (float) $order->total_price,
-            'order_info' => 'Payment for '.$order->order_code,
+            'order_info' => 'Thanh toán cho '.$order->order_code,
             'order_type' => 'other',
             'locale'     => 'vn',
         ]);

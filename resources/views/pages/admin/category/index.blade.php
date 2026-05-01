@@ -1,44 +1,44 @@
 <div>
-    @section('pageTitle', 'Manage Categories')
+    @section('pageTitle', __('admin.titles.manage_categories'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
-            ['label' => 'Category', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.common.category'), 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 
     <div class="bg-white dark:bg-slate-800 shadow  rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-            <h4 class="font-medium">Manage</h4>
+            <h4 class="font-medium">{{ __('admin.common.manage') }}</h4>
         </div>
         <div class="flex-auto p-4">
             <livewire:admin.table.category.category-table />
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showCreateModal" title="Create new Category" max-width="2xl">
+    <x-reusable.modal wire:model="showCreateModal" :title="__('admin.modal.create_category')" max-width="2xl">
         <form id="createCategoryForm" class="space-y-4" wire:submit="createCategory">
             <div class="mb-2">
-                <label for="name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
+                <label for="name" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.name') }}<span class="text-red-400">*</span></label>
                 <input wire:model="createForm.name" type="text" id="name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="Enter category name" required>
+                       placeholder="{{ __('admin.placeholders.category_name') }}" required>
                 @error('createForm.name')
                     <small class="error block text-red-500 text-xs">{{ $message }}</small>
                 @enderror
             </div>
             <div class="mb-2">
-                <label for="slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
+                <label for="slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.slug') }}</label>
                 <input wire:model="createForm.slug" type="text" id="slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700"
-                       placeholder="Enter slug or leave blank for auto-generation">
+                       placeholder="{{ __('admin.placeholders.slug_auto') }}">
                 @error('createForm.slug')
                     <small class="error block text-red-500 text-xs">{{ $message }}</small>
                 @enderror
             </div>
             <div class="mb-2">
-                <label for="parent_category" class="font-medium text-sm text-slate-600 dark:text-slate-400">Parent Category</label>
+                <label for="parent_category" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.parent') }}</label>
                 <select wire:model="createForm.parentId" id="parent_category" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 placeholder:font-normal placeholder:text-sm hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500  dark:hover:border-slate-700">
-                    <option value="">--None--</option>
+                    <option value="">{{ __('admin.common.none') }}</option>
 
                     @foreach($this->parentCategories as $parentCategory)
                         <option value="{{ $parentCategory->id }}">{{ $parentCategory->name }}</option>
@@ -46,13 +46,13 @@
                 </select>
             </div>
             <div class="flex items-center justify-end space-x-2">
-                <button wire:target="createCategory" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">Submit</button>
-                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="createCategory" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.submit') }}</button>
+                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500  text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showViewModal" title="Category Details" max-width="2xl">
+    <x-reusable.modal wire:model="showViewModal" :title="__('admin.modal.category_details')" max-width="2xl">
         @if($viewData)
             <div class="space-y-4">
                 <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
@@ -64,34 +64,34 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Name</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.name') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['name'] }}</dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Slug</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.slug') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['slug'] }}</dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Parent</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.parent') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['parent_name'] }}</dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">
                                 {!! $viewData['status_label'] !!}
                             </dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Created At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.created_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['created_at'] }}</dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3 border-b-0">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Updated At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.updated_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['updated_at'] }}</dd>
                         </div>
 
@@ -102,15 +102,15 @@
 
         <x-slot:footer>
             <button wire:click="$set('showViewModal', false)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 transition-colors inline-flex items-center">
-                <i class="fa-solid fa-xmark mr-2"></i> Close
+                <i class="fa-solid fa-xmark mr-2"></i> {{ __('admin.common.close') }}
             </button>
         </x-slot:footer>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showEditModal" title="Edit Category #{{ $editForm->category?->id }}" max-width="2xl">
+    <x-reusable.modal wire:model="showEditModal" :title="__('admin.modal.edit_category', ['id' => $editForm->category?->id])" max-width="2xl">
         <form id="editCategoryForm" class="space-y-4" wire:submit="updateCategory">
             <div class="mb-2">
-                <label for="edit_name" class="font-medium text-sm text-slate-600 dark:text-slate-400">Name<span class="text-red-400">*</span></label>
+                <label for="edit_name" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.name') }}<span class="text-red-400">*</span></label>
                 <input wire:model="editForm.name" type="text" id="edit_name" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" required>
                 @error('editForm.name')
                     <small class="text-red-500 text-xs">{{ $message }}</small>
@@ -118,7 +118,7 @@
             </div>
 
             <div class="mb-2">
-                <label for="edit_slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">Slug</label>
+                <label for="edit_slug" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.slug') }}</label>
                 <input wire:model="editForm.slug" type="text" id="edit_slug" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70">
                 @error('editForm.slug')
                     <small class="text-red-500 text-xs">{{ $message }}</small>
@@ -126,9 +126,9 @@
             </div>
 
             <div class="mb-2">
-                <label for="edit_parent_category" class="font-medium text-sm text-slate-600 dark:text-slate-400">Parent Category</label>
+                <label for="edit_parent_category" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.parent') }}</label>
                 <select wire:model="editForm.parentId" id="edit_parent_category" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0">
-                    <option value="">--None--</option>
+                    <option value="">{{ __('admin.common.none') }}</option>
                     @foreach($this->parentCategories as $parentCategory)
                         @if($parentCategory->id !== $editForm->category?->id)
                             <option value="{{ $parentCategory->id }}">{{ $parentCategory->name }}</option>
@@ -141,7 +141,7 @@
             </div>
 
             <div class="mb-2">
-                <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="editForm.status" id="edit_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
                     @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
@@ -155,22 +155,22 @@
             </div>
 
             <div class="flex items-center justify-end space-x-2">
-                <button wire:target="updateCategory" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">Update</button>
-                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="updateCategory" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.update') }}</button>
+                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showBulkStatusModal" title="Change Status for Selected Categories" max-width="md">
+    <x-reusable.modal wire:model="showBulkStatusModal" :title="__('admin.modal.change_category_status')" max-width="md">
         <form id="bulkStatusForm" class="space-y-4" wire:submit="bulkChangeStatusCategory">
 
             <div class="mb-2">
                 <label for="bulk_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">
-                    Select New Status <span class="text-red-400">*</span>
+                    {{ __('admin.common.select_new_status') }} <span class="text-red-400">*</span>
                 </label>
 
                 <select wire:model="bulkChangeStatusForm.status" id="bulk_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500 dark:hover:border-slate-700" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
 
                     @foreach(\App\Enums\GeneralStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\GeneralStatus::Deleted)
@@ -186,10 +186,10 @@
 
             <div class="flex items-center justify-end space-x-2 mt-6">
                 <button wire:target="bulkChangeStatusCategory" type="submit" class="inline-block focus:outline-none text-yellow-600 hover:bg-yellow-500 hover:text-white bg-transparent border border-yellow-400 dark:border-yellow-600 text-sm font-medium py-1 px-3 rounded mb-1 transition-colors">
-                    Apply Status
+                    {{ __('admin.common.apply_status') }}
                 </button>
                 <button wire:click="$set('showBulkStatusModal', false)" type="button" class="inline-block focus:outline-none text-slate-500 hover:bg-slate-500 hover:text-white bg-transparent border border-slate-300 dark:border-slate-600 text-sm font-medium py-1 px-3 rounded mb-1 transition-colors">
-                    Cancel
+                    {{ __('admin.common.cancel') }}
                 </button>
             </div>
         </form>

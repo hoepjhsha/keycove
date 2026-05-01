@@ -20,7 +20,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Shop')]
+#[Title('Cửa hàng')]
 class Home extends Component
 {
     public bool $showAllCategories = false;
@@ -231,12 +231,12 @@ class Home extends Component
 
                 return [
                     'id'           => $listing->id,
-                    'title'        => $listing->display_name ?: ($product?->name ?? 'Untitled listing'),
+                    'title'        => $listing->display_name ?: ($product?->name ?? 'Listing chưa có tên'),
                     'slug'         => $listing->slug,
                     'price'        => (float) $listing->price,
                     'stock_count'  => (int) $listing->stock_count,
-                    'seller_name'  => $listing->seller?->shop_name ?: $listing->seller?->user?->username ?: 'Seller',
-                    'product_name' => $product?->name ?? 'Unknown product',
+                    'seller_name'  => $listing->seller?->shop_name ?: $listing->seller?->user?->username ?: 'Người bán',
+                    'product_name' => $product?->name ?? 'Sản phẩm chưa xác định',
                     'product_slug' => $product?->slug,
                     'image'        => $product?->image_thumbnail_path ? StorageUtility::getUrl($product->image_thumbnail_path) : null,
                     'categories'   => $categories,

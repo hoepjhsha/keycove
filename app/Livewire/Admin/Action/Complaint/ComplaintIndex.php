@@ -89,7 +89,7 @@ class ComplaintIndex extends Component
                 'order_code'      => $complaint->orderItem?->order?->order_code ?? '-',
                 'buyer_username'  => $complaint->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'     => $complaint->orderItem?->order?->buyer?->email ?? '-',
-                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? 'Shop Admin',
+                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? __('admin.common.shop_admin'),
                 'seller_email'    => $complaint->orderItem?->listing?->seller?->user?->email ?? 'KeyCove',
                 'product_name'    => $complaint->orderItem?->product_name_snapshot ?? '-',
                 'reason'          => $complaint->reason,
@@ -103,7 +103,7 @@ class ComplaintIndex extends Component
                     ->get()
                     ->map(fn ($msg) => [
                         'id'          => $msg->id,
-                        'sender_name' => $msg->sender?->username ?? 'Unknown',
+                        'sender_name' => $msg->sender?->username ?? __('admin.common.unknown'),
                         'message'     => $msg->message,
                         'attachments' => $this->resolveStoredPaths($msg->attachments),
                         'created_at'  => $msg->created_at->format('d/m/Y H:i:s'),
@@ -138,7 +138,7 @@ class ComplaintIndex extends Component
             $this->showViewModal = false;
             $this->dispatch('notify', [
                 'type'    => 'success',
-                'message' => 'Complaint status updated successfully',
+                'message' => __('admin.messages.updated', ['Name' => __('admin.nav.dispute_center')]),
             ]);
 
             $this->dispatch('pg:eventRefresh-complaintTable');
@@ -172,7 +172,7 @@ class ComplaintIndex extends Component
         if ($paymentMethod !== PaymentMethod::VNPay) {
             $this->dispatch('notify', [
                 'type'    => 'error',
-                'message' => 'Refund is only available for VNPay orders at the moment.',
+                'message' => __('admin.messages.refund_vnpay_only'),
             ]);
 
             return;
@@ -181,7 +181,7 @@ class ComplaintIndex extends Component
         if (! $transaction) {
             $this->dispatch('notify', [
                 'type'    => 'error',
-                'message' => 'Refund failed: payment transaction was not found.',
+                'message' => __('admin.messages.refund_payment_not_found'),
             ]);
 
             return;
@@ -220,13 +220,13 @@ class ComplaintIndex extends Component
             $this->showViewModal = false;
             $this->dispatch('notify', [
                 'type'    => 'success',
-                'message' => 'Refund processed successfully',
+                'message' => __('admin.messages.refund_processed'),
             ]);
             $this->dispatch('pg:eventRefresh-complaintTable');
         } catch (Throwable $throwable) {
             $this->dispatch('notify', [
                 'type'    => 'error',
-                'message' => 'Refund failed: '.$throwable->getMessage(),
+                'message' => __('admin.messages.refund_failed', ['error' => $throwable->getMessage()]),
             ]);
         }
     }
@@ -264,7 +264,7 @@ class ComplaintIndex extends Component
         $this->showViewModal = false;
         $this->dispatch('notify', [
             'type'    => 'success',
-            'message' => 'Release processed successfully',
+            'message' => __('admin.messages.release_processed'),
         ]);
         $this->dispatch('pg:eventRefresh-complaintTable');
     }

@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Verify OTP')]
+#[Title('Xác minh OTP')]
 class VerifyOtp extends Component
 {
     public VerifyOtpForm $form;
@@ -33,7 +33,7 @@ class VerifyOtp extends Component
     {
         $this->form->verifyProcess();
 
-        flash()->use('theme.aurora')->success('OTP verified successfully.');
+        flash()->use('theme.aurora')->success('Xác minh OTP thành công.');
 
         return redirect()->route('app.auth.password.reset');
     }
@@ -44,7 +44,7 @@ class VerifyOtp extends Component
         $this->remainingTime = 180;
         $this->timerExpired = false;
 
-        flash()->use('theme.aurora')->success('OTP has been resent.');
+        flash()->use('theme.aurora')->success('Mã OTP đã được gửi lại.');
     }
 
     public function render()

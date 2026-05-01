@@ -28,7 +28,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('My Library')]
+#[Title('Thư viện của tôi')]
 class MyLibrary extends Component
 {
     use WithFileUploads;
@@ -91,7 +91,7 @@ class MyLibrary extends Component
     {
         $pendingOrderService->cancel($this->resolveOwnedOrder($orderId));
 
-        session()->flash('library-status', 'The pending order has been cancelled and reserved keys were released.');
+        session()->flash('library-status', 'Đơn chờ thanh toán đã bị hủy và các key đã giữ chỗ được giải phóng.');
     }
 
     public function promptKeyReveal(int $orderItemId): void
@@ -156,7 +156,7 @@ class MyLibrary extends Component
         $keys = $this->orderItemKeys($orderItem);
 
         if ($keys === []) {
-            $this->addError('keyAccessPassword', 'No product keys are attached to this order item yet.');
+            $this->addError('keyAccessPassword', 'Sản phẩm này chưa có key được gắn vào.');
 
             return;
         }
@@ -174,7 +174,7 @@ class MyLibrary extends Component
 
         $this->keyAccessPassword = '';
         $this->keyAccessOrderItemId = null;
-        session()->flash('library-status', 'Your key is now visible below. Stay on this screen while reviewing and activating it.');
+        session()->flash('library-status', 'Key của bạn đang hiển thị bên dưới. Hãy ở lại màn hình này trong lúc kiểm tra và kích hoạt.');
     }
 
     public function hideOrderItemKeys(int $orderItemId): void
@@ -219,7 +219,7 @@ class MyLibrary extends Component
         $item = $this->resolveOwnedOrderItem($orderItemId);
 
         if ($item->status !== OrderStatus::Delivered || $item->buyer_key_viewed_at === null) {
-            session()->flash('library-status', 'Open the key once before confirming receipt.');
+            session()->flash('library-status', 'Vui lòng mở key một lần trước khi xác nhận đã nhận.');
 
             return;
         }
@@ -230,7 +230,7 @@ class MyLibrary extends Component
 
         $this->confirmReceivedOrderItemId = null;
 
-        session()->flash('library-status', 'The order item has been marked as completed.');
+        session()->flash('library-status', 'Sản phẩm trong đơn đã được đánh dấu hoàn tất.');
     }
 
     public function openReviewForm(int $orderItemId): void
@@ -238,13 +238,13 @@ class MyLibrary extends Component
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
 
         if ($orderItem->status !== OrderStatus::Completed) {
-            session()->flash('library-status', 'Only completed items can be reviewed.');
+            session()->flash('library-status', 'Chỉ sản phẩm đã hoàn tất mới có thể đánh giá.');
 
             return;
         }
 
         if ($orderItem->review !== null) {
-            session()->flash('library-status', 'You have already reviewed this item.');
+            session()->flash('library-status', 'Bạn đã đánh giá sản phẩm này.');
 
             return;
         }
@@ -311,14 +311,14 @@ class MyLibrary extends Component
 
         if (! $created) {
             $this->cancelReviewForm();
-            session()->flash('library-status', 'You have already reviewed this item.');
+            session()->flash('library-status', 'Bạn đã đánh giá sản phẩm này.');
 
             return;
         }
 
         $this->cancelReviewForm();
 
-        session()->flash('library-status', 'Your review has been submitted.');
+        session()->flash('library-status', 'Đánh giá của bạn đã được gửi.');
     }
 
     public function openConfirmReceivedModal(int $orderItemId): void
@@ -342,13 +342,13 @@ class MyLibrary extends Component
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
 
         if (! in_array($orderItem->status, [OrderStatus::Delivered, OrderStatus::Disputing], true)) {
-            session()->flash('library-status', 'Complaints can only be opened for delivered or disputing items.');
+            session()->flash('library-status', 'Chỉ có thể mở khiếu nại cho sản phẩm đã giao hoặc đang khiếu nại.');
 
             return;
         }
 
         if ($orderItem->buyer_key_viewed_at === null) {
-            session()->flash('library-status', 'Open the key first before filing a complaint.');
+            session()->flash('library-status', 'Vui lòng mở key trước khi gửi khiếu nại.');
 
             return;
         }
@@ -450,7 +450,7 @@ class MyLibrary extends Component
         $this->complaintReplyMessage = '';
         $this->complaintReplyAttachments = [];
         $this->resetValidation('complaintReplyMessage');
-        session()->flash('library-status', 'Your message has been added to the complaint thread.');
+        session()->flash('library-status', 'Tin nhắn của bạn đã được thêm vào hội thoại khiếu nại.');
     }
 
     public function render(): View
@@ -541,7 +541,7 @@ class MyLibrary extends Component
             ->map(function (ComplaintMessage $message): array {
                 return [
                     'id'          => $message->id,
-                    'sender_name' => $message->sender?->username ?? 'Support',
+                    'sender_name' => $message->sender?->username ?? 'Hỗ trợ',
                     'message'     => $message->message,
                     'created_at'  => $message->created_at?->format('d/m/Y H:i'),
                     'attachments' => $this->resolveStoredPaths($message->attachments),

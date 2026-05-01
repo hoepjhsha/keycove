@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Product Detail')]
+#[Title('Chi tiết sản phẩm')]
 class ProductShow extends Component
 {
     public Product $product;
@@ -67,7 +67,7 @@ class ProductShow extends Component
             ->findOrFail($listingId);
 
         if ($this->currentSellerId() !== null && $this->currentSellerId() === $listing->seller_id) {
-            session()->flash('seller-status', 'You cannot buy your own listing.');
+            session()->flash('seller-status', 'Bạn không thể mua listing của chính mình.');
 
             return;
         }
@@ -78,7 +78,7 @@ class ProductShow extends Component
         $cartItem->save();
 
         $product = $listing->variant?->product;
-        $title = $listing->display_name ?: ($product?->name ?? 'Untitled listing');
+        $title = $listing->display_name ?: ($product?->name ?? 'Listing chưa có tên');
 
         $this->dispatch('shop:cart:add', item: [
             'id'         => $cartItem->id,
@@ -113,7 +113,7 @@ class ProductShow extends Component
             ->map(function (Review $review): array {
                 return [
                     'id'         => $review->id,
-                    'user_name'  => $review->user?->username ?? 'Buyer',
+                    'user_name'  => $review->user?->username ?? 'Người mua',
                     'rating'     => $review->rating,
                     'comment'    => $review->comment,
                     'created_at' => $review->created_at?->format('d/m/Y H:i'),

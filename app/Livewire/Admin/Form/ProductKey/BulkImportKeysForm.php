@@ -21,10 +21,10 @@ class BulkImportKeysForm extends Form
     public function messages(): array
     {
         return [
-            'file.required' => 'Please select a file to upload',
-            'file.file'     => 'Please upload a valid file',
-            'file.mimes'    => 'File must be CSV or XLSX format',
-            'file.max'      => 'File size must not exceed 10MB',
+            'file.required' => __('admin.validation.file_required'),
+            'file.file'     => __('admin.validation.file_valid'),
+            'file.mimes'    => __('admin.validation.file_mimes_csv_xlsx'),
+            'file.max'      => __('admin.validation.file_max_10mb'),
         ];
     }
 

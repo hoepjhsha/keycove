@@ -29,7 +29,7 @@ class SellerKycProcessForm extends Form
     public function messages(): array
     {
         return [
-            'kyc_rejected_reason.required_if' => 'Please provide a reason for rejecting the KYC.',
+            'kyc_rejected_reason.required_if' => __('admin.validation.seller_kyc_rejection_reason'),
         ];
     }
 

@@ -17,13 +17,13 @@
                 const data = event[0];
                 Swal.fire({
                     title: data.title,
-                    text: data.text ?? "You can not revert this action!",
+                    text: data.text ?? @js(__('admin.swal.default_confirm_text')),
                     icon: data.type ?? 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: @js(__('admin.common.yes')),
+                    cancelButtonText: @js(__('admin.common.cancel'))
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Livewire.dispatch(data.method, [data.id]);
@@ -33,7 +33,7 @@
 
             Livewire.on('swal:success', (event) => {
                 Swal.fire({
-                    title: 'Success!',
+                    title: @js(__('admin.common.success')),
                     text: event[0].message,
                     icon: 'success',
                     timer: 2000,
@@ -46,7 +46,7 @@
 
             Livewire.on('swal:error', (event) => {
                 Swal.fire({
-                    title: 'Error!',
+                    title: @js(__('admin.common.error')),
                     text: event[0].message,
                     icon: 'error',
                     timer: 2000,

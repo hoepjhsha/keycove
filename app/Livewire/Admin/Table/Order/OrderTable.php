@@ -145,14 +145,14 @@ final class OrderTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'id')->index(),
-            Column::make('Order Code', 'order_code')->sortable()->searchable(),
-            Column::make('Buyer', 'buyer_name', 'buyer.username')->sortable()->searchable(),
-            Column::make('Total', 'total_price_formatted', 'total_price')->sortable()->bodyAttribute('text-right'),
-            Column::make('Status', 'status_label', 'aggregated_status')->sortable(),
-            Column::make('Payment', 'payment_method_label', 'payment_method')->sortable(),
-            Column::make('Payment Status', 'payment_status_label', 'payment_status')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::make(__('admin.common.order_code'), 'order_code')->sortable()->searchable(),
+            Column::make(__('admin.common.buyer'), 'buyer_name', 'buyer.username')->sortable()->searchable(),
+            Column::make(__('admin.common.total'), 'total_price_formatted', 'total_price')->sortable()->bodyAttribute('text-right'),
+            Column::make(__('admin.common.status'), 'status_label', 'aggregated_status')->sortable(),
+            Column::make(__('admin.common.payment'), 'payment_method_label', 'payment_method')->sortable(),
+            Column::make(__('admin.common.payment_status'), 'payment_status_label', 'payment_status')->sortable(),
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')->sortable(),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -195,7 +195,7 @@ final class OrderTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewOrder', ['rowId' => $row->id]),
         ];

@@ -41,7 +41,7 @@
                     'id' => $item->id,
                     'code' => $item->cart_item_code,
                     'listing_id' => $listing?->id,
-                    'title' => $listing?->display_name ?: ($product?->name ?? 'Unknown item'),
+                    'title' => $listing?->display_name ?: ($product?->name ?? 'Sản phẩm chưa xác định'),
                     'subtitle' => collect([$product?->name, $listing?->variant?->edition])->filter()->implode(' • '),
                     'quantity' => (int) $item->quantity,
                     'price' => (float) ($listing?->price ?? 0),
@@ -80,7 +80,7 @@
         wishlistPulse: false,
         cartPulse: false,
         actionToastOpen: false,
-        actionToast: { type: 'wishlist', label: '', title: '' },
+                actionToast: { type: 'wishlist', label: '', title: '' },
         actionToastTimeout: null,
         pulseTimeouts: { wishlist: null, cart: null },
         init() {
@@ -232,7 +232,7 @@
             this.actionToast = {
                 type,
                 label,
-                title: title || (type === 'wishlist' ? 'Saved item' : 'Cart item'),
+                title: title || (type === 'wishlist' ? 'Sản phẩm đã lưu' : 'Sản phẩm trong giỏ'),
             };
 
             this.actionToastOpen = true;
@@ -267,14 +267,14 @@
                 const payload = await response.json();
 
                 if (! response.ok) {
-                    throw new Error(payload.message || 'Unable to update cart item.');
+                    throw new Error(payload.message || 'Không thể cập nhật giỏ hàng.');
                 }
 
                 this.cartItems = this.cartItems.map(entry => String(entry.id) === String(itemId) ? payload.item : entry);
                 this.pulseAction('cart');
-                this.showActionToast('cart', 'Cart updated', payload.item.title);
+                this.showActionToast('cart', 'Đã cập nhật giỏ', payload.item.title);
             } catch (error) {
-                this.showActionToast('cart', 'Update failed', existingItem.title);
+                this.showActionToast('cart', 'Cập nhật thất bại', existingItem.title);
             } finally {
                 this.setCartItemPending(itemId, false);
             }
@@ -331,15 +331,15 @@
                 const payload = await response.json();
 
                 if (! response.ok) {
-                    throw new Error(payload.message || 'Unable to remove cart item.');
+                    throw new Error(payload.message || 'Không thể xóa sản phẩm khỏi giỏ.');
                 }
 
                 this.cartItems = this.cartItems.filter(entry => String(entry.id) !== String(payload.item_id));
                 this.selectedCartItemCodes = this.selectedCartItemCodes.filter(code => String(code) !== String(payload.item_code));
                 this.pulseAction('cart');
-                this.showActionToast('cart', 'Removed from cart', existingItem.title);
+                this.showActionToast('cart', 'Đã xóa khỏi giỏ', existingItem.title);
             } catch (error) {
-                this.showActionToast('cart', 'Remove failed', existingItem.title);
+                this.showActionToast('cart', 'Xóa thất bại', existingItem.title);
             } finally {
                 this.setCartItemPending(itemId, false);
             }
@@ -354,7 +354,7 @@
             if (! alreadySaved) {
                 this.wishlistItems.unshift({
                     id: item.id,
-                    title: item.title || 'Saved item',
+                    title: item.title || 'Sản phẩm đã lưu',
                     subtitle: item.subtitle || '',
                     price: Number(item.price || 0),
                     image: item.image || null,
@@ -365,7 +365,7 @@
             }
 
             this.pulseAction('wishlist');
-            this.showActionToast('wishlist', alreadySaved ? 'Already saved' : 'Wishlist updated', item.title);
+            this.showActionToast('wishlist', alreadySaved ? 'Đã lưu trước đó' : 'Đã cập nhật yêu thích', item.title);
 
         },
         addCartItem(item) {
@@ -385,7 +385,7 @@
                     id: item.id,
                     code: String(item.code || ''),
                     listing_id: item.listing_id,
-                    title: item.title || 'Cart item',
+                    title: item.title || 'Sản phẩm trong giỏ',
                     subtitle: item.subtitle || '',
                     quantity: Number(item.quantity || 1),
                     price: Number(item.price || 0),
@@ -398,7 +398,7 @@
             }
 
             this.pulseAction('cart');
-            this.showActionToast('cart', 'Added to cart', item.title);
+            this.showActionToast('cart', 'Đã thêm vào giỏ', item.title);
 
         },
         removeWishlistItem(itemId) {
@@ -436,25 +436,25 @@
 
             <nav class="hidden flex-1 items-center justify-center gap-8 lg:flex">
                 <a href="/" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
-                    Home
+                    Trang chủ
                     <svg class="ml-1.5 h-3 w-3 text-gray-400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
                     </svg>
                 </a>
                 <a href="{{ route('app.products.index') }}" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
-                    All Products
+                    Tất cả sản phẩm
                     <svg class="ml-1.5 h-3 w-3 text-gray-400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
                     </svg>
                 </a>
                 <a href="{{ route('app.sellers.index') }}" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
-                    Browse Sellers
+                    Gian hàng người bán
                     <svg class="ml-1.5 h-3 w-3 text-gray-400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
                     </svg>
                 </a>
                 <a href="{{ $libraryUrl }}" class="group flex items-center text-[15px] font-bold text-black transition-colors hover:text-[#D32F2F] dark:text-white">
-                    My Library
+                    Thư viện của tôi
                     <svg class="ml-1.5 h-3 w-3 text-gray-400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/>
                     </svg>
@@ -497,16 +497,16 @@
                          style="display: none;"
                          class="absolute right-0 top-full z-[60] mt-4 w-72 overflow-hidden rounded-3xl border border-black/10 bg-white/95 p-2 shadow-2xl shadow-black/15 backdrop-blur-xl dark:border-white/10 dark:bg-gray-950/95">
                         <div class="rounded-2xl bg-[#FCF9F4] px-4 py-3 dark:bg-white/5">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Account</p>
-                            <p class="mt-1 text-sm font-semibold text-black dark:text-white" x-text="authName || 'Guest session'"></p>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="isAuthenticated ? 'Manage your account and saved activity.' : 'Sign in to manage your cart and account.'"></p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Tài khoản</p>
+                            <p class="mt-1 text-sm font-semibold text-black dark:text-white" x-text="authName || 'Khách'"></p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="isAuthenticated ? 'Quản lý tài khoản và hoạt động đã lưu.' : 'Đăng nhập để quản lý giỏ hàng và tài khoản.'"></p>
                         </div>
 
                         <div class="mt-2 space-y-1">
                             <a href="{{ $libraryUrl }}" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]">
                                 <span class="flex items-center gap-3">
                                     <i class="fa-solid fa-folder-open text-[15px]"></i>
-                                    My library
+                                    Thư viện của tôi
                                 </span>
                                 <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
                             </a>
@@ -514,7 +514,7 @@
                             <a x-bind:href="profileUrl" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]">
                                 <span class="flex items-center gap-3">
                                     <i class="fa-regular fa-id-badge text-[15px]"></i>
-                                    My profile
+                                    Hồ sơ của tôi
                                 </span>
                                 <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
                             </a>
@@ -523,7 +523,7 @@
                                 <a x-bind:href="logoutUrl" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10">
                                     <span class="flex items-center gap-3">
                                         <i class="fa-solid fa-right-from-bracket text-[15px]"></i>
-                                        Logout
+                                        Đăng xuất
                                     </span>
                                     <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
                                 </a>
@@ -533,7 +533,7 @@
                                 <a x-bind:href="loginUrl" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]">
                                     <span class="flex items-center gap-3">
                                         <i class="fa-solid fa-right-to-bracket text-[15px]"></i>
-                                        Login
+                                        Đăng nhập
                                     </span>
                                     <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
                                 </a>
@@ -587,9 +587,9 @@
                 <div class="border-b border-black/8 px-5 pb-4 pt-5 dark:border-white/10">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Quick Access</p>
-                            <h2 class="mt-2 text-xl font-semibold text-black dark:text-white" x-text="activeDrawerTab === 'cart' ? 'Your cart' : 'Your wishlist'"></h2>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="activeDrawerTab === 'cart' ? 'A focused checkout-ready panel on the edge of the screen.' : 'Saved picks that follow the user through a simple cookie.'"></p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Truy cập nhanh</p>
+                            <h2 class="mt-2 text-xl font-semibold text-black dark:text-white" x-text="activeDrawerTab === 'cart' ? 'Giỏ hàng của bạn' : 'Danh sách yêu thích'"></h2>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="activeDrawerTab === 'cart' ? 'Kiểm tra sản phẩm đã chọn trước khi thanh toán.' : 'Những sản phẩm bạn đã lưu để xem lại sau.'"></p>
                         </div>
 
                         <button type="button" x-on:click="closePanel()" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/70 text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -600,13 +600,13 @@
                     <div class="mt-4 grid grid-cols-2 rounded-2xl bg-[#F6EBD9] p-1.5 dark:bg-white/5">
                         <button type="button" x-on:click="activeDrawerTab = 'cart'" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300" x-bind:class="activeDrawerTab === 'cart' ? 'bg-white text-black shadow-sm dark:bg-gray-900 dark:text-white' : 'text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'">
                             <i class="fa-solid fa-cart-shopping text-[13px]"></i>
-                            Cart
+                            Giỏ hàng
                             <span class="rounded-full bg-black/6 px-2 py-0.5 text-[11px] dark:bg-white/10" x-text="cartCount()"></span>
                         </button>
 
                         <button type="button" x-on:click="activeDrawerTab = 'wishlist'" class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300" x-bind:class="activeDrawerTab === 'wishlist' ? 'bg-white text-black shadow-sm dark:bg-gray-900 dark:text-white' : 'text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'">
                             <i class="fa-regular fa-heart text-[13px]"></i>
-                            Wishlist
+                            Yêu thích
                             <span class="rounded-full bg-black/6 px-2 py-0.5 text-[11px] dark:bg-white/10" x-text="wishlistItems.length"></span>
                         </button>
                     </div>
@@ -619,10 +619,10 @@
                                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-gray-950">
                                     <i class="fa-solid fa-lock"></i>
                                 </div>
-                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Login required for cart</h3>
-                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Wishlist can stay with the visitor in cookies, but cart is reserved for signed-in accounts so checkout stays clean and traceable.</p>
+                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Cần đăng nhập để dùng giỏ hàng</h3>
+                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Hãy đăng nhập để thêm sản phẩm vào giỏ và tiếp tục thanh toán an toàn.</p>
                                 <a href="{{ $loginUrl }}" class="mt-5 inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                    Login to open cart
+                                    Đăng nhập để mở giỏ hàng
                                 </a>
                             </div>
                         </template>
@@ -632,8 +632,8 @@
                                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-gray-950">
                                     <i class="fa-solid fa-bag-shopping"></i>
                                 </div>
-                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Your cart is empty</h3>
-                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Once you start adding listings, they will appear here with a quick subtotal and a cleaner path to checkout.</p>
+                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Giỏ hàng đang trống</h3>
+                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Khi bạn thêm sản phẩm, chúng sẽ xuất hiện tại đây kèm tạm tính để thanh toán nhanh hơn.</p>
                             </div>
                         </template>
 
@@ -657,7 +657,7 @@
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div class="min-w-0">
                                                         <a x-bind:href="item.url" class="line-clamp-1 text-sm font-semibold text-black transition-colors hover:text-[#D32F2F] dark:text-white dark:hover:text-[#ff8b8b]" x-text="item.title"></a>
-                                                        <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400" x-text="item.subtitle || 'Store listing'"></p>
+                                                         <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400" x-text="item.subtitle || 'Sản phẩm trong cửa hàng'"></p>
                                                     </div>
 
                                                     <div class="flex flex-col items-end gap-2">
@@ -669,7 +669,7 @@
                                                                 x-bind:disabled="isCartItemPending(item.id)"
                                                                 class="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F] dark:border-white/20 dark:bg-gray-950"
                                                             >
-                                                            <span>Select</span>
+                                                             <span>Chọn</span>
                                                         </label>
 
                                                         <button
@@ -684,7 +684,7 @@
 
                                                 <div class="mt-4 flex items-end justify-between gap-3">
                                                     <div class="space-y-2">
-                                                        <span class="block text-xs font-medium text-gray-500 dark:text-gray-400" x-text="item.stock > 0 ? `${item.stock} keys left` : 'Sold out'"></span>
+                                                         <span class="block text-xs font-medium text-gray-500 dark:text-gray-400" x-text="item.stock > 0 ? `Còn ${item.stock} key` : 'Hết hàng'"></span>
 
                                                         <div class="inline-flex items-center rounded-full border border-black/10 bg-white p-1 shadow-sm dark:border-white/10 dark:bg-gray-900">
                                                             <button
@@ -708,7 +708,7 @@
                                                     </div>
 
                                                     <div class="text-right">
-                                                        <p class="text-[11px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">Total</p>
+                                                         <p class="text-[11px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">Tổng</p>
                                                         <span class="mt-1 block text-sm font-semibold text-black dark:text-white" x-text="formatPrice(item.price * item.quantity)"></span>
                                                     </div>
                                                 </div>
@@ -726,8 +726,8 @@
                                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#D32F2F] text-white">
                                     <i class="fa-regular fa-heart"></i>
                                 </div>
-                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Wishlist is empty</h3>
-                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Saved items will live in a browser cookie for now, so guests can still keep a shortlist before signing in.</p>
+                                <h3 class="mt-4 text-lg font-semibold text-black dark:text-white">Danh sách yêu thích đang trống</h3>
+                                <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Lưu sản phẩm bạn quan tâm để quay lại xem nhanh hơn.</p>
                             </div>
                         </template>
 
@@ -751,7 +751,7 @@
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div class="min-w-0">
                                                         <a x-bind:href="item.url" class="line-clamp-1 text-sm font-semibold text-black transition-colors hover:text-[#D32F2F] dark:text-white dark:hover:text-[#ff8b8b]" x-text="item.title"></a>
-                                                        <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400" x-text="item.subtitle || 'Saved for later'"></p>
+                                                        <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400" x-text="item.subtitle || 'Đã lưu để xem sau'"></p>
                                                     </div>
                                                     <button type="button" x-on:click="removeWishlistItem(item.id)" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-gray-500 transition-colors hover:border-[#D32F2F]/30 hover:bg-[#D32F2F] hover:text-white dark:border-white/10 dark:text-gray-300 dark:hover:border-[#D32F2F]/40 dark:hover:bg-[#D32F2F] dark:hover:text-white">
                                                         <i class="fa-solid fa-xmark text-[12px]"></i>
@@ -782,23 +782,23 @@
                                             x-on:change="toggleAllCartItemsSelection()"
                                             class="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F] dark:border-white/20 dark:bg-gray-950"
                                         >
-                                        <span x-text="areAllCartItemsSelected() ? 'Clear all' : 'Select all'"></span>
+                                         <span x-text="areAllCartItemsSelected() ? 'Bỏ chọn tất cả' : 'Chọn tất cả'"></span>
                                     </label>
 
-                                    <span x-text="`${selectedCartItemCodes.length} / ${cartItems.length} selected`"></span>
+                                     <span x-text="`Đã chọn ${selectedCartItemCodes.length} / ${cartItems.length}`"></span>
                                 </div>
 
                                 <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                                    <span>Subtotal</span>
+                                     <span>Tạm tính</span>
                                     <span class="font-semibold text-black dark:text-white" x-text="formatPrice(selectedCartSubtotal())"></span>
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="`${selectedCartItemCodes.length} item(s) selected`"></p>
+                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="`Đã chọn ${selectedCartItemCodes.length} sản phẩm`"></p>
                                 <div class="mt-3 grid grid-cols-2 gap-3">
                         <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-900 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
-                            Continue shopping
+                             Tiếp tục mua sắm
                         </a>
                                     <a x-bind:href="checkoutReviewUrl()" x-bind:aria-disabled="! selectedCartItemCodes.length" x-bind:class="selectedCartItemCodes.length ? 'inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white' : 'pointer-events-none inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white opacity-50 dark:bg-white dark:text-gray-950'">
-                                        Review checkout
+                                         Xem lại thanh toán
                                     </a>
                                 </div>
                             </div>
@@ -807,7 +807,7 @@
 
                     <div x-show="activeDrawerTab === 'wishlist'" class="space-y-3">
                         <button type="button" x-on:click="openPanel('cart')" class="inline-flex w-full items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-900 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
-                            Switch to cart
+                             Chuyển sang giỏ hàng
                         </button>
                     </div>
                 </div>

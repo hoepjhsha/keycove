@@ -20,8 +20,8 @@ test('verified users can open the seller application page', function (): void {
     $this->actingAs($user)
         ->get('/seller/apply')
         ->assertOk()
-        ->assertSee('Become a seller')
-        ->assertSee('Application details');
+        ->assertSee('Trở thành người bán')
+        ->assertSee('Thông tin đăng ký');
 });
 
 test('unverified users are redirected away from the seller application page', function (): void {
@@ -30,7 +30,7 @@ test('unverified users are redirected away from the seller application page', fu
     $this->actingAs($user)
         ->get('/seller/apply')
         ->assertRedirect('/my-profile?section=security')
-        ->assertSessionHas('profile-status', 'Verify your email first to unlock seller onboarding.');
+        ->assertSessionHas('profile-status', 'Vui lòng xác minh email trước để mở đăng ký người bán.');
 });
 
 test('verified users can submit a seller application', function (): void {
@@ -49,7 +49,7 @@ test('verified users can submit a seller application', function (): void {
         ->set('cccdBackImage', $backImage)
         ->call('submit')
         ->assertHasNoErrors()
-        ->assertSee('Your seller application has been submitted for review.');
+        ->assertSee('Hồ sơ người bán của bạn đã được gửi để xét duyệt.');
 
     $seller = Seller::query()->where('user_id', $user->id)->first();
 
@@ -100,9 +100,9 @@ test('approved sellers can access the seller dashboard', function (): void {
         ->get('/seller/dashboard')
         ->assertOk()
         ->assertSeeLivewire(Dashboard::class)
-        ->assertSee('Seller Portal')
-        ->assertSee('Recent products')
-        ->assertSee('Recent listings');
+        ->assertSee('Tổng quan người bán')
+        ->assertSee('Sản phẩm gần đây')
+        ->assertSee('Listing gần đây');
 });
 
 test('pending sellers are redirected from the seller dashboard to the application', function (): void {
@@ -121,5 +121,5 @@ test('pending sellers are redirected from the seller dashboard to the applicatio
     $this->actingAs($user)
         ->get('/seller/dashboard')
         ->assertRedirect('/seller/apply')
-        ->assertSessionHas('seller-status', 'Complete and submit your seller application first.');
+        ->assertSessionHas('seller-status', 'Vui lòng hoàn tất và gửi hồ sơ người bán trước.');
 });

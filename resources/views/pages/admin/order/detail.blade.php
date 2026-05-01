@@ -1,9 +1,9 @@
 <div>
-    @section('pageTitle', 'Order Details')
+    @section('pageTitle', __('admin.titles.order_details'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Orders', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.orders'), 'url' => 'javascript:void(0)'],
             ['label' => 'Orders History', 'url' => route('admin.orders.index')],
             ['label' => 'Details', 'url' => 'javascript:void(0)'],
         ]" />
@@ -25,13 +25,13 @@
 
                     <!-- Order Code -->
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">Order Code</dt>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('admin.common.order_code') }}</dt>
                         <dd class="text-slate-900 dark:text-white font-semibold text-lg">#{{ $order->order_code }}</dd>
                     </div>
 
                     <!-- Status -->
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">Status</dt>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('admin.common.status') }}</dt>
                         <dd class="text-slate-900 dark:text-white">
                             @php
                                 $status = $order->status;
@@ -53,7 +53,7 @@
 
                     <!-- Payment Method -->
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">Payment Method</dt>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('admin.common.payment_method') }}</dt>
                         <dd class="text-slate-900 dark:text-white">
                             @php
                                 $method = $order->payment_method;
@@ -70,7 +70,7 @@
 
                     <!-- Payment Status -->
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">Payment Status</dt>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('admin.common.payment_status') }}</dt>
                         <dd class="text-slate-900 dark:text-white">
                             @php
                                 $paymentStatus = $order->payment_status;
@@ -90,7 +90,7 @@
 
                     <!-- Total Price -->
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">Total Price</dt>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400 text-sm mb-2">{{ __('admin.common.total_price') }}</dt>
                         <dd class="text-slate-900 dark:text-white font-semibold text-lg">{{ number_format((float) $order->total_price, 2) }} VND</dd>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
         <!-- Payment Summary Card -->
         <div class="bg-white dark:bg-slate-800 shadow rounded-md">
             <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-                <h4 class="font-medium">Payment Summary</h4>
+                <h4 class="font-medium">{{ __('admin.common.payment_summary') }}</h4>
             </div>
             <div class="p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -130,7 +130,7 @@
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Gateway</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Gateway Tx ID</th>
                                     <th class="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">Amount</th>
-                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
+                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }}</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Paid At</th>
                                 </tr>
                             </thead>
@@ -188,12 +188,12 @@
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">#</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Product Name</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Shop Name</th>
-                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Seller</th>
-                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
+                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.seller') }}</th>
+                                    <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }}</th>
                                     <th class="px-4 py-3 text-center font-medium text-slate-600 dark:text-slate-400">Quantity</th>
                                     <th class="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">Unit Price</th>
                                     <th class="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">Subtotal</th>
-                                    <th class="px-4 py-3 text-center font-medium text-slate-600 dark:text-slate-400">Keys</th>
+                                    <th class="px-4 py-3 text-center font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.available_keys') }}</th>
                                     <th class="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">Settlement</th>
                                 </tr>
                             </thead>

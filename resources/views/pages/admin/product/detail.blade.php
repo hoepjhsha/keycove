@@ -1,9 +1,9 @@
 <div>
-    @section('pageTitle', 'Product Details: ' . $product->name)
+    @section('pageTitle', __('admin.titles.product_details') . ': ' . $product->name)
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
             ['label' => 'Products List', 'url' => route('admin.products.index')],
             ['label' => $product->name, 'url' => 'javascript:void(0)'],
         ]" />
@@ -12,7 +12,7 @@
     <div class="space-y-6">
         <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
             <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-                <h4 class="font-medium">Product Information</h4>
+                <h4 class="font-medium">{{ __('admin.common.product') }}</h4>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -25,7 +25,7 @@
                             <div class="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
                                 <div class="text-center">
                                     <i class="fa-solid fa-image text-4xl text-slate-300 dark:text-slate-600 mb-2"></i>
-                                    <p class="text-slate-500 dark:text-slate-400 text-xs">No Image</p>
+                                    <p class="text-slate-500 dark:text-slate-400 text-xs">{{ __('admin.common.no_image') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -34,31 +34,31 @@
                     <div class="lg:col-span-3 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Name</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.name') }}</p>
                                 <p class="text-slate-900 dark:text-white font-medium">{{ $product->name }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Slug</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.slug') }}</p>
                                 <p class="text-slate-900 dark:text-white">{{ $product->slug }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Publisher</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.publisher') }}</p>
                                 <p class="text-slate-900 dark:text-white">{{ $product->publisher ?? '--N/A--' }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Developer</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.developer') }}</p>
                                 <p class="text-slate-900 dark:text-white">{{ $product->developer ?? '--N/A--' }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Release Date</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.release_date_full') }}</p>
                                 <p class="text-slate-900 dark:text-white">{{ $product->release_date?->format('d/m/Y') ?? '--N/A--' }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Submitted By</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.submitted_by') }}</p>
                                 <p class="text-slate-900 dark:text-white">{{ $product->submittedBySeller?->shop_name ?? 'Shop Admin' }}</p>
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Status</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ __('admin.common.status') }}</p>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $product->status->value === 1 ? 'bg-green-500/10 text-green-500' : ($product->status->value === 2 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-gray-500/10 text-gray-500') }}">
                                     {{ $product->status->label() }}
                                 </span>
@@ -67,7 +67,7 @@
 
                         @if($product->categories->isNotEmpty())
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Categories</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{{ __('admin.nav.categories') }}</p>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($product->categories as $category)
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
@@ -80,7 +80,7 @@
 
                         @if($product->description)
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Description</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{{ __('admin.common.description') }}</p>
                                 <div class="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/30 rounded-lg p-3 max-h-32 overflow-y-auto">
                                     {!! nl2br(e($product->description)) !!}
                                 </div>
@@ -89,7 +89,7 @@
 
                         @if($product->system_requirement)
                             <div>
-                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">System Requirements</p>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{{ __('admin.common.system_requirements') }}</p>
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                                     @foreach($product->system_requirement as $key => $value)
                                         <div class="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-2">
@@ -130,13 +130,13 @@
                             <thead>
                                 <tr class="border-b border-slate-200 dark:border-slate-700">
                                     <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400 w-10"></th>
-                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Region</th>
-                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Platform</th>
+                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.region') }}</th>
+                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.nav.platforms') }}</th>
                                     <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">OS</th>
-                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Edition</th>
-                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
-                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Listings</th>
-                                    <th class="px-3 py-2 text-right font-medium text-slate-600 dark:text-slate-400">Actions</th>
+                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.edition') }}</th>
+                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }}</th>
+                                    <th class="px-3 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.listings') }}</th>
+                                    <th class="px-3 py-2 text-right font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -197,11 +197,11 @@
                                                         <table class="w-full text-xs">
                                                             <thead>
                                                                 <tr class="border-b border-slate-200 dark:border-slate-600">
-                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">Seller</th>
-                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">Price</th>
-                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">Status</th>
-                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">Keys</th>
-                                                                    <th class="px-2 py-1 text-right text-slate-500 dark:text-slate-400">Actions</th>
+                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.seller') }}</th>
+                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.price') }}</th>
+                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</th>
+                                                                    <th class="px-2 py-1 text-left text-slate-500 dark:text-slate-400">{{ __('admin.common.available_keys') }}</th>
+                                                                    <th class="px-2 py-1 text-right text-slate-500 dark:text-slate-400">{{ __('admin.common.actions') }}</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -254,7 +254,7 @@
         <form class="space-y-4" wire:submit="saveVariant">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Region <span class="text-red-400">*</span></label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.region') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.region_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
                         <option value="">-- Select Region --</option>
                         @foreach($this->regions as $region)
@@ -266,7 +266,7 @@
                     @enderror
                 </div>
                 <div>
-                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Platform <span class="text-red-400">*</span></label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.platforms') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.platform_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
                         <option value="">-- Select Platform --</option>
                         @foreach($this->platforms as $platform)
@@ -281,7 +281,7 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Operating System <span class="text-red-400">*</span></label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.operating_systems') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.os_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
                         <option value="">-- Select OS --</option>
                         @foreach($this->operatingSystems as $os)
@@ -293,7 +293,7 @@
                     @enderror
                 </div>
                 <div>
-                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Edition</label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.edition') }}</label>
                     <input wire:model="variantForm.edition" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="e.g., Standard Edition">
                     @error('variantForm.edition')
                         <small class="error text-red-500 text-xs">{{ $message }}</small>
@@ -302,7 +302,7 @@
             </div>
 
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="variantForm.status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
                     @foreach(\App\Enums\ProductVariantStatus::cases() as $status)
                         @if($status !== \App\Enums\ProductVariantStatus::Deleted)
@@ -330,16 +330,16 @@
         <form class="space-y-4" wire:submit="saveListing">
             <div>
                 <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Listing Title <span class="text-slate-400">(Optional)</span></label>
-                <input wire:model="listingForm.display_name" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="Shown instead of the product name when filled">
+                <input wire:model="listingForm.display_name" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="{{ __('admin.placeholders.listing_display_name') }}">
                 @error('listingForm.display_name')
                     <small class="error text-red-500 text-xs">{{ $message }}</small>
                 @enderror
             </div>
 
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Seller</label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.seller') }}</label>
                 <select wire:model="listingForm.seller_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
-                    <option value="">Shop Admin</option>
+                    <option value="">{{ __('admin.common.shop_admin') }}</option>
                     @foreach($this->sellers as $seller)
                         <option value="{{ $seller->id }}">{{ $seller->shop_name }} ({{ $seller->user->email ?? 'N/A' }})</option>
                     @endforeach
@@ -350,7 +350,7 @@
             </div>
 
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Price <span class="text-red-400">*</span></label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.price') }} <span class="text-red-400">*</span></label>
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">VND</span>
                     <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-8 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
@@ -361,7 +361,7 @@
             </div>
 
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="listingForm.status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
                     @foreach(\App\Enums\ProductListingStatus::cases() as $status)
                         @if($status === \App\Enums\ProductListingStatus::Deleted)
@@ -387,11 +387,11 @@
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showKeysModal" title="Product Keys" max-width="3xl">
+    <x-reusable.modal wire:model="showKeysModal" :title="__('admin.common.available_keys')" max-width="3xl">
         <div class="space-y-4">
             <form class="flex gap-2 items-end" wire:submit="saveKey">
                 <div class="flex-1">
-                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Key Code <span class="text-red-400">*</span></label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.key_code') }} <span class="text-red-400">*</span></label>
                     <input wire:model="keyForm.key_code" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" required>
                     @error('keyForm.key_code')
                         <small class="error text-red-500 text-xs">{{ $message }}</small>
@@ -410,15 +410,15 @@
                     @if($this->viewingListingKeys->isEmpty())
                         <div class="p-8 text-center text-slate-500 dark:text-slate-400">
                             <i class="fa-solid fa-key text-2xl mb-2"></i>
-                            <p>No keys available</p>
+                            <p>{{ __('admin.common.no_keys_available') }}</p>
                         </div>
                     @else
                         <table class="w-full text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-700/30 sticky top-0">
                                 <tr>
-                                    <th class="px-4 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Key Code</th>
-                                    <th class="px-4 py-2 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
-                                    <th class="px-4 py-2 text-right font-medium text-slate-600 dark:text-slate-400">Action</th>
+                                    <th class="px-4 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.key_code') }}</th>
+                                    <th class="px-4 py-2 text-left font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }}</th>
+                                    <th class="px-4 py-2 text-right font-medium text-slate-600 dark:text-slate-400">{{ __('admin.common.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
@@ -473,12 +473,12 @@
         </x-slot:footer>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showVariantBulkStatusModal" title="Change Status for Selected Variants" max-width="md">
+    <x-reusable.modal wire:model="showVariantBulkStatusModal" :title="__('admin.modal.change_variant_status')" max-width="md">
         <form class="space-y-4" wire:submit="bulkChangeVariantStatus">
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Select New Status <span class="text-red-400">*</span></label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.select_new_status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="variantBulkStatusForm_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
                     @foreach(\App\Enums\ProductVariantStatus::cases() as $status)
                         <option value="{{ $status->value }}">{{ $status->label() }}</option>
                     @endforeach
@@ -499,12 +499,12 @@
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showListingBulkStatusModal" title="Change Status for Selected Listings" max-width="md">
+    <x-reusable.modal wire:model="showListingBulkStatusModal" :title="__('admin.modal.change_listing_status')" max-width="md">
         <form class="space-y-4" wire:submit="bulkChangeListingStatus">
             <div>
-                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Select New Status <span class="text-red-400">*</span></label>
+                <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.select_new_status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="listingBulkStatusForm_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
                     @foreach(\App\Enums\ProductListingStatus::cases() as $status)
                         <option value="{{ $status->value }}">{{ $status->label() }}</option>
                     @endforeach

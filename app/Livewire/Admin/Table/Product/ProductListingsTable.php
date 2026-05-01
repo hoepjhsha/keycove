@@ -66,7 +66,7 @@ final class ProductListingsTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('seller_name', fn (ProductListing $model) => $model->seller?->shop_name ?? 'Shop Admin')
+            ->add('seller_name', fn (ProductListing $model) => $model->seller?->shop_name ?? __('admin.common.shop_admin'))
             ->add('seller_email', fn (ProductListing $model) => $model->seller?->user?->email ?? 'KeyCove')
             ->add('price_formatted', fn (ProductListing $model) => number_format((float) $model->price, 2).' VND')
             ->add('price', fn (ProductListing $model) => (float) $model->price)
@@ -97,26 +97,26 @@ final class ProductListingsTable extends PowerGridComponent
     public function columns(): array
     {
         return [
-            Column::make('ID', 'id')
+            Column::make(__('admin.common.id'), 'id')
                 ->sortable(),
 
-            Column::make('Seller', 'seller_name')
+            Column::make(__('admin.common.seller'), 'seller_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Email', 'seller_email'),
+            Column::make(__('admin.common.email'), 'seller_email'),
 
-            Column::make('Price', 'price_formatted', 'price')
+            Column::make(__('admin.common.price'), 'price_formatted', 'price')
                 ->sortable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Available Keys', 'keys_count')
+            Column::make(__('admin.common.available_keys'), 'keys_count')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -138,17 +138,17 @@ final class ProductListingsTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent rounded text-xs transition-colors duration-200')
                 ->dispatch('openListingModal', ['variantId' => $this->variantId]),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent rounded text-xs ml-1 transition-colors duration-200')
                 ->dispatch('bulkDeleteListing', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-1 px-3 border border-yellow-500 hover:border-transparent rounded text-xs ml-1 transition-colors duration-200')
                 ->dispatch('triggerBulkStatusListing', []),
         ];
@@ -164,7 +164,7 @@ final class ProductListingsTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Keys',
+                    'x-tooltip' => __('admin.common.available_keys'),
                 ])
                 ->dispatch('openKeysModal', ['listingId' => $row->id]),
 
@@ -175,7 +175,7 @@ final class ProductListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === ProductListingStatus::Active ? 'Deactivate Now' : 'Activate Now',
+                    'x-tooltip' => $row->status === ProductListingStatus::Active ? __('admin.common.deactivate_now') : __('admin.common.activate_now'),
                 ])
                 ->dispatch('toggleListingStatus', ['rowId' => $row->id]),
 
@@ -184,7 +184,7 @@ final class ProductListingsTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Listing',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('openListingModal', ['variantId' => $this->variantId, 'listingId' => $row->id]),
 
@@ -193,7 +193,7 @@ final class ProductListingsTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deleteListing', ['rowId' => $row->id]),
 
@@ -202,7 +202,7 @@ final class ProductListingsTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === ProductListingStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('restoreListing', ['rowId' => $row->id]),
         ];
@@ -212,8 +212,8 @@ final class ProductListingsTable extends PowerGridComponent
     public function toggleListingStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the status of this listing?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.common.listing')]),
             'method' => 'performToggleListingStatus',
             'id'     => $rowId,
         ]);
@@ -235,15 +235,15 @@ final class ProductListingsTable extends PowerGridComponent
         $listing->status = $newStatus;
         $listing->save();
 
-        $this->dispatch('swal:success', ['message' => 'Listing Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.common.listing')])]);
     }
 
     #[On('deleteListing')]
     public function deleteListing($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Listing?',
-            'text'   => 'Are you sure you want to delete this listing? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.listing')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.common.listing')]),
             'method' => 'performDeleteListing',
             'id'     => $rowId,
         ]);
@@ -259,7 +259,7 @@ final class ProductListingsTable extends PowerGridComponent
                 $hasSoldKeys = $listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists();
 
                 if ($hasSoldKeys) {
-                    throw new \Exception('Cannot delete listing with sold keys.');
+                    throw new \Exception(__('admin.validation.listing_delete_sold_keys'));
                 }
 
                 $listing->status = ProductListingStatus::Deleted;
@@ -267,7 +267,7 @@ final class ProductListingsTable extends PowerGridComponent
                 $listing->delete();
             });
 
-            $this->dispatch('swal:success', ['message' => 'Listing Deleted Successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.common.listing')])]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -277,8 +277,8 @@ final class ProductListingsTable extends PowerGridComponent
     public function restoreListing($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Listing?',
-            'text'   => 'Are you sure you want to restore this listing?',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.common.listing')]),
+            'text'   => __('admin.swal.restore_text', ['name' => __('admin.common.listing')]),
             'method' => 'performRestoreListing',
             'id'     => $rowId,
         ]);
@@ -292,20 +292,20 @@ final class ProductListingsTable extends PowerGridComponent
         $listing->status = ProductListingStatus::Draft;
         $listing->save();
 
-        $this->dispatch('swal:success', ['message' => 'Listing Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.common.listing')])]);
     }
 
     #[On('bulkDeleteListing')]
     public function bulkDeleteListing(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one listing!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.listing')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected listings?',
+            'title'  => __('admin.swal.delete_selected_named', ['count' => count($this->checkboxValues), 'name' => __('admin.common.listings')]),
             'method' => 'performBulkDeleteListing',
             'id'     => null,
         ]);
@@ -331,7 +331,7 @@ final class ProductListingsTable extends PowerGridComponent
                 }
             });
 
-            $this->dispatch('swal:success', ['message' => 'Bulk delete completed.']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed_short')]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -341,7 +341,7 @@ final class ProductListingsTable extends PowerGridComponent
     public function triggerBulkStatusListing(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one listing!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.listing')])]);
 
             return;
         }

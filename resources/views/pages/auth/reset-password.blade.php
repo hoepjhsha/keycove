@@ -3,11 +3,11 @@
 
         <div class="hidden lg:flex lg:w-1/2 bg-[#F6EBD9] dark:bg-gray-900 relative flex-col pt-32 px-16 lg:px-24 overflow-hidden border-r border-gray-200 dark:border-gray-800">
             <div class="relative z-20">
-                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">New Password</h1>
+                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Mật khẩu mới</h1>
                 <div class="flex items-center text-[15px] font-medium text-black/70 dark:text-gray-400 space-x-3">
-                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Home</a>
+                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Trang chủ</a>
                     <i class="fa-solid fa-angle-right text-[12px]"></i>
-                    <span class="text-black dark:text-white">Reset</span>
+                    <span class="text-black dark:text-white">Đặt lại</span>
                 </div>
             </div>
 
@@ -24,18 +24,18 @@
                     <div class="w-14 h-14 bg-[#FCF9F4] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-black dark:text-white rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fa-solid fa-shield-halved text-xl"></i>
                     </div>
-                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Set new password</h2>
-                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Must be at least 8 characters.</p>
+                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Đặt mật khẩu mới</h2>
+                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Mật khẩu cần có ít nhất 8 ký tự.</p>
                 </div>
 
                 <form wire:submit="resetPassword" class="space-y-6">
 
                     <div x-data="{ show: false }">
-                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">New Password</label>
+                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">Mật khẩu mới</label>
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" wire:model="form.password"
                                    class="w-full pl-4 pr-12 py-3.5 bg-transparent border border-black dark:border-gray-600 rounded-lg text-[15px] text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors"
-                                   placeholder="New Password" required autofocus>
+                                    placeholder="Mật khẩu mới" required autofocus>
                             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-black dark:text-gray-400 hover:text-gray-600 focus:outline-none">
                                 <i class="fa-regular" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
@@ -46,11 +46,11 @@
                     </div>
 
                     <div x-data="{ show: false }">
-                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">Confirm Password</label>
+                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">Xác nhận mật khẩu</label>
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" wire:model="form.password_confirmation"
                                    class="w-full pl-4 pr-12 py-3.5 bg-transparent border border-black dark:border-gray-600 rounded-lg text-[15px] text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors"
-                                   placeholder="Confirm New Password" required>
+                                    placeholder="Xác nhận mật khẩu mới" required>
                             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-black dark:text-gray-400 hover:text-gray-600 focus:outline-none">
                                 <i class="fa-regular" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
@@ -63,14 +63,14 @@
                     <div class="pt-2">
                         <button type="submit"
                                 class="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:bg-[#D32F2F] dark:hover:bg-[#D32F2F] dark:hover:text-white transition-colors text-[14px] tracking-wide uppercase">
-                            Reset Password
+                            Đặt lại mật khẩu
                         </button>
                     </div>
                 </form>
 
                 <div class="mt-8 text-center">
                     <a href="{{ route('app.auth.login') }}" class="text-[14px] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors font-bold flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-left"></i> Back to log in
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại đăng nhập
                     </a>
                 </div>
             </div>

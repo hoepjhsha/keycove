@@ -23,33 +23,33 @@
                                 </a>
                             </li>
                             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
-                            <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">My Library</li>
+                            <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">Thư viện của tôi</li>
                         </ol>
                     </nav>
 
                     <div class="space-y-3">
                         <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
                             <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                            Buyer workspace
+                            Khu vực người mua
                         </p>
                         <div>
-                            <h1 class="text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">My Library</h1>
-                            <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Manage pending payments, completed purchases, revealed keys, and complaints from a single buyer-focused workspace.</p>
+                             <h1 class="text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Thư viện của tôi</h1>
+                             <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Quản lý đơn chờ thanh toán, giao dịch hoàn tất, key đã mở và khiếu nại tại một nơi.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Orders</p>
+                         <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Đơn hàng</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $orders->count() }}</p>
                     </div>
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Pending payment</p>
+                         <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Chờ thanh toán</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $pendingPaymentCount }}</p>
                     </div>
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Completed</p>
+                         <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Hoàn tất</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $completedOrderCount }}</p>
                     </div>
                 </div>
@@ -59,13 +59,13 @@
         <section class="rounded-[1.75rem] border border-black/8 bg-white/90 px-5 py-5 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur dark:border-white/10 dark:bg-gray-900/85">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller onboarding</p>
-                    <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $hasApprovedSellerAccount ? 'Seller dashboard' : 'Become a seller' }}</h2>
+                     <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Đăng ký người bán</p>
+                     <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $hasApprovedSellerAccount ? 'Bảng điều khiển người bán' : 'Trở thành người bán' }}</h2>
                     <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">
                         @if($hasApprovedSellerAccount)
-                            You already have seller access. Open your dashboard to manage listings and keys.
+                             Bạn đã có quyền người bán. Mở dashboard để quản lý listing và key.
                         @else
-                            {{ $user->hasVerifiedEmail() ? 'Open the seller application and complete your KYC details.' : 'Verify your email first to unlock seller onboarding.' }}
+                             {{ $user->hasVerifiedEmail() ? 'Mở đơn đăng ký người bán và hoàn tất thông tin KYC.' : 'Vui lòng xác minh email trước để đăng ký người bán.' }}
                         @endif
                     </p>
                 </div>
@@ -73,17 +73,17 @@
                 <div class="space-y-2 sm:text-right">
                     @if($hasApprovedSellerAccount)
                         <a href="{{ $sellerDashboardUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Open dashboard
+                            Mở bảng điều khiển
                         </a>
                     @elseif($user->hasVerifiedEmail())
                         <a href="{{ route('seller.apply') }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Become a seller
+                             Trở thành người bán
                         </a>
                     @else
                         <span aria-disabled="true" class="inline-flex cursor-not-allowed items-center justify-center rounded-2xl bg-gray-400/20 px-5 py-3 text-sm font-semibold text-gray-500 dark:bg-white/10 dark:text-gray-400">
-                            Become a seller
+                             Trở thành người bán
                         </span>
-                        <p class="text-xs text-amber-700 dark:text-amber-300">You need a verified email to continue.</p>
+                         <p class="text-xs text-amber-700 dark:text-amber-300">Bạn cần xác minh email để tiếp tục.</p>
                     @endif
                 </div>
             </div>
@@ -121,28 +121,28 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="rounded-full bg-black px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-gray-950">{{ $order->order_code }}</span>
                                 <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $orderStatusClasses }}">{{ $order->status->label() }}</span>
-                                <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $paymentStatusClasses }}">{{ $order->payment_status?->label() ?? 'Unknown' }}</span>
+                                 <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $paymentStatusClasses }}">{{ $order->payment_status?->label() ?? 'Không xác định' }}</span>
                             </div>
 
                             <div>
-                                <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $order->payment_method?->label() ?? 'Payment' }} order</h2>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Placed on {{ $order->created_at?->format('d/m/Y H:i') ?? '--' }} with {{ $order->items_count }} item{{ $order->items_count === 1 ? '' : 's' }}.</p>
+                                 <h2 class="text-lg font-semibold text-gray-950 dark:text-white">Đơn hàng {{ $order->payment_method?->label() ?? 'thanh toán' }}</h2>
+                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Đặt lúc {{ $order->created_at?->format('d/m/Y H:i') ?? '--' }} với {{ $order->items_count }} sản phẩm.</p>
                             </div>
 
                             @if($isPendingPayment)
                                 <div class="flex flex-wrap gap-3">
                                     <button type="button" wire:click="continuePayment({{ $order->id }})" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        Continue payment
+                                         Tiếp tục thanh toán
                                     </button>
                                     <button type="button" wire:click="cancelOrder({{ $order->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-rose-500/30 hover:text-rose-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-rose-400/30 dark:hover:text-rose-300">
-                                        Cancel order
+                                         Hủy đơn hàng
                                     </button>
                                 </div>
                             @endif
                         </div>
 
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-gray-800/70 lg:min-w-44 lg:text-right">
-                            <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Order total</div>
+                             <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tổng đơn hàng</div>
                             <div class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $order->total_price, 0, ',', '.') }} VND</div>
                         </div>
                     </div>
@@ -188,9 +188,9 @@
                                 <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                                     <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $itemStatusClasses }}">{{ $item->status?->label() ?? 'Unknown' }}</span>
-                                <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">Qty {{ $item->quantity }}</span>
-                                <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">{{ $item->keys_count }} key{{ $item->keys_count === 1 ? '' : 's' }}</span>
+                                 <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $itemStatusClasses }}">{{ $item->status?->label() ?? 'Không xác định' }}</span>
+                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">SL {{ $item->quantity }}</span>
+                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">{{ $item->keys_count }} key</span>
                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-gray-950 dark:text-gray-300">{{ $item->order_item_code ?? ('#'.$item->id) }}</span>
                                 @if($item->complaint)
                                     <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $complaintStatusClasses }}">{{ $item->complaint->status->label() }}</span>
@@ -199,11 +199,11 @@
 
                                         <div>
                                             <h3 class="text-base font-semibold text-gray-950 dark:text-white">{{ $item->product_name_snapshot }}</h3>
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $product?->name ?? 'Store item' }}</p>
+                                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $product?->name ?? 'Sản phẩm' }}</p>
                                             <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
-                                                <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->edition ?? 'Standard' }}</span>
-                                                <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->region?->name ?? $variant?->region?->slug ?? 'Region' }}</span>
-                                                <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->platform?->name ?? $variant?->platform?->slug ?? 'Platform' }}</span>
+                                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->edition ?? 'Bản tiêu chuẩn' }}</span>
+                                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->region?->name ?? $variant?->region?->slug ?? 'Khu vực' }}</span>
+                                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->platform?->name ?? $variant?->platform?->slug ?? 'Nền tảng' }}</span>
                                                 <span class="rounded-full border border-black/8 bg-white px-3 py-1 dark:border-white/10 dark:bg-gray-950">{{ $variant?->operatingSystem?->name ?? $variant?->operatingSystem?->slug ?? 'OS' }}</span>
                                             </div>
                                         </div>
@@ -211,30 +211,30 @@
 
                                     <div class="flex flex-col items-start gap-3 xl:items-end">
                                         <div class="text-left xl:text-right">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Item subtotal</div>
+                                             <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tạm tính sản phẩm</div>
                                             <div class="mt-1 text-base font-semibold text-gray-950 dark:text-white">{{ number_format((float) $item->subtotal, 0, ',', '.') }} VND</div>
                                         </div>
 
                                         <div class="flex flex-wrap gap-2">
                                             <button type="button" wire:click="openItemDetails({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/30 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/30 dark:hover:text-[#ff9c9c]">
-                                                View details
+                                                 Xem chi tiết
                                             </button>
 
                                             @if($item->keys_count > 0 && $canViewKeys)
                                                 @if($hasViewedKey)
                                                     <button type="button" wire:click="toggleOrderItemKeys({{ $item->id }})" class="{{ $viewKeyButtonClasses }}">
-                                                        {{ $isKeyVisible ? 'Hide key' : 'View key' }}
+                                                         {{ $isKeyVisible ? 'Ẩn key' : 'Xem key' }}
                                                     </button>
                                                 @else
                                                     <button type="button" wire:click="promptKeyReveal({{ $item->id }})" class="{{ $viewKeyButtonClasses }}">
-                                                        View key
+                                                         Xem key
                                                     </button>
                                                 @endif
                                             @endif
 
                                             @if($isPaidOrder && $item->buyer_key_viewed_at !== null && in_array($item->status, [\App\Enums\OrderStatus::Delivered, \App\Enums\OrderStatus::Disputing], true))
                                                 <button type="button" wire:click="openConfirmReceivedModal({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/30 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/30 dark:hover:text-emerald-300">
-                                                    Confirm received
+                                                     Xác nhận đã nhận
                                                 </button>
                                             @endif
 
@@ -245,14 +245,14 @@
                                                         $complaintThreadUrl = route('app.library.complaints.show', ['complaint' => $complaintRouteValue]);
                                                     @endphp
                                                     <button type="button" wire:click="openComplaintDetails({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm ring-1 ring-amber-400/20 transition-colors hover:border-amber-500/30 hover:bg-amber-500/15 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-300/20 dark:hover:bg-amber-400/15">
-                                                        View complaint
+                                                         Xem khiếu nại
                                                     </button>
                                                     <a href="{{ $complaintThreadUrl }}" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/30 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/30 dark:hover:text-[#ff9c9c]">
-                                                        Open complaint page
+                                                         Mở trang khiếu nại
                                                     </a>
                                                 @elseif($item->status !== \App\Enums\OrderStatus::Completed)
                                                     <button type="button" wire:click="openComplaintForm({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-rose-500/30 hover:text-rose-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-rose-400/30 dark:hover:text-rose-300">
-                                                        Open complaint
+                                                         Mở khiếu nại
                                                     </button>
                                                 @endif
                                             @endif
@@ -260,11 +260,11 @@
                                             @if($item->status === \App\Enums\OrderStatus::Completed)
                                                 @if($item->review)
                                                     <span class="inline-flex items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
-                                                        Reviewed
+                                                         Đã đánh giá
                                                     </span>
                                                 @else
                                                     <button type="button" wire:click="openReviewForm({{ $item->id }})" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/30 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/30 dark:hover:text-emerald-300">
-                                                        Write review
+                                                         Viết đánh giá
                                                     </button>
                                                 @endif
                                             @endif
@@ -275,7 +275,7 @@
                                 @if($visibleKeys !== [] && ($hasViewedKey || $isKeyVisible))
                                     <div class="mt-4 space-y-3 border-t border-black/8 pt-4 dark:border-white/10">
                                         <div class="rounded-2xl border border-amber-500/15 bg-amber-500/8 px-4 py-3 text-sm text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                                            Record your full screen from the moment you open the key until you try to use it. Upload that video here if the key is fake, expired, or otherwise invalid.
+                                             Hãy quay toàn màn hình từ lúc mở key đến khi thử kích hoạt. Tải video đó lên nếu key giả, hết hạn hoặc không hợp lệ.
                                         </div>
 
                                         <div class="space-y-2">
@@ -294,8 +294,8 @@
                     <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FCF9F4] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                         <i class="fa-solid fa-gamepad"></i>
                     </div>
-                    <h2 class="mt-5 text-lg font-semibold text-gray-950 dark:text-white">Your library is empty</h2>
-                    <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Completed purchases and pending payment orders will appear here.</p>
+                     <h2 class="mt-5 text-lg font-semibold text-gray-950 dark:text-white">Thư viện của bạn đang trống</h2>
+                     <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Các đơn đã mua và đơn chờ thanh toán sẽ xuất hiện tại đây.</p>
                 </div>
             @endforelse
         </div>
@@ -312,9 +312,9 @@
                 <div class="relative z-10 w-full max-w-2xl rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Variant details</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Chi tiết biến thể</p>
                             <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->product_name_snapshot }}</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Quick reference for the exact listing and variant you bought.</p>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Thông tin tham chiếu nhanh cho đúng listing và biến thể bạn đã mua.</p>
                         </div>
 
                         <button type="button" wire:click="closeItemDetails" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -324,42 +324,42 @@
 
                     <div class="mt-6 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Product</p>
-                            <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedProduct?->name ?? 'Store item' }}</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Sản phẩm</p>
+                            <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedProduct?->name ?? 'Sản phẩm cửa hàng' }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
                             <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Listing</p>
-                            <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->listing?->display_name ?: ($selectedProduct?->name ?? 'Untitled listing') }}</p>
+                            <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->listing?->display_name ?: ($selectedProduct?->name ?? 'Listing chưa có tên') }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Edition</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Phiên bản</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedVariant?->edition ?? 'Standard' }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Order code</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Mã đơn hàng</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->order_item_code ?? ('#'.$selectedOrderItem->id) }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Region</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Khu vực</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedVariant?->region?->name ?? $selectedVariant?->region?->slug ?? '-' }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Platform / OS</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Nền tảng / HĐH</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedVariant?->platform?->name ?? $selectedVariant?->platform?->slug ?? '-' }} / {{ $selectedVariant?->operatingSystem?->name ?? $selectedVariant?->operatingSystem?->slug ?? '-' }}</p>
                         </div>
                     </div>
 
                     <div class="mt-6 grid gap-4 sm:grid-cols-3">
                         <div class="rounded-2xl border border-black/8 bg-white px-4 py-4 dark:border-white/10 dark:bg-gray-950">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Quantity</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Số lượng</p>
                             <p class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->quantity }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-white px-4 py-4 dark:border-white/10 dark:bg-gray-950">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Unit price</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Đơn giá</p>
                             <p class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $selectedOrderItem->unit_price, 0, ',', '.') }} VND</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-white px-4 py-4 dark:border-white/10 dark:bg-gray-950">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Subtotal</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tạm tính</p>
                             <p class="mt-2 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $selectedOrderItem->subtotal, 0, ',', '.') }} VND</p>
                         </div>
                     </div>
@@ -368,7 +368,7 @@
                         <div class="mt-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/8 p-4 dark:border-emerald-400/20 dark:bg-emerald-400/10">
                             <div class="flex flex-wrap items-center justify-between gap-3">
                                 <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Your review</p>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Đánh giá của bạn</p>
                                     <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedOrderItem->review->rating }}/5</p>
                                 </div>
                                 <div class="flex items-center gap-1 text-amber-400">
@@ -384,7 +384,7 @@
 
                             @if(($selectedReviewMedia ?? []) !== [])
                                 <div x-data="{ previewUrl: null }" class="mt-4 space-y-2 border-t border-emerald-500/15 pt-4 dark:border-emerald-400/20">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Attached media</p>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Tệp đính kèm</p>
                                     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                         @foreach($selectedReviewMedia as $media)
                                             @php
@@ -429,7 +429,7 @@
                                         x-on:click.self="previewUrl = null"
                                         class="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4"
                                     >
-                                        <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Close preview"></button>
+                                        <button type="button" x-on:click="previewUrl = null" class="absolute inset-0 cursor-default" aria-label="Đóng xem trước"></button>
                                         <div class="relative z-10 max-h-[90vh] max-w-[92vw] overflow-hidden rounded-2xl bg-black shadow-2xl">
                                             <img :src="previewUrl" alt="" class="max-h-[90vh] max-w-[92vw] object-contain">
                                         </div>
@@ -469,9 +469,9 @@
                 <div class="relative z-10 w-full max-w-4xl rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Complaint details</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">{{ $selectedComplaint->complaint_code ?? ('Complaint #'.$selectedComplaint->id) }}</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Track the full complaint thread and add follow-up context if the dispute is still active.</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Chi tiết khiếu nại</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">{{ $selectedComplaint->complaint_code ?? ('Khiếu nại #'.$selectedComplaint->id) }}</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Theo dõi toàn bộ hội thoại khiếu nại và bổ sung thông tin nếu vụ việc còn đang xử lý.</p>
                         </div>
 
                         <button type="button" wire:click="closeComplaintDetails" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -481,19 +481,19 @@
 
                     <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Status</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Trạng thái</p>
                             <span class="mt-2 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold {{ $selectedComplaintStatusClasses }}">{{ $selectedComplaint->status->label() }}</span>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Order code</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Mã đơn hàng</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedComplaintOrder?->order_code ?? '-' }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Messages</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tin nhắn</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ count($selectedComplaintMessages ?? []) }}</p>
                         </div>
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Opened at</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Mở lúc</p>
                             <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedComplaint->created_at?->format('d/m/Y H:i') ?? '-' }}</p>
                         </div>
                     </div>
@@ -501,13 +501,13 @@
                     <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                         <div class="space-y-4">
                             <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Buyer reason</p>
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Lý do của người mua</p>
                                 <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300">{{ $selectedComplaint->reason }}</p>
                             </div>
 
                             @if(($selectedComplaintEvidence ?? []) !== [])
                                 <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Evidence</p>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Bằng chứng</p>
                                     <div class="mt-3 space-y-2">
                                         @foreach($selectedComplaintEvidence as $evidence)
                                             @if($evidence['url'])
@@ -526,16 +526,16 @@
 
                             <div class="flex flex-wrap gap-3">
                                 <a href="{{ $selectedComplaintThreadUrl }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                    Open complaint page
+                                    Mở trang khiếu nại
                                 </a>
                             </div>
 
                             @if($selectedComplaint->resolved_at || filled($selectedComplaint->resolution_note))
                                 <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/8 p-4 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
-                                    <p class="font-semibold">Resolution note</p>
-                                    <p class="mt-2 whitespace-pre-line leading-6">{{ $selectedComplaint->resolution_note ?? 'Resolved.' }}</p>
+                                    <p class="font-semibold">Ghi chú xử lý</p>
+                                    <p class="mt-2 whitespace-pre-line leading-6">{{ $selectedComplaint->resolution_note ?? 'Đã xử lý.' }}</p>
                                     @if($selectedComplaint->resolvedBy)
-                                        <p class="mt-3 text-xs uppercase tracking-[0.16em]">Handled by {{ $selectedComplaint->resolvedBy->username }}</p>
+                                        <p class="mt-3 text-xs uppercase tracking-[0.16em]">Xử lý bởi {{ $selectedComplaint->resolvedBy->username }}</p>
                                     @endif
                                 </div>
                             @endif
@@ -543,8 +543,8 @@
 
                         <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
                             <div class="flex items-center justify-between gap-3">
-                                <h3 class="text-sm font-semibold text-gray-950 dark:text-white">Conversation</h3>
-                                <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">{{ count($selectedComplaintMessages ?? []) }} posts</span>
+                                <h3 class="text-sm font-semibold text-gray-950 dark:text-white">Hội thoại</h3>
+                                <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">{{ count($selectedComplaintMessages ?? []) }} tin nhắn</span>
                             </div>
 
                             <div class="mt-4 space-y-3">
@@ -574,7 +574,7 @@
                                     </div>
                                 @empty
                                     <div class="rounded-2xl border border-dashed border-black/10 bg-white p-4 text-sm text-gray-500 dark:border-white/10 dark:bg-gray-950 dark:text-gray-400">
-                                        No messages yet.
+                                        Chưa có tin nhắn.
                                     </div>
                                 @endforelse
                             </div>
@@ -582,17 +582,17 @@
                             @if($canReplyToComplaint)
                                 <form wire:submit="replyComplaint" class="mt-4 space-y-3 border-t border-black/8 pt-4 dark:border-white/10">
                                     <div>
-                                        <label for="complaint-reply-message" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Add message</label>
-                                        <textarea id="complaint-reply-message" wire:model="complaintReplyMessage" rows="4" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Add more context or a follow-up update..."></textarea>
+                                        <label for="complaint-reply-message" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Thêm tin nhắn</label>
+                                        <textarea id="complaint-reply-message" wire:model="complaintReplyMessage" rows="4" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Bổ sung thông tin hoặc cập nhật mới..."></textarea>
                                         @error('complaintReplyMessage')
                                             <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <div>
-                                        <label for="complaint-reply-attachments" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Attachments</label>
+                                        <label for="complaint-reply-attachments" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tệp đính kèm</label>
                                         <input id="complaint-reply-attachments" wire:model="complaintReplyAttachments" type="file" multiple accept="image/*,video/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
-                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Optional. Up to 5 files.</p>
+                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Không bắt buộc. Tối đa 5 tệp.</p>
                                         @error('complaintReplyAttachments')
                                             <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                                         @enderror
@@ -603,10 +603,10 @@
 
                                     <div class="flex flex-wrap justify-end gap-3">
                                         <button type="button" wire:click="closeComplaintDetails" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                                            Close
+                                            Đóng
                                         </button>
                                         <button type="submit" wire:loading.attr="disabled" wire:target="replyComplaint" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                            Send message
+                                            Gửi tin nhắn
                                         </button>
                                     </div>
                                 </form>
@@ -624,9 +624,9 @@
                 <div class="relative z-10 w-full max-w-lg rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Confirm received</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Mark this order as completed?</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Only confirm if you have received and checked the item.</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Xác nhận đã nhận</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Đánh dấu đơn này là hoàn tất?</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Chỉ xác nhận khi bạn đã nhận và kiểm tra sản phẩm.</p>
                         </div>
 
                         <button type="button" wire:click="cancelConfirmReceivedModal" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -635,17 +635,17 @@
                     </div>
 
                     <div class="mt-6 rounded-2xl border border-black/8 bg-[#FCF9F4] p-4 dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Item</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Sản phẩm</p>
                         <p class="mt-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $selectedConfirmReceivedOrderItem->product_name_snapshot }}</p>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $selectedConfirmReceivedOrderItem->order_item_code ?? ('#'.$selectedConfirmReceivedOrderItem->id) }}</p>
                     </div>
 
                     <div class="mt-6 flex flex-wrap justify-end gap-3">
                         <button type="button" wire:click="cancelConfirmReceivedModal" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                            Cancel
+                            Hủy
                         </button>
                         <button type="button" wire:click="confirmReceived({{ $selectedConfirmReceivedOrderItem->id }})" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70">
-                            Yes, confirm received
+                            Vâng, xác nhận đã nhận
                         </button>
                     </div>
                 </div>
@@ -659,9 +659,9 @@
                 <div class="relative z-10 w-full max-w-xl rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Review</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Share your experience</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Your review helps other buyers understand the purchase quality.</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">Đánh giá</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Chia sẻ trải nghiệm của bạn</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Đánh giá của bạn giúp người mua khác hiểu rõ chất lượng giao dịch.</p>
                         </div>
 
                         <button type="button" wire:click="cancelReviewForm" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -671,13 +671,13 @@
 
                     <form wire:submit="submitReview" class="mt-6 space-y-4">
                         <div>
-                            <label for="library-review-rating" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Rating</label>
+                            <label for="library-review-rating" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Điểm đánh giá</label>
                             <select id="library-review-rating" wire:model="reviewRating" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="5">5 - Excellent</option>
-                                <option value="4">4 - Good</option>
-                                <option value="3">3 - Average</option>
-                                <option value="2">2 - Poor</option>
-                                <option value="1">1 - Bad</option>
+                                <option value="5">5 - Xuất sắc</option>
+                                <option value="4">4 - Tốt</option>
+                                <option value="3">3 - Trung bình</option>
+                                <option value="2">2 - Kém</option>
+                                <option value="1">1 - Tệ</option>
                             </select>
                             @error('reviewRating')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
@@ -685,17 +685,17 @@
                         </div>
 
                         <div>
-                            <label for="library-review-comment" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Comment</label>
-                            <textarea id="library-review-comment" wire:model="reviewComment" rows="4" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Share what you liked or what could be better..."></textarea>
+                            <label for="library-review-comment" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Nhận xét</label>
+                            <textarea id="library-review-comment" wire:model="reviewComment" rows="4" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Chia sẻ điều bạn hài lòng hoặc cần cải thiện..."></textarea>
                             @error('reviewComment')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="library-review-media" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Media</label>
+                            <label for="library-review-media" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Tệp đính kèm</label>
                             <input id="library-review-media" wire:model="reviewMedia" type="file" multiple accept="image/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
-                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Optional. Up to 5 files.</p>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Không bắt buộc. Tối đa 5 tệp.</p>
                             @error('reviewMedia')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                             @enderror
@@ -706,10 +706,10 @@
 
                         <div class="flex flex-wrap justify-end gap-3">
                             <button type="button" wire:click="cancelReviewForm" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-emerald-500/25 hover:text-emerald-600 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-emerald-400/25 dark:hover:text-emerald-300">
-                                Cancel
+                                Hủy
                             </button>
                             <button type="submit" wire:loading.attr="disabled" wire:target="submitReview" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-emerald-500 dark:hover:text-white">
-                                Submit review
+                                Gửi đánh giá
                             </button>
                         </div>
                     </form>
@@ -724,9 +724,9 @@
                 <div class="relative z-10 w-full max-w-lg rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Protected access</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Confirm password to view your key</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Before revealing a purchased key, re-enter your account password and read the warning below carefully.</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Truy cập bảo vệ</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Xác nhận mật khẩu để xem key</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Trước khi mở key đã mua, hãy nhập lại mật khẩu tài khoản và đọc kỹ lưu ý bên dưới.</p>
                         </div>
 
                         <button type="button" wire:click="cancelKeyReveal" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -735,12 +735,12 @@
                     </div>
 
                     <div class="mt-5 rounded-2xl border border-amber-500/15 bg-amber-500/8 px-4 py-4 text-sm leading-6 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                        Stay on the key viewing and activation screen while using the code. Avoid breaking the process halfway so your support and rights remain easier to verify if something goes wrong.
+                        Hãy ở lại màn hình xem key và kích hoạt trong lúc sử dụng mã. Tránh gián đoạn giữa chừng để việc hỗ trợ và xác minh quyền lợi dễ dàng hơn nếu có sự cố.
                     </div>
 
                     <form wire:submit="revealOrderItemKeys" class="mt-5 space-y-4">
                         <div>
-                            <label for="library-key-access-password" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Account password</label>
+                            <label for="library-key-access-password" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Mật khẩu tài khoản</label>
                             <input id="library-key-access-password" wire:model="keyAccessPassword" type="password" autofocus class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                             @error('keyAccessPassword')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
@@ -749,10 +749,10 @@
 
                         <div class="flex flex-wrap justify-end gap-3">
                             <button type="button" wire:click="cancelKeyReveal" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                                Cancel
+                                Hủy
                             </button>
                             <button type="submit" wire:loading.attr="disabled" wire:target="revealOrderItemKeys" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                Show key
+                                Hiện key
                             </button>
                         </div>
                     </form>
@@ -767,9 +767,9 @@
                 <div class="relative z-10 w-full max-w-xl rounded-[2rem] border border-black/8 bg-white p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Complaint</p>
-                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Describe the issue</h2>
-                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Record your full screen while opening the key and trying to use it, then explain what went wrong.</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">Khiếu nại</p>
+                            <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Mô tả vấn đề</h2>
+                            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Hãy quay toàn màn hình khi mở key và thử sử dụng, sau đó mô tả lỗi gặp phải.</p>
                         </div>
 
                         <button type="button" wire:click="cancelComplaintForm" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-white/10 dark:bg-gray-950 dark:text-white dark:hover:bg-white dark:hover:text-gray-950">
@@ -779,17 +779,17 @@
 
                     <form wire:submit="submitComplaint" class="mt-5 space-y-4">
                         <div>
-                            <label for="complaint-reason" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Reason</label>
-                            <textarea id="complaint-reason" wire:model="complaintReason" rows="5" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Describe the key issue, wrong region, activation failure, or any mismatch..."></textarea>
+                            <label for="complaint-reason" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Lý do</label>
+                            <textarea id="complaint-reason" wire:model="complaintReason" rows="5" class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100" placeholder="Mô tả lỗi key, sai khu vực, không kích hoạt được hoặc sai thông tin..."></textarea>
                             @error('complaintReason')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="complaint-evidence" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Evidence</label>
+                            <label for="complaint-evidence" class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Bằng chứng</label>
                             <input id="complaint-evidence" wire:model="complaintEvidence" type="file" multiple accept="image/*,video/*,application/pdf" class="mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:border-white/10 dark:bg-gray-950 dark:text-gray-100 file:dark:bg-white file:dark:text-gray-950">
-                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Upload a full-screen recording or supporting proof. Required. Up to 3 files.</p>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Tải lên video quay toàn màn hình hoặc bằng chứng hỗ trợ. Bắt buộc. Tối đa 3 tệp.</p>
                             @error('complaintEvidence')
                                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
                             @enderror
@@ -800,10 +800,10 @@
 
                         <div class="flex flex-wrap justify-end gap-3">
                             <button type="button" wire:click="cancelComplaintForm" class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                                Cancel
+                                Hủy
                             </button>
                             <button type="submit" wire:loading.attr="disabled" wire:target="submitComplaint" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                Submit complaint
+                                Gửi khiếu nại
                             </button>
                         </div>
                     </form>

@@ -22,7 +22,7 @@ class EnsureSellerEmailVerified
         if ($user !== null && ! $user->hasVerifiedEmail()) {
             return redirect()
                 ->to('/my-profile?section=security')
-                ->with('profile-status', 'Verify your email first to unlock seller onboarding.');
+                ->with('profile-status', 'Vui lòng xác minh email trước để mở đăng ký người bán.');
         }
 
         return $next($request);

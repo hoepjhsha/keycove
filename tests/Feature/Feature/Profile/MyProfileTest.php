@@ -34,9 +34,9 @@ test('authenticated user can access the my profile page', function (): void {
         ->assertSee('Hoep Tran')
         ->assertSee('0987654321')
         ->assertSee('Profile bio for storefront display.')
-        ->assertSee('Profile')
-        ->assertSee('Security')
-        ->assertSee('My Library');
+        ->assertSee('Hồ sơ')
+        ->assertSee('Bảo mật')
+        ->assertSee('Thư viện của tôi');
 });
 
 test('verified users can start seller onboarding from my profile', function (): void {
@@ -44,7 +44,7 @@ test('verified users can start seller onboarding from my profile', function (): 
 
     Livewire::actingAs($user)
         ->test(MyProfile::class)
-        ->assertSee('Become a seller')
+        ->assertSee('Trở thành người bán')
         ->assertSee(route('seller.apply'));
 });
 
@@ -63,7 +63,7 @@ test('approved sellers can open the seller dashboard from my profile', function 
 
     Livewire::actingAs($user)
         ->test(MyProfile::class)
-        ->assertSee('Open dashboard')
+        ->assertSee('Mở bảng điều khiển')
         ->assertSee(route('seller.dashboard.index'));
 });
 
@@ -72,8 +72,8 @@ test('unverified users are shown the seller onboarding restriction on my profile
 
     Livewire::actingAs($user)
         ->test(MyProfile::class)
-        ->assertSee('Verify your email first to unlock seller onboarding.')
-        ->assertSee('You need a verified email to continue.');
+        ->assertSee('Vui lòng xác minh email trước để đăng ký người bán.')
+        ->assertSee('Bạn cần xác minh email để tiếp tục.');
 });
 
 test('authenticated user can change password from the security section', function (): void {
@@ -120,7 +120,7 @@ test('authenticated user can update profile information from my profile', functi
         ->set('avatar', $avatar)
         ->call('saveProfile')
         ->assertHasNoErrors()
-        ->assertSee('Your profile has been updated successfully.');
+        ->assertSee('Hồ sơ của bạn đã được cập nhật thành công.');
 
     $freshUser = $user->fresh();
     $freshProfile = $freshUser->profile;

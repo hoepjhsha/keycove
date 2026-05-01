@@ -70,8 +70,8 @@ final class SellerKycTable extends PowerGridComponent
 
                 return '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$labelText.'</span>';
             })
-            ->add('created_at_formatted', fn (Seller $model) => $model->created_at ? Carbon::parse($model->created_at)->format('d/m/Y H:i:s') : 'N/A')
-            ->add('updated_at_formatted', fn (Seller $model) => $model->updated_at ? Carbon::parse($model->updated_at)->format('d/m/Y H:i:s') : 'N/A');
+            ->add('created_at_formatted', fn (Seller $model) => $model->created_at ? Carbon::parse($model->created_at)->format('d/m/Y H:i:s') : __('admin.common.n_a'))
+            ->add('updated_at_formatted', fn (Seller $model) => $model->updated_at ? Carbon::parse($model->updated_at)->format('d/m/Y H:i:s') : __('admin.common.n_a'));
     }
 
     public function columns(): array
@@ -80,22 +80,22 @@ final class SellerKycTable extends PowerGridComponent
             Column::make('#', 'id')
                 ->index(),
 
-            Column::make('User', 'user_info', 'user_id'),
+            Column::make(__('admin.common.user'), 'user_info', 'user_id'),
 
-            Column::make('Shop Name', 'shop_name')
+            Column::make(__('admin.common.shop_name'), 'shop_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('KYC Status', 'kyc_status_label', 'kyc_status')
+            Column::make(__('admin.common.kyc_status'), 'kyc_status_label', 'kyc_status')
                 ->sortable(),
 
-            Column::make('Applied At', 'created_at_formatted', 'created_at')
+            Column::make(__('admin.common.applied_at'), 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-            Column::make('Updated At', 'updated_at_formatted', 'updated_at')
+            Column::make(__('admin.common.updated_at'), 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -132,7 +132,7 @@ final class SellerKycTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewSellerKyc', ['rowId' => $row->id]),
 
@@ -141,7 +141,7 @@ final class SellerKycTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-600 hover:text-yellow-800 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'Process KYC',
+                    'x-tooltip' => __('admin.common.process_kyc'),
                 ])
                 ->dispatch('processSellerKyc', ['rowId' => $row->id]),
         ];

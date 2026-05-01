@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Seller Complaints')]
+#[Title('Khiếu nại người bán')]
 class ComplaintIndex extends Component
 {
     public function render(): View
@@ -46,7 +46,7 @@ class ComplaintIndex extends Component
             'activeCount'   => $complaints->whereIn('status', [ComplaintStatus::Open, ComplaintStatus::InProcess, ComplaintStatus::Escalated])->count(),
             'resolvedCount' => $complaints->whereIn('status', [ComplaintStatus::ApprovedRefund, ComplaintStatus::RejectedRelease])->count(),
         ])->layout('components.layouts.seller', [
-            'title'         => 'Seller Complaints',
+            'title'         => 'Khiếu nại người bán',
             'user'          => $user,
             'seller'        => $seller,
             'activeSection' => 'complaints',

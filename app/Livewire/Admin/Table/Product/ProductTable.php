@@ -54,7 +54,7 @@ final class ProductTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('name')
-            ->add('submitted_by', fn (Product $model) => $model->submittedBySeller?->shop_name ?? 'Shop Admin')
+            ->add('submitted_by', fn (Product $model) => $model->submittedBySeller?->shop_name ?? __('admin.common.shop_admin'))
             ->add('slug')
             ->add('publisher')
             ->add('developer')
@@ -82,37 +82,37 @@ final class ProductTable extends PowerGridComponent
         return [
             Column::make('#', 'id')
                 ->index(),
-            Column::make('Name', 'name')
+            Column::make(__('admin.common.name'), 'name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Owner', 'submitted_by', 'submitted_by_seller_id')
+            Column::make(__('admin.common.owner'), 'submitted_by', 'submitted_by_seller_id')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Slug', 'slug')
+            Column::make(__('admin.common.slug'), 'slug')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Publisher', 'publisher')
+            Column::make(__('admin.common.publisher'), 'publisher')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Developer', 'developer')
+            Column::make(__('admin.common.developer'), 'developer')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Created at', 'created_at_formatted', 'created_at')
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-            Column::make('Updated at', 'updated_at_formatted', 'updated_at')
+            Column::make(__('admin.common.updated_at_short'), 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -135,7 +135,7 @@ final class ProductTable extends PowerGridComponent
 
             Filter::multiSelect('submitted_by', 'submitted_by_seller_id')
                 ->dataSource(collect([
-                    ['id' => 0, 'name' => 'Shop Admin'],
+                    ['id' => 0, 'name' => __('admin.common.shop_admin')],
                 ])->concat($ownerOptions))
                 ->optionValue('id')
                 ->optionLabel('name'),
@@ -159,17 +159,17 @@ final class ProductTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm transition-colors duration-200')
                 ->dispatch('openCreateModal', []),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('bulkDelete', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-2 px-4 border border-yellow-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('triggerBulkStatus', []),
         ];
@@ -185,7 +185,7 @@ final class ProductTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewProduct', ['rowId' => $row->id]),
 
@@ -194,7 +194,7 @@ final class ProductTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Product',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('editProduct', ['rowId' => $row->id]),
 
@@ -205,7 +205,7 @@ final class ProductTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === GeneralStatus::Active ? 'Deactivate Now' : 'Activate Now',
+                    'x-tooltip' => $row->status === GeneralStatus::Active ? __('admin.common.deactivate_now') : __('admin.common.activate_now'),
                 ])
                 ->dispatch('toggleStatus', ['rowId' => $row->id]),
 
@@ -214,7 +214,7 @@ final class ProductTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deleteProduct', ['rowId' => $row->id]),
 
@@ -223,7 +223,7 @@ final class ProductTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === GeneralStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('revertDelete', ['rowId' => $row->id]),
         ];
@@ -233,8 +233,8 @@ final class ProductTable extends PowerGridComponent
     public function toggleStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the status of this product?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.nav.products_list')]),
             'method' => 'performToggleStatus',
             'id'     => $rowId,
         ]);
@@ -250,15 +250,15 @@ final class ProductTable extends PowerGridComponent
         };
         $product->save();
 
-        $this->dispatch('swal:success', ['message' => 'Product Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.products_list')])]);
     }
 
     #[On('deleteProduct')]
     public function deleteProduct($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Product?',
-            'text'   => 'Are you sure you want to delete this product? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.nav.products_list')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.nav.products_list')]),
             'method' => 'performDelete',
             'id'     => $rowId,
         ]);
@@ -278,15 +278,15 @@ final class ProductTable extends PowerGridComponent
             $product->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Product Deleted Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.nav.products_list')])]);
     }
 
     #[On('revertDelete')]
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Product?',
-            'text'   => 'Are you sure you want to restore this product? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.nav.products_list')]),
+            'text'   => __('admin.swal.restore_text_irreversible', ['name' => __('admin.nav.products_list')]),
             'method' => 'performRevertDelete',
             'id'     => $rowId,
         ]);
@@ -302,20 +302,20 @@ final class ProductTable extends PowerGridComponent
         $product->status = GeneralStatus::Inactive;
         $product->save();
 
-        $this->dispatch('swal:success', ['message' => 'Product Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.products_list')])]);
     }
 
     #[On('bulkDelete')]
     public function bulkDelete(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one product!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.products_list')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => __('admin.swal.delete_selected', ['count' => count($this->checkboxValues)]),
             'method' => 'performBulkDelete',
             'id'     => null,
         ]);
@@ -330,7 +330,7 @@ final class ProductTable extends PowerGridComponent
 
         if ($alreadyDeletedExists) {
             $this->dispatch('swal:error', [
-                'message' => 'Some selected items are already deleted or in the trash.',
+                'message' => __('admin.messages.cannot_change_deleted_status'),
             ]);
 
             return;
@@ -348,14 +348,14 @@ final class ProductTable extends PowerGridComponent
             Product::whereIn('id', $this->checkboxValues)->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed')]);
     }
 
     #[On('triggerBulkStatus')]
     public function triggerBulkStatus(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one product!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.products_list')])]);
 
             return;
         }

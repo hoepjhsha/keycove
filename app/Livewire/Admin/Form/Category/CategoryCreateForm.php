@@ -44,7 +44,7 @@ class CategoryCreateForm extends Form
 
         if (Category::where('slug', $this->slug)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.slug' => 'Category already exists. Write your own slug or change category name',
+                'createForm.slug' => __('admin.validation.duplicate_category_slug'),
             ]);
         }
 

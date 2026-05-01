@@ -51,7 +51,7 @@ class RegionCreateForm extends Form
 
         if (Region::where('slug', $this->slug)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.slug' => 'Region already exists. Write your own slug or change region name',
+                'createForm.slug' => __('admin.validation.duplicate_region_slug'),
             ]);
         }
 

@@ -10,47 +10,47 @@
                 <div class="space-y-5">
                     <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
                         <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                        Marketplace home
+                        Trang chủ marketplace
                     </p>
 
                     <div class="space-y-3">
                         <h1 class="max-w-4xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl dark:text-white">
-                            Search fast, browse by category, and discover the best listings in one place.
+                            Tìm nhanh, duyệt theo danh mục và khám phá các listing tốt nhất tại một nơi.
                         </h1>
                         <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">
-                            Use the homepage to jump straight into the product catalog with the same filters you already know.
+                            Bắt đầu từ trang chủ để đi thẳng vào catalog sản phẩm với các bộ lọc quen thuộc.
                         </p>
                     </div>
 
                     <form action="{{ route('app.products.index') }}" method="GET" class="flex flex-col gap-3 rounded-[1.6rem] border border-black/8 bg-white/90 p-3 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.45)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-gray-950/80">
                         <label class="flex-1">
-                            <span class="sr-only">Search products</span>
-                            <input name="search" value="{{ request('search') }}" type="search" placeholder="Search by title, publisher, edition..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <span class="sr-only">Tìm sản phẩm</span>
+                            <input name="search" value="{{ request('search') }}" type="search" placeholder="Tìm theo tên, nhà phát hành, phiên bản..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </label>
 
                         <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Search
+                            Tìm kiếm
                         </button>
                     </form>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Categories</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Danh mục</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($categories->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Quick jumps into the catalog</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Truy cập nhanh vào catalog</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Featured products</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Sản phẩm nổi bật</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($featuredProducts->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Top sales plus fallback discovery</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sản phẩm bán chạy và gợi ý khám phá</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller listings</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Listing người bán</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($sellerListings->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Active listings from sellers</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing đang hoạt động từ người bán</p>
                     </div>
                 </div>
             </div>
@@ -59,11 +59,11 @@
         <section class="space-y-4">
             <div class="flex items-end justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Categories</p>
-                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Browse by category</h2>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Danh mục</p>
+                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Duyệt theo danh mục</h2>
                 </div>
                 <button type="button" wire:click="toggleCategories" class="text-sm font-medium text-[#D32F2F] hover:underline dark:text-[#ff9c9c]">
-                    {{ $showAllCategories ? 'Show less' : 'View all' }}
+                    {{ $showAllCategories ? 'Thu gọn' : 'Xem tất cả' }}
                 </button>
             </div>
 
@@ -75,7 +75,7 @@
                         </div>
                         <div class="mt-4 space-y-1">
                             <h3 class="line-clamp-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $category['name'] }}</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($category['products_count']) }} products</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($category['products_count']) }} sản phẩm</p>
                         </div>
 
                         @if($category['children']->isNotEmpty())
@@ -93,10 +93,10 @@
         <section class="space-y-4">
             <div class="flex items-end justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Featured</p>
-                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Featured products</h2>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Nổi bật</p>
+                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Sản phẩm nổi bật</h2>
                 </div>
-                <a href="{{ route('app.products.index') }}" wire:navigate.hover class="text-sm font-medium text-[#D32F2F] hover:underline dark:text-[#ff9c9c]">Browse catalog</a>
+                <a href="{{ route('app.products.index') }}" wire:navigate.hover class="text-sm font-medium text-[#D32F2F] hover:underline dark:text-[#ff9c9c]">Xem catalog</a>
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -112,7 +112,7 @@
                             @endif
 
                             <div class="absolute right-3 top-3 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-semibold text-gray-900 shadow-lg shadow-black/10 dark:bg-gray-950/95 dark:text-white">
-                                {{ $product['listing'] ? number_format($product['listing']['price'], 0, ',', '.') . ' VND' : 'New' }}
+                                {{ $product['listing'] ? number_format($product['listing']['price'], 0, ',', '.') . ' VND' : 'Mới' }}
                             </div>
 
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/90 via-gray-950/45 to-transparent p-4">
@@ -127,15 +127,15 @@
                         <div class="p-4">
                             <h3 class="line-clamp-1 text-base font-semibold text-gray-950 dark:text-white">{{ $product['name'] }}</h3>
                             <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ $product['publisher'] ?? 'Unknown publisher' }}
+                                {{ $product['publisher'] ?? 'Chưa rõ nhà phát hành' }}
                                 @if($product['developer'])
                                     <span class="text-gray-300 dark:text-gray-600">•</span> {{ $product['developer'] }}
                                 @endif
                             </p>
 
                             <div class="mt-4 rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Listing scope</div>
-                                <div class="mt-1 text-sm font-medium text-gray-900 dark:text-white">{{ $product['listing'] ? $product['listing']['title'] : 'Browse all listings' }}</div>
+                                <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Phạm vi listing</div>
+                                <div class="mt-1 text-sm font-medium text-gray-900 dark:text-white">{{ $product['listing'] ? $product['listing']['title'] : 'Xem tất cả listing' }}</div>
                             </div>
                         </div>
                     </a>
@@ -146,10 +146,10 @@
         <section class="space-y-4">
             <div class="flex items-end justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Sellers</p>
-                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Seller listings</h2>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Người bán</p>
+                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Listing từ người bán</h2>
                 </div>
-                <span class="text-sm text-gray-500 dark:text-gray-400">Latest active listings from sellers</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Listing đang hoạt động mới nhất từ người bán</span>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -178,12 +178,12 @@
 
                             <div class="grid grid-cols-2 gap-2 text-[11px]">
                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing['stock_count'] > 0 ? $listing['stock_count'].' keys' : 'Sold out' }}</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Tồn kho</div>
+                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing['stock_count'] > 0 ? $listing['stock_count'].' key' : 'Hết hàng' }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Type</div>
-                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">Seller listing</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Loại</div>
+                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">Listing người bán</div>
                                 </div>
                             </div>
 

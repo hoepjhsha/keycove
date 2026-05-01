@@ -42,14 +42,14 @@ class CartCheckoutController extends Controller
             ->pluck('id')
             ->all();
 
-        abort_if(count($selectedCartItemIds) !== count($selectedCartItemCodes), 422, 'One or more selected items are no longer available.');
+        abort_if(count($selectedCartItemIds) !== count($selectedCartItemCodes), 422, 'Một hoặc nhiều sản phẩm đã chọn không còn khả dụng.');
 
         $order = $checkoutService->createOrderFromCart($cart, selectedCartItemIds: $selectedCartItemIds);
 
         $paymentUrl = $paymentManager->driver('vnpay')->createPayment([
             'txn_ref'    => $order->order_code,
             'amount'     => (float) $order->total_price,
-            'order_info' => 'Payment for '.$order->order_code,
+            'order_info' => 'Thanh toán cho '.$order->order_code,
             'order_type' => 'other',
             'locale'     => 'vn',
         ]);

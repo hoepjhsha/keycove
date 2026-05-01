@@ -18,7 +18,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('Become a Seller')]
+#[Title('Trở thành người bán')]
 class Apply extends Component
 {
     use WithFileUploads;
@@ -47,7 +47,7 @@ class Apply extends Component
         $user = $this->resolveUser();
 
         if ($user->seller?->kyc_status === KycStatus::Approved) {
-            session()->flash('seller-status', 'Your seller account is already approved.');
+            session()->flash('seller-status', 'Tài khoản người bán của bạn đã được phê duyệt.');
 
             return;
         }
@@ -107,7 +107,7 @@ class Apply extends Component
         $this->cccdBackImage = null;
         $this->syncForm();
 
-        session()->flash('seller-status', 'Your seller application has been submitted for review.');
+        session()->flash('seller-status', 'Hồ sơ người bán của bạn đã được gửi để xét duyệt.');
     }
 
     public function render(): View
@@ -116,38 +116,38 @@ class Apply extends Component
 
         $portalState = match ($this->seller?->kyc_status) {
             KycStatus::Approved => [
-                'badge'       => 'Approved',
+                'badge'       => 'Đã duyệt',
                 'badgeClass'  => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-                'headline'    => 'Seller account approved',
-                'description' => 'Your application is complete. You can open the seller dashboard now.',
-                'actionLabel' => 'Open seller dashboard',
+                'headline'    => 'Tài khoản người bán đã được duyệt',
+                'description' => 'Hồ sơ của bạn đã hoàn tất. Bạn có thể mở bảng điều khiển người bán ngay.',
+                'actionLabel' => 'Mở bảng điều khiển người bán',
                 'actionUrl'   => route('seller.dashboard.index'),
                 'actionClass' => 'bg-black text-white hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white',
             ],
             KycStatus::Pending => [
-                'badge'       => 'Pending',
+                'badge'       => 'Đang chờ',
                 'badgeClass'  => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-                'headline'    => 'Application pending review',
-                'description' => 'Your seller application is waiting for admin approval.',
-                'actionLabel' => 'Back to profile',
+                'headline'    => 'Hồ sơ đang chờ xét duyệt',
+                'description' => 'Hồ sơ người bán của bạn đang chờ quản trị viên phê duyệt.',
+                'actionLabel' => 'Quay lại hồ sơ',
                 'actionUrl'   => url('/my-profile'),
                 'actionClass' => 'border border-slate-200 bg-white text-slate-700 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-slate-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]',
             ],
             KycStatus::Rejected => [
-                'badge'       => 'Rejected',
+                'badge'       => 'Bị từ chối',
                 'badgeClass'  => 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
-                'headline'    => 'Application needs changes',
-                'description' => 'Update the details below and resubmit your application.',
-                'actionLabel' => 'Resubmit application',
+                'headline'    => 'Hồ sơ cần chỉnh sửa',
+                'description' => 'Cập nhật thông tin bên dưới và gửi lại hồ sơ.',
+                'actionLabel' => 'Gửi lại hồ sơ',
                 'actionUrl'   => null,
                 'actionClass' => 'bg-black text-white hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white',
             ],
             default => [
-                'badge'       => 'Ready',
+                'badge'       => 'Sẵn sàng',
                 'badgeClass'  => 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
-                'headline'    => 'Become a seller',
-                'description' => 'Submit your shop name and KYC details to unlock the seller portal.',
-                'actionLabel' => 'Submit application',
+                'headline'    => 'Trở thành người bán',
+                'description' => 'Gửi tên cửa hàng và thông tin KYC để mở cổng người bán.',
+                'actionLabel' => 'Gửi hồ sơ',
                 'actionUrl'   => null,
                 'actionClass' => 'bg-black text-white hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white',
             ],
@@ -158,7 +158,7 @@ class Apply extends Component
             'seller'      => $this->seller,
             'portalState' => $portalState,
         ])->layout('components.layouts.seller', [
-            'title'         => 'Seller Application',
+            'title'         => 'Hồ sơ người bán',
             'user'          => $user,
             'seller'        => $this->seller,
             'activeSection' => 'application',

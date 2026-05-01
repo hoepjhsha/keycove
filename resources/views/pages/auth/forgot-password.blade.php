@@ -3,11 +3,11 @@
 
         <div class="hidden lg:flex lg:w-1/2 bg-[#F6EBD9] dark:bg-gray-900 relative flex-col pt-32 px-16 lg:px-24 overflow-hidden border-r border-gray-200 dark:border-gray-800">
             <div class="relative z-20">
-                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Recovery</h1>
+                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Khôi phục</h1>
                 <div class="flex items-center text-[15px] font-medium text-black/70 dark:text-gray-400 space-x-3">
-                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Home</a>
+                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Trang chủ</a>
                     <i class="fa-solid fa-angle-right text-[12px]"></i>
-                    <span class="text-black dark:text-white">Forgot Password</span>
+                    <span class="text-black dark:text-white">Quên mật khẩu</span>
                 </div>
             </div>
 
@@ -24,16 +24,16 @@
                     <div class="w-14 h-14 bg-[#FCF9F4] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-black dark:text-white rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fa-solid fa-key text-xl"></i>
                     </div>
-                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Forgot password?</h2>
-                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Enter your email and we'll send you an OTP.</p>
+                    <h2 class="text-3xl font-bold text-black dark:text-white mb-2">Quên mật khẩu?</h2>
+                    <p class="text-[15px] text-gray-600 dark:text-gray-400">Nhập email để nhận mã OTP đặt lại mật khẩu.</p>
                 </div>
 
                 <form wire:submit="sendOtp" class="space-y-6">
                     <div>
-                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">Email Address</label>
+                        <label class="block text-[15px] font-bold text-black dark:text-white mb-2">Địa chỉ email</label>
                         <input type="email" wire:model="form.email"
                                class="w-full px-4 py-3.5 bg-transparent border border-black dark:border-gray-600 rounded-lg text-[15px] text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-colors"
-                               placeholder="Enter your email" required autofocus>
+                                placeholder="Nhập email của bạn" required autofocus>
                         @error('form.email')
                         <small class="text-[#D32F2F] block mt-1.5 font-bold text-[13px]">{{ $message }}</small>
                         @enderror
@@ -42,14 +42,14 @@
                     <div class="pt-2">
                         <button type="submit"
                                 class="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:bg-[#D32F2F] dark:hover:bg-[#D32F2F] dark:hover:text-white transition-colors text-[14px] tracking-wide uppercase">
-                            Send OTP
+                            Gửi mã OTP
                         </button>
                     </div>
                 </form>
 
                 <div class="mt-8 text-center">
                     <a href="{{ route('app.auth.login') }}" class="text-[14px] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors font-bold flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-arrow-left"></i> Back to log in
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại đăng nhập
                     </a>
                 </div>
             </div>

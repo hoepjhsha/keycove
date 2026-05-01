@@ -1,5 +1,5 @@
 <div>
-    @section('pageTitle', 'Manage Users')
+    @section('pageTitle', __('admin.titles.manage_users'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
@@ -10,14 +10,14 @@
 
     <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-            <h4 class="font-medium">Manage Users</h4>
+            <h4 class="font-medium">{{ __('admin.titles.manage_users') }}</h4>
         </div>
         <div class="flex-auto p-4">
             <livewire:admin.table.user.user-table />
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showCreateModal" title="Create new User" max-width="2xl">
+    <x-reusable.modal wire:model="showCreateModal" :title="__('admin.modal.create_user')" max-width="2xl">
         <form id="createUserForm" class="space-y-4" wire:submit="createUser">
             <div class="mb-2">
                 <label for="username" class="font-medium text-sm text-slate-600 dark:text-slate-400">Username<span class="text-red-400">*</span></label>
@@ -55,9 +55,9 @@
                 @enderror
             </div>
             <div class="mb-2">
-                <label for="create_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                <label for="create_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="createForm.status" id="create_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500 dark:focus:border-primary-500" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
                     @foreach(\App\Enums\UserStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\UserStatus::Deleted)
                             <option value="{{ $statusEnum->value }}">{{ $statusEnum->label() }}</option>
@@ -69,13 +69,13 @@
                 @enderror
             </div>
             <div class="flex items-center justify-end space-x-2">
-                <button wire:target="createUser" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">Submit</button>
-                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="createUser" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.submit') }}</button>
+                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showViewModal" title="User Details" max-width="2xl">
+    <x-reusable.modal wire:model="showViewModal" :title="__('admin.modal.user_details')" max-width="2xl">
         @if($viewData)
             <div class="space-y-4">
                 <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
@@ -85,11 +85,11 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white font-semibold">#{{ $viewData['id'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Username</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.username') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['username'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Email</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.email') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['email'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
@@ -97,15 +97,15 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white">{!! $viewData['role_label'] !!}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{!! $viewData['status_label'] !!}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Created At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.created_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['created_at'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3 border-b-0">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Updated At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.updated_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['updated_at'] }}</dd>
                         </div>
                     </dl>
@@ -119,7 +119,7 @@
         </x-slot:footer>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showEditModal" title="Edit User #{{ $editForm->user?->id }}" max-width="2xl">
+    <x-reusable.modal wire:model="showEditModal" :title="__('admin.modal.edit_user', ['id' => $editForm->user?->id])" max-width="2xl">
         <form id="editUserForm" class="space-y-4" wire:submit="updateUser">
             <div class="mb-2">
                 <label for="edit_username" class="font-medium text-sm text-slate-600 dark:text-slate-400">Username<span class="text-red-400">*</span></label>
@@ -159,7 +159,7 @@
                 @enderror
             </div>
             <div class="mb-2">
-                <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">Status <span class="text-red-400">*</span></label>
+                <label for="edit_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.status') }} <span class="text-red-400">*</span></label>
                 <select wire:model="editForm.status" id="edit_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0" required>
                     @foreach(\App\Enums\UserStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\UserStatus::Deleted)
@@ -172,20 +172,20 @@
                 @enderror
             </div>
             <div class="flex items-center justify-end space-x-2">
-                <button wire:target="updateUser" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">Update</button>
-                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:target="updateUser" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.update') }}</button>
+                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showBulkStatusModal" title="Change Status for Selected Users" max-width="md">
+    <x-reusable.modal wire:model="showBulkStatusModal" :title="__('admin.modal.change_user_status')" max-width="md">
         <form id="bulkStatusForm" class="space-y-4" wire:submit="bulkChangeStatusUser">
             <div class="mb-2">
                 <label for="bulk_status" class="font-medium text-sm text-slate-600 dark:text-slate-400">
                     Select New Status <span class="text-red-400">*</span>
                 </label>
                 <select wire:model="bulkChangeStatusForm.status" id="bulk_status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0" required>
-                    <option value="">-- Select Status --</option>
+                    <option value="">{{ __('admin.common.select_status') }}</option>
                     @foreach(\App\Enums\UserStatus::cases() as $statusEnum)
                         @if($statusEnum !== \App\Enums\UserStatus::Deleted)
                             <option value="{{ $statusEnum->value }}">{{ $statusEnum->label() }}</option>
@@ -198,7 +198,7 @@
             </div>
             <div class="flex items-center justify-end space-x-2 mt-6">
                 <button wire:target="bulkChangeStatusUser" type="submit" class="inline-block focus:outline-none text-yellow-600 hover:bg-yellow-500 hover:text-white bg-transparent border border-yellow-400 dark:border-yellow-600 text-sm font-medium py-1 px-3 rounded mb-1 transition-colors">Apply Status</button>
-                <button wire:click="$set('showBulkStatusModal', false)" type="button" class="inline-block focus:outline-none text-slate-500 hover:bg-slate-500 hover:text-white bg-transparent border border-slate-300 dark:border-slate-600 text-sm font-medium py-1 px-3 rounded mb-1 transition-colors">Cancel</button>
+                <button wire:click="$set('showBulkStatusModal', false)" type="button" class="inline-block focus:outline-none text-slate-500 hover:bg-slate-500 hover:text-white bg-transparent border border-slate-300 dark:border-slate-600 text-sm font-medium py-1 px-3 rounded mb-1 transition-colors">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>

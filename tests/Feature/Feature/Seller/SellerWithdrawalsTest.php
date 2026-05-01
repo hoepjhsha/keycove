@@ -89,7 +89,7 @@ it('shows the seller withdrawals page', function (): void {
         ->get('/seller/withdrawals')
         ->assertOk()
         ->assertSeeLivewire(Withdrawals::class)
-        ->assertSee('Withdraw your shop balance');
+        ->assertSee('Rút số dư cửa hàng');
 });
 
 it('processes a successful withdrawal request', function (): void {

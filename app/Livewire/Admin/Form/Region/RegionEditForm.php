@@ -72,13 +72,13 @@ class RegionEditForm extends Form
 
         if (Region::where('slug', $this->slug)->where('id', '!=', $this->region->id)->exists()) {
             throw ValidationException::withMessages([
-                'editForm.slug' => 'Region already exists. Write your own slug or change region name',
+                'editForm.slug' => __('admin.validation.duplicate_region_slug'),
             ]);
         }
 
         if ($this->status === GeneralStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'editForm.status' => 'Cannot set status to Deleted via update.',
+                'editForm.status' => __('admin.validation.status_deleted_update'),
             ]);
         }
 

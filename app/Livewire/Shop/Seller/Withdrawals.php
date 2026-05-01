@@ -21,7 +21,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Throwable;
 
-#[Title('Seller Withdrawals')]
+#[Title('Rút tiền người bán')]
 class Withdrawals extends Component
 {
     public string $amount = '';
@@ -63,7 +63,7 @@ class Withdrawals extends Component
 
             report($throwable);
 
-            session()->flash('withdraw-error', 'Your withdrawal request failed unexpectedly.');
+            session()->flash('withdraw-error', 'Yêu cầu rút tiền của bạn gặp lỗi không mong muốn.');
 
             return;
         }
@@ -71,12 +71,12 @@ class Withdrawals extends Component
         $this->reset(['amount', 'bankName', 'bankCode', 'bankAccountNumber', 'bankAccountName']);
 
         if ($withdrawal->status === WithdrawStatus::Completed) {
-            session()->flash('withdraw-status', 'Your withdrawal request has been completed.');
+            session()->flash('withdraw-status', 'Yêu cầu rút tiền của bạn đã hoàn tất.');
 
             return;
         }
 
-        session()->flash('withdraw-error', 'Your withdrawal request could not be completed. Your balance was restored.');
+        session()->flash('withdraw-error', 'Không thể hoàn tất yêu cầu rút tiền. Số dư của bạn đã được khôi phục.');
     }
 
     public function render(): View
@@ -95,7 +95,7 @@ class Withdrawals extends Component
             'minimumWithdrawal' => $this->minimumWithdrawalAmount(),
             'maximumWithdrawal' => $this->maximumWithdrawalAmount($seller),
         ])->layout('components.layouts.seller', [
-            'title'         => 'Seller Withdrawals',
+            'title'         => 'Rút tiền người bán',
             'user'          => $user,
             'seller'        => $seller,
             'activeSection' => 'withdrawals',

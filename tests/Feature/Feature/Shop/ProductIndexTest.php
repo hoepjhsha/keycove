@@ -140,7 +140,7 @@ test('shop filters by category and stock state', function (): void {
     ]);
 
     Livewire::test(ProductIndex::class)
-        ->set('categoryId', $category->id)
+        ->set('category', $category->slug)
         ->set('inStock', true)
         ->assertSee('Filtered Product')
         ->assertDontSee('Other listing');

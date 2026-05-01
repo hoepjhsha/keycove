@@ -1,9 +1,9 @@
 <div>
-    @section('pageTitle', 'Bulk Import Keys')
+    @section('pageTitle', __('admin.titles.bulk_import_keys'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
-            ['label' => 'Catalog & Keys', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
             ['label' => 'Bulk Import Keys', 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
@@ -11,7 +11,7 @@
     <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
             <div class="flex items-center justify-between">
-                <h4 class="font-medium">Bulk Import Keys</h4>
+                <h4 class="font-medium">{{ __('admin.nav.bulk_import_keys') }}</h4>
                 <button wire:click="downloadTemplate" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                     <i class="fa-solid fa-download mr-1"></i> Download Template
                 </button>
@@ -24,12 +24,12 @@
                     <div class="mb-4">
                         <i class="fa-solid fa-file-import text-4xl text-slate-400 dark:text-slate-500"></i>
                     </div>
-                    <p class="text-slate-600 dark:text-slate-400 mb-4">Upload a CSV or XLSX file to import product keys</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4">{{ __('admin.common.upload_keys_help') }}</p>
                     <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">Maximum file size: 10MB. Required columns: listing_id, key_code. Optional: status</p>
 
                     <div class="max-w-md mx-auto">
                         <label class="block">
-                            <span class="sr-only">Choose file</span>
+                            <span class="sr-only">{{ __('admin.common.choose_file') }}</span>
                             <input type="file"
                                    wire:model="importForm.file"
                                    accept=".csv,.xlsx"
@@ -76,7 +76,7 @@
             @else
                 <div class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <h5 class="font-medium text-lg">Import Results</h5>
+                        <h5 class="font-medium text-lg">{{ __('admin.common.import_results') }}</h5>
                         <button wire:click="resetImport" class="text-sm text-blue-600 hover:text-blue-800">
                             <i class="fa-solid fa-plus mr-1"></i> Import More
                         </button>
@@ -85,30 +85,30 @@
                     <div class="grid grid-cols-3 gap-4">
                         <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-lg text-center">
                             <p class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ $importResult['totalRows'] }}</p>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Total Rows</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin.common.total_rows') }}</p>
                         </div>
                         <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg text-center">
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $importResult['successCount'] }}</p>
-                            <p class="text-sm text-green-600 dark:text-green-400">Successful</p>
+                            <p class="text-sm text-green-600 dark:text-green-400">{{ __('admin.common.successful') }}</p>
                         </div>
                         <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-lg text-center">
                             <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $importResult['failureCount'] }}</p>
-                            <p class="text-sm text-red-600 dark:text-red-400">Failed</p>
+                            <p class="text-sm text-red-600 dark:text-red-400">{{ __('admin.common.failed') }}</p>
                         </div>
                     </div>
 
                     @if (!empty($importResult['errors']))
                         <div class="border border-red-200 dark:border-red-800 rounded-lg overflow-hidden">
                             <div class="bg-red-50 dark:bg-red-900/20 px-4 py-3 border-b border-red-200 dark:border-red-800">
-                                <h6 class="font-medium text-red-800 dark:text-red-300">Validation Errors</h6>
+                                <h6 class="font-medium text-red-800 dark:text-red-300">{{ __('admin.common.validation_errors') }}</h6>
                             </div>
                             <div class="max-h-64 overflow-y-auto">
                                 <table class="w-full text-sm">
                                     <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                                         <tr>
-                                            <th class="px-4 py-2 text-left">Row</th>
-                                            <th class="px-4 py-2 text-left">Field</th>
-                                            <th class="px-4 py-2 text-left">Error</th>
+                                            <th class="px-4 py-2 text-left">{{ __('admin.common.row') }}</th>
+                                            <th class="px-4 py-2 text-left">{{ __('admin.common.field') }}</th>
+                                            <th class="px-4 py-2 text-left">{{ __('admin.common.error') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
