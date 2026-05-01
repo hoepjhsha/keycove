@@ -52,7 +52,7 @@ class CheckoutReview extends Component
             ->orderBy('id')
             ->get();
 
-        abort_if($items->count() !== count($this->selectedCartItemCodes), 422, 'Một hoặc nhiều sản phẩm đã chọn không còn khả dụng.');
+        abort_if($items->count() !== count($this->selectedCartItemCodes), 422, __('shop.checkout.selected_items_unavailable'));
 
         $subtotal = $items->sum(function (CartItem $item): float {
             return (float) ($item->listing?->price ?? 0) * (int) $item->quantity;

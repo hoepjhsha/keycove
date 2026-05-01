@@ -42,7 +42,7 @@ class CartCheckoutController extends Controller
             ->pluck('id')
             ->all();
 
-        abort_if(count($selectedCartItemIds) !== count($selectedCartItemCodes), 422, 'Một hoặc nhiều sản phẩm đã chọn không còn khả dụng.');
+        abort_if(count($selectedCartItemIds) !== count($selectedCartItemCodes), 422, __('shop.checkout.selected_items_unavailable'));
 
         $order = $checkoutService->createOrderFromCart($cart, selectedCartItemIds: $selectedCartItemIds);
 

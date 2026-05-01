@@ -90,7 +90,14 @@ class BulkImportIndex extends Component
         }
 
         $csv = Writer::createFromString();
-        $csv->insertOne(['Row', 'Field', 'Error', 'Listing Slug', 'Key Code', 'Status']);
+        $csv->insertOne([
+            __('admin.common.row'),
+            __('admin.common.field'),
+            __('admin.common.error'),
+            __('admin.common.listing_slug'),
+            __('admin.common.key_code'),
+            __('admin.common.status'),
+        ]);
 
         foreach ($this->importResult['errors'] as $error) {
             $csv->insertOne([

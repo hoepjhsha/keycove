@@ -9,7 +9,6 @@ use App\Enums\PaymentStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
-use App\Enums\WalletType;
 use App\Livewire\Shop\Checkout\CheckoutReview;
 use App\Livewire\Shop\Library\MyLibrary;
 use App\Models\Cart;
@@ -51,8 +50,7 @@ it('creates an order from cart and redirects to vnpay', function (): void {
     expect($order?->payment_method)->toBe(PaymentMethod::VNPay);
     expect($order?->payment_status)->toBe(PaymentStatus::Pending);
     expect(PaymentTransaction::query()->where('order_id', $order?->id)->exists())->toBeTrue();
-    expect($order?->transactions)->toHaveCount(1);
-    expect($order?->transactions->first()?->wallet?->type)->toBe(WalletType::Internal);
+    expect($order?->transactions)->toHaveCount(0);
     expect(ProductKey::query()->where('listing_id', $listing->id)->where('status', ProductKeyStatus::Reserved)->count())->toBe(1);
     expect($listing->fresh()->stock_count)->toBe(5);
     expect(CartItem::query()->whereKey($otherCartItem->id)->exists())->toBeTrue();
@@ -82,6 +80,30 @@ it('prevents sellers from checking out their own listings', function (): void {
         ->assertStatus(422);
 
     expect(Order::query()->where('buyer_id', $sellerUser->id)->exists())->toBeFalse();
+});
+
+it('does not apply commission to platform-owned listings during checkout', function (): void {
+    $user = User::factory()->create();
+    $listing = activeCheckoutListing();
+    $listing->forceFill(['seller_id' => null])->save();
+    ProductKey::factory()->withListing($listing)->available()->count(1)->create();
+
+    $cart = Cart::factory()->forUser($user)->create();
+    $cartItem = CartItem::factory()->forCart($cart)->withListing($listing)->create(['quantity' => 1]);
+
+    $this->actingAs($user)
+        ->post(route('app.cart.checkout'), ['item_codes' => [$cartItem->cart_item_code]])
+        ->assertRedirect();
+
+    $orderItem = Order::query()
+        ->where('buyer_id', $user->id)
+        ->firstOrFail()
+        ->items()
+        ->firstOrFail();
+
+    expect($orderItem->seller_id)->toBeNull()
+        ->and($orderItem->platform_fee)->toBe('0.00')
+        ->and($orderItem->seller_amount)->toBe('199000.00');
 });
 
 it('shows a checkout review page for selected cart items', function (): void {

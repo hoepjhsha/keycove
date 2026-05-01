@@ -14,6 +14,7 @@ use App\Enums\TransactionType;
 use App\Enums\WalletType;
 use App\Models\Escrow;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\Wallet;
 use App\Services\InternalWalletService;
@@ -99,6 +100,23 @@ class PaymentSettlementService
                         'source_id'    => $item->escrow?->id,
                         'type'         => TransactionType::PaymentReceived,
                         'balance_type' => TransactionBalanceType::Holding,
+                        'payment_info' => $paymentData,
+                        'amount'       => (float) $item->seller_amount,
+                        'status'       => TransactionStatus::Completed,
+                        'metadata'     => ['order_item_id' => $item->id],
+                    ]);
+                } else {
+                    $internalWallet = Wallet::query()
+                        ->whereKey($this->internalWalletService->wallet()->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    $internalWallet->transactions()->create([
+                        'order_id'     => $order->id,
+                        'source_type'  => OrderItem::class,
+                        'source_id'    => $item->id,
+                        'type'         => TransactionType::PaymentReceived,
+                        'balance_type' => TransactionBalanceType::Available,
                         'payment_info' => $paymentData,
                         'amount'       => (float) $item->seller_amount,
                         'status'       => TransactionStatus::Completed,

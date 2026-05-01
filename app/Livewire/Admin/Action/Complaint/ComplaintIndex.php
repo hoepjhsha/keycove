@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Action\Complaint;
 
 use App\Enums\ComplaintStatus;
-use App\Enums\PaymentMethod;
-use App\Managers\PaymentManager;
 use App\Models\Complaint;
 use App\Services\Shop\ComplaintService;
 use App\Utilities\StorageUtility;
@@ -31,13 +29,6 @@ class ComplaintIndex extends Component
     public ?string $resolutionNote = null;
 
     public ?string $resolvedAt = null;
-
-    private PaymentManager $paymentManager;
-
-    public function boot(PaymentManager $paymentManager): void
-    {
-        $this->paymentManager = $paymentManager;
-    }
 
     /**
      * @return array<int, ComplaintStatus>
@@ -160,57 +151,14 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.order.paymentTransactions', 'orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
         }
 
-        $transaction = $complaint->orderItem?->order?->transaction;
-        $paymentMethod = $complaint->orderItem?->order?->payment_method;
-
-        if ($paymentMethod !== PaymentMethod::VNPay) {
-            $this->dispatch('notify', [
-                'type'    => 'error',
-                'message' => __('admin.messages.refund_vnpay_only'),
-            ]);
-
-            return;
-        }
-
-        if (! $transaction) {
-            $this->dispatch('notify', [
-                'type'    => 'error',
-                'message' => __('admin.messages.refund_payment_not_found'),
-            ]);
-
-            return;
-        }
-
         try {
-            // TODO: refund stuff
-            //            $refundResponse = $this->paymentManager->driver('vnpay')->refund([
-            //                'txn_ref'          => $complaint->orderItem?->order?->order_code ?? (string) $complaint->id,
-            //                'amount'           => (float) $complaint->orderItem?->subtotal,
-            //                'order_info'       => 'Refund complaint #'.$complaint->id,
-            //                'transaction_no'   => $transaction->payment_info['transaction_id'] ?? null,
-            //                'transaction_date' => $transaction->payment_info['pay_date'] ?? now()->format('YmdHis'),
-            //                'create_by'        => (string) auth()->id(),
-            //                'ip_address'       => request()->ip(),
-            //            ]);
-            //
-            //            if (! ($refundResponse['success'] ?? false)) {
-            //                $message = $refundResponse['message'] ?? 'Refund request was rejected by the payment gateway.';
-            //
-            //                $this->dispatch('notify', [
-            //                    'type'    => 'error',
-            //                    'message' => $message,
-            //                ]);
-            //
-            //                return;
-            //            }
-
-            $complaintService->resolveRefund(
+            $complaintService->refundComplaint(
                 $complaint,
                 auth()->guard('admin')->user() ?? auth()->user(),
                 (string) $this->resolutionNote,

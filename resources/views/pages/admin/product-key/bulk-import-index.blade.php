@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
-            ['label' => 'Bulk Import Keys', 'url' => 'javascript:void(0)'],
+            ['label' => __('admin.nav.bulk_import_keys'), 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
 
@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between">
                 <h4 class="font-medium">{{ __('admin.nav.bulk_import_keys') }}</h4>
                 <button wire:click="downloadTemplate" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                    <i class="fa-solid fa-download mr-1"></i> Download Template
+                    <i class="fa-solid fa-download mr-1"></i> {{ __('admin.common.download_template') }}
                 </button>
             </div>
         </div>
@@ -25,7 +25,7 @@
                         <i class="fa-solid fa-file-import text-4xl text-slate-400 dark:text-slate-500"></i>
                     </div>
                     <p class="text-slate-600 dark:text-slate-400 mb-4">{{ __('admin.common.upload_keys_help') }}</p>
-                    <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">Maximum file size: 10MB. Required columns: listing_slug, key_code. Optional: status</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">{{ __('admin.common.bulk_import_file_requirements') }}</p>
 
                     <div class="max-w-md mx-auto">
                         <label class="block">
@@ -66,10 +66,10 @@
                             @if (!$importForm->file) disabled @endif
                             class="inline-block focus:outline-none text-white hover:bg-blue-600 bg-blue-500 border border-blue-500 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 text-sm font-medium py-2 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="processImport">
-                            <i class="fa-solid fa-upload mr-2"></i> Import Keys
+                            <i class="fa-solid fa-upload mr-2"></i> {{ __('admin.common.import_keys') }}
                         </span>
                         <span wire:loading wire:target="processImport">
-                            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...
+                            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> {{ __('admin.common.processing') }}
                         </span>
                     </button>
                 </div>
@@ -78,7 +78,7 @@
                     <div class="flex items-center justify-between">
                         <h5 class="font-medium text-lg">{{ __('admin.common.import_results') }}</h5>
                         <button wire:click="resetImport" class="text-sm text-blue-600 hover:text-blue-800">
-                            <i class="fa-solid fa-plus mr-1"></i> Import More
+                            <i class="fa-solid fa-plus mr-1"></i> {{ __('admin.common.import_more') }}
                         </button>
                     </div>
 
@@ -126,7 +126,7 @@
 
                         <div class="flex justify-center">
                             <button wire:click="downloadErrorReport" class="inline-block focus:outline-none text-red-600 hover:bg-red-600 hover:text-white bg-transparent border border-red-300 dark:border-red-700 text-sm font-medium py-2 px-4 rounded transition-colors">
-                                <i class="fa-solid fa-download mr-2"></i> Download Error Report
+                                <i class="fa-solid fa-download mr-2"></i> {{ __('admin.common.download_error_report') }}
                             </button>
                         </div>
                     @endif
@@ -135,7 +135,7 @@
                         <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                             <p class="text-green-700 dark:text-green-300">
                                 <i class="fa-solid fa-check-circle mr-2"></i>
-                                Successfully imported {{ $importResult['successCount'] }} product key(s)!
+                                {{ __('admin.messages.import_success_count', ['count' => $importResult['successCount']]) }}
                             </p>
                         </div>
                     @endif

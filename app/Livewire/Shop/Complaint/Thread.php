@@ -90,7 +90,7 @@ class Thread extends Component
             'resolutionNote' => ['required', 'string', 'min:3'],
         ]);
 
-        $complaintService->resolveRefund(
+        $complaintService->refundComplaint(
             $this->complaint,
             $this->currentUser(),
             trim($this->resolutionNote),

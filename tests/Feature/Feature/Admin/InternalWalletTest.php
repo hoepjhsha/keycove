@@ -12,17 +12,21 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Enums\TransactionBalanceType;
 use App\Enums\TransactionStatus;
+use App\Enums\TransactionType;
 use App\Enums\WalletType;
 use App\Enums\WithdrawStatus;
 use App\Livewire\Admin\Action\InternalWallet\InternalWalletIndex;
 use App\Livewire\Admin\Action\Withdraw\WithdrawalRequestIndex;
 use App\Livewire\Shop\Seller\Withdrawals;
+use App\Managers\PaymentManager;
 use App\Models\Complaint;
 use App\Models\Escrow;
 use App\Models\InternalWalletEntry;
 use App\Models\OperatingSystem;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\Platform;
 use App\Models\Product;
@@ -31,10 +35,13 @@ use App\Models\ProductListing;
 use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Seller;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\InternalWalletService;
 use App\Services\Payment\VNPayGateway;
 use App\Services\Shop\ComplaintService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -118,6 +125,68 @@ it('records payment receipts and escrow holds for settled orders', function (): 
         ->and($entries->first(fn (InternalWalletEntry $entry): bool => $entry->source_type === Escrow::class && $entry->source_id === $escrow->id)?->affects_balance)->toBeFalse();
 });
 
+it('records payment receipts on the internal wallet transaction ledger for platform-owned orders', function (): void {
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $listing = activeListing($seller);
+    $listing->forceFill(['seller_id' => null])->save();
+
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_method' => PaymentMethod::VNPay,
+        'payment_status' => PaymentStatus::Pending,
+        'total_price'    => 199000,
+    ]);
+
+    $orderItem = $order->items()->create([
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'order_item_code'       => 'OI-20260501-INTERNALSALE',
+        'product_name_snapshot' => 'Internal Sale Listing',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 0,
+        'seller_amount'         => 199000,
+        'status'                => OrderStatus::PendingPayment,
+    ]);
+
+    PaymentTransaction::factory()->create([
+        'order_id'               => $order->id,
+        'gateway'                => PaymentMethod::VNPay,
+        'gateway_transaction_id' => $order->order_code,
+        'status'                 => PaymentStatus::Pending,
+        'amount'                 => 199000,
+    ]);
+
+    $request = [
+        'vnp_TxnRef'       => $order->order_code,
+        'vnp_Amount'       => 19900000,
+        'vnp_ResponseCode' => '00',
+        'vnp_SecureHash'   => hash_hmac('sha512', http_build_query([
+            'vnp_Amount'       => 19900000,
+            'vnp_ResponseCode' => '00',
+            'vnp_TxnRef'       => $order->order_code,
+        ]), config('services.payment.vnpay.hash_secret', '')),
+    ];
+
+    app(VNPayGateway::class)->handleIpn($request);
+
+    $internalWallet = Wallet::query()->where('type', WalletType::Internal)->first();
+    $paymentTransaction = Transaction::query()
+        ->where('wallet_id', $internalWallet?->id)
+        ->where('type', TransactionType::PaymentReceived)
+        ->latest('id')
+        ->first();
+
+    expect($paymentTransaction)->not->toBeNull()
+        ->and($paymentTransaction?->amount)->toBe('199000.00')
+        ->and($paymentTransaction?->source_type)->toBe(OrderItem::class)
+        ->and($paymentTransaction?->source_id)->toBe($orderItem->id)
+        ->and($paymentTransaction?->balance_type)->toBe(TransactionBalanceType::Available);
+});
+
 it('records refund payouts and reduces the internal wallet balance', function (): void {
     $sellerUser = User::factory()->seller()->create();
     $seller = approvedSeller($sellerUser);
@@ -191,6 +260,260 @@ it('records refund payouts and reduces the internal wallet balance', function ()
         ->and($entry)->not->toBeNull()
         ->and($entry?->amount)->toBe('199000.00')
         ->and($entry?->status)->toBe(TransactionStatus::Completed);
+});
+
+it('refunds seller-owned complaints through vnpay before recording refund transactions', function (): void {
+    config()->set('services.payment.default', 'vnpay');
+    config()->set('services.payment.vnpay.refund_mock', true);
+
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $admin = User::factory()->admin()->create();
+    $listing = activeListing($seller);
+    $buyer = User::factory()->create();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INTWALLET005',
+        'balance'   => 199000,
+        'holding'   => 0,
+    ]);
+
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_method' => PaymentMethod::VNPay,
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $orderItem = $order->items()->create([
+        'listing_id'            => $listing->id,
+        'seller_id'             => $seller->id,
+        'order_item_code'       => 'OI-20260501-GATEWAYREFUND',
+        'product_name_snapshot' => 'Gateway Refund Listing',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 19900,
+        'seller_amount'         => 179100,
+        'status'                => OrderStatus::Disputing,
+    ]);
+
+    $escrow = Escrow::query()->create([
+        'order_item_id' => $orderItem->id,
+        'seller_id'     => $seller->id,
+        'amount'        => 179100,
+        'release_date'  => now()->addDay(),
+        'status'        => EscrowStatus::Holding,
+    ]);
+
+    Wallet::query()->create([
+        'seller_id' => $seller->id,
+        'type'      => WalletType::Seller,
+        'code'      => 'SELLERWALLET5',
+        'balance'   => 0,
+        'holding'   => 179100,
+    ]);
+
+    PaymentTransaction::factory()->completed()->create([
+        'order_id'               => $order->id,
+        'gateway'                => PaymentMethod::VNPay,
+        'gateway_transaction_id' => $order->order_code,
+        'amount'                 => 199000,
+        'response_payload'       => [
+            'vnp_TransactionNo' => '12345678',
+            'vnp_PayDate'       => now()->subMinute()->format('YmdHis'),
+        ],
+    ]);
+
+    $complaint = Complaint::query()->create([
+        'order_item_id'   => $orderItem->id,
+        'complaint_code'  => 'CMP-REFUND-GATEWAY-1',
+        'reason'          => 'Broken key',
+        'evidence'        => [],
+        'status'          => ComplaintStatus::Open,
+        'resolution_note' => null,
+        'resolved_by'     => null,
+        'resolved_at'     => null,
+    ]);
+
+    app(ComplaintService::class)->refundComplaint($complaint, $admin, 'Refund approved');
+
+    $sellerWallet = Wallet::query()->where('seller_id', $seller->id)->first();
+    $refundTransaction = Transaction::query()
+        ->where('wallet_id', $sellerWallet?->id)
+        ->where('type', TransactionType::Refund)
+        ->latest('id')
+        ->first();
+
+    expect($complaint->fresh()?->status)->toBe(ComplaintStatus::ApprovedRefund)
+        ->and($escrow->fresh()?->status)->toBe(EscrowStatus::Refunded)
+        ->and($sellerWallet?->holding)->toBe('0.00')
+        ->and($refundTransaction)->not->toBeNull()
+        ->and(data_get($refundTransaction?->payment_info, 'gateway_refund.success'))->toBeTrue()
+        ->and(data_get($order->paymentTransactions()->latest('id')->first()?->response_payload, 'refund.success'))->toBeTrue();
+});
+
+it('refunds platform-owned complaints through vnpay and records an internal refund transaction', function (): void {
+    config()->set('services.payment.default', 'vnpay');
+    config()->set('services.payment.vnpay.refund_mock', true);
+
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $admin = User::factory()->admin()->create();
+    $listing = activeListing($seller);
+    $listing->forceFill(['seller_id' => null])->save();
+    $buyer = User::factory()->create();
+
+    $internalWallet = Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INTWALLET006',
+        'balance'   => 199000,
+        'holding'   => 0,
+    ]);
+
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_method' => PaymentMethod::VNPay,
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $orderItem = $order->items()->create([
+        'listing_id'            => $listing->id,
+        'seller_id'             => null,
+        'order_item_code'       => 'OI-20260501-INTERNALREFUND',
+        'product_name_snapshot' => 'Internal Refund Listing',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 0,
+        'seller_amount'         => 199000,
+        'status'                => OrderStatus::Disputing,
+    ]);
+
+    PaymentTransaction::factory()->completed()->create([
+        'order_id'               => $order->id,
+        'gateway'                => PaymentMethod::VNPay,
+        'gateway_transaction_id' => $order->order_code,
+        'amount'                 => 199000,
+        'response_payload'       => [
+            'vnp_TransactionNo' => '87654321',
+            'vnp_PayDate'       => now()->subMinute()->format('YmdHis'),
+        ],
+    ]);
+
+    $complaint = Complaint::query()->create([
+        'order_item_id'   => $orderItem->id,
+        'complaint_code'  => 'CMP-REFUND-INTERNAL-1',
+        'reason'          => 'Wrong item',
+        'evidence'        => [],
+        'status'          => ComplaintStatus::Open,
+        'resolution_note' => null,
+        'resolved_by'     => null,
+        'resolved_at'     => null,
+    ]);
+
+    app(ComplaintService::class)->refundComplaint($complaint, $admin, 'Refund approved');
+
+    $refundTransaction = Transaction::query()
+        ->where('wallet_id', $internalWallet->id)
+        ->where('type', TransactionType::Refund)
+        ->latest('id')
+        ->first();
+
+    expect($complaint->fresh()?->status)->toBe(ComplaintStatus::ApprovedRefund)
+        ->and($internalWallet->fresh()?->balance)->toBe('0.00')
+        ->and($refundTransaction)->not->toBeNull()
+        ->and($refundTransaction?->amount)->toBe('-199000.00')
+        ->and(data_get($refundTransaction?->payment_info, 'gateway_refund.success'))->toBeTrue();
+});
+
+it('rolls back complaint refund changes when the refund ledger write fails', function (): void {
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $admin = User::factory()->admin()->create();
+    $listing = activeListing($seller);
+    $buyer = User::factory()->create();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INTWALLET004',
+        'balance'   => 199000,
+        'holding'   => 0,
+    ]);
+
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $orderItem = $order->items()->create([
+        'listing_id'            => $listing->id,
+        'seller_id'             => $seller->id,
+        'order_item_code'       => 'OI-20260501-ROLLBACK',
+        'product_name_snapshot' => 'Refund Rollback Listing',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 19900,
+        'seller_amount'         => 179100,
+        'status'                => OrderStatus::Disputing,
+    ]);
+
+    $escrow = Escrow::query()->create([
+        'order_item_id' => $orderItem->id,
+        'seller_id'     => $seller->id,
+        'amount'        => 179100,
+        'release_date'  => now()->addDay(),
+        'status'        => EscrowStatus::Holding,
+    ]);
+
+    Wallet::query()->create([
+        'seller_id' => $seller->id,
+        'type'      => WalletType::Seller,
+        'code'      => 'SELLERWALLET4',
+        'balance'   => 0,
+        'holding'   => 179100,
+    ]);
+
+    $complaint = Complaint::query()->create([
+        'order_item_id'   => $orderItem->id,
+        'complaint_code'  => 'CMP-REFUND-ROLLBACK',
+        'reason'          => 'Broken key',
+        'evidence'        => [],
+        'status'          => ComplaintStatus::Open,
+        'resolution_note' => null,
+        'resolved_by'     => null,
+        'resolved_at'     => null,
+    ]);
+
+    $failingComplaintService = new ComplaintService(
+        new class extends InternalWalletService
+        {
+            public function refundPaid(Complaint $complaint, ?Carbon $occurredAt = null): InternalWalletEntry
+            {
+                throw new RuntimeException('Ledger write failed.');
+            }
+        },
+        app(PaymentManager::class),
+    );
+
+    expect(fn () => $failingComplaintService->resolveRefund($complaint, $admin, 'Refund approved'))
+        ->toThrow(RuntimeException::class, 'Ledger write failed.');
+
+    expect($complaint->fresh()?->status)->toBe(ComplaintStatus::Open)
+        ->and($complaint->fresh()?->resolved_by)->toBeNull()
+        ->and($complaint->fresh()?->resolved_at)->toBeNull()
+        ->and($orderItem->fresh()?->status)->toBe(OrderStatus::Disputing)
+        ->and($escrow->fresh()?->status)->toBe(EscrowStatus::Holding)
+        ->and(Wallet::query()->where('seller_id', $seller->id)->first()?->holding)->toBe('179100.00')
+        ->and(Wallet::query()->where('seller_id', $seller->id)->first()?->balance)->toBe('0.00')
+        ->and(InternalWalletEntry::query()->count())->toBe(0);
 });
 
 it('records seller payout requests as pending against the internal wallet', function (): void {
