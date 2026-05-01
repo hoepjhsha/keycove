@@ -16,6 +16,7 @@ use App\Enums\TransactionStatus;
 use App\Enums\WalletType;
 use App\Enums\WithdrawStatus;
 use App\Livewire\Admin\Action\InternalWallet\InternalWalletIndex;
+use App\Livewire\Admin\Action\Withdraw\WithdrawalRequestIndex;
 use App\Livewire\Shop\Seller\Withdrawals;
 use App\Models\Complaint;
 use App\Models\Escrow;
@@ -192,7 +193,7 @@ it('records refund payouts and reduces the internal wallet balance', function ()
         ->and($entry?->status)->toBe(TransactionStatus::Completed);
 });
 
-it('records seller payout requests and completions against the internal wallet', function (): void {
+it('records seller payout requests as pending against the internal wallet', function (): void {
     config()->set('services.payment.default', 'vnpay');
     config()->set('services.payment.vnpay.withdraw_mock', true);
 
@@ -228,17 +229,21 @@ it('records seller payout requests and completions against the internal wallet',
     $entries = InternalWalletEntry::query()->orderBy('id')->get();
 
     expect($sellerWallet->fresh()->balance)->toBe('11000.00')
-        ->and($internalWallet?->balance)->toBe('24000.00')
-        ->and($entries)->toHaveCount(2)
+        ->and($sellerWallet->fresh()->holding)->toBe('3000.00')
+        ->and($internalWallet?->balance)->toBe('25000.00')
+        ->and($entries)->toHaveCount(1)
+        ->and($entries->pluck('type')->all())->toBe([
+            InternalWalletEntryType::SellerPayoutRequested,
+        ])
         ->and($entries->pluck('status')->all())->toBe([
-            TransactionStatus::Completed,
-            TransactionStatus::Completed,
+            TransactionStatus::Pending,
         ]);
 });
 
-it('keeps the internal wallet balance unchanged when seller payout fails', function (): void {
+it('keeps the internal wallet balance unchanged when an approved seller payout fails', function (): void {
     config()->set('services.payment.default', 'vnpay');
     config()->set('services.payment.vnpay.withdraw_mock', true);
+    config()->set('queue.default', 'sync');
 
     Wallet::query()->create([
         'seller_id' => null,
@@ -251,7 +256,7 @@ it('keeps the internal wallet balance unchanged when seller payout fails', funct
     $sellerUser = User::factory()->seller()->create();
     $seller = approvedSeller($sellerUser);
 
-    Wallet::query()->create([
+    $sellerWallet = Wallet::query()->create([
         'seller_id' => $seller->id,
         'type'      => WalletType::Seller,
         'code'      => 'SELLERWALLET3',
@@ -269,11 +274,26 @@ it('keeps the internal wallet balance unchanged when seller payout fails', funct
         ->call('submit')
         ->assertHasNoErrors();
 
+    $withdraw = $sellerWallet->withdraws()->firstOrFail();
+    $admin = User::factory()->admin()->create();
+
+    Livewire::actingAs($admin, 'admin')
+        ->test(WithdrawalRequestIndex::class)
+        ->call('approve', $withdraw->id)
+        ->assertHasNoErrors();
+
     $internalWallet = Wallet::query()->where('type', WalletType::Internal)->first();
     $entries = InternalWalletEntry::query()->orderBy('id')->get();
 
     expect($internalWallet?->balance)->toBe('25000.00')
         ->and($entries)->toHaveCount(2)
+        ->and($withdraw->fresh()->status)->toBe(WithdrawStatus::Failed)
+        ->and($sellerWallet->fresh()->balance)->toBe('12000.00')
+        ->and($sellerWallet->fresh()->holding)->toBe('2000.00')
+        ->and($entries->pluck('type')->all())->toBe([
+            InternalWalletEntryType::SellerPayoutRequested,
+            InternalWalletEntryType::SellerPayoutFailed,
+        ])
         ->and($entries->last()?->status)->toBe(TransactionStatus::Failed);
 });
 

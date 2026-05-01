@@ -14,6 +14,7 @@ return [
         'actions'                      => 'Actions',
         'activate_now'                 => 'Activate Now',
         'amount'                       => 'Amount',
+        'approve'                      => 'Approve',
         'apply_status'                 => 'Apply Status',
         'attributes'                   => 'Attributes',
         'back_to_dashboard'            => 'Back to Dashboard',
@@ -125,6 +126,7 @@ return [
         'affects_balance'              => 'Affects Balance',
         'publisher'                    => 'Publisher',
         'reason'                       => 'Reason',
+        'reject'                       => 'Reject',
         'release_date'                 => 'Release date',
         'retry'                        => 'Retry',
         'restore'                      => 'Restore',
@@ -254,6 +256,7 @@ return [
         'user_details'                   => 'User Details',
         'edit_system_setting'            => 'Edit System Setting #:id',
         'system_setting_details'         => 'System Setting Details',
+        'withdrawal_details'             => 'Withdrawal Request Details',
     ],
 
     'placeholders' => [
@@ -323,6 +326,10 @@ return [
         'refund_vnpay_only'            => 'Refund is only available for VNPay orders at the moment.',
         'release_processed'            => 'Release processed successfully',
         'import_failed'                => 'Import failed: :error',
+        'withdrawal_processed'         => 'Withdrawal request has been queued for automatic processing.',
+        'withdrawal_process_failed'    => 'Failed to queue the withdrawal request for processing: :error',
+        'withdrawal_rejected'          => 'Withdrawal request rejected successfully.',
+        'withdrawal_reject_failed'     => 'Failed to reject withdrawal request: :error',
     ],
 
     'validation' => [
@@ -398,6 +405,10 @@ return [
         'short_description_placeholder' => 'Short description of this setting',
         'add_setting'                   => 'Add Setting',
         'key_locked'                    => 'Key cannot be edited.',
+    ],
+
+    'withdrawals' => [
+        'empty' => 'No withdrawal requests found.',
     ],
 
     'errors' => [

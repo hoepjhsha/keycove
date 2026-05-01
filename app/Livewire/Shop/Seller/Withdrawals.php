@@ -7,7 +7,6 @@ namespace App\Livewire\Shop\Seller;
 use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
-use App\Enums\WithdrawStatus;
 use App\Models\OrderItem;
 use App\Models\Seller;
 use App\Models\SystemConfig;
@@ -70,13 +69,7 @@ class Withdrawals extends Component
 
         $this->reset(['amount', 'bankName', 'bankCode', 'bankAccountNumber', 'bankAccountName']);
 
-        if ($withdrawal->status === WithdrawStatus::Completed) {
-            session()->flash('withdraw-status', 'Yêu cầu rút tiền của bạn đã hoàn tất.');
-
-            return;
-        }
-
-        session()->flash('withdraw-error', 'Không thể hoàn tất yêu cầu rút tiền. Số dư của bạn đã được khôi phục.');
+        session()->flash('withdraw-status', 'Yêu cầu rút tiền của bạn đã được gửi và đang chờ xử lý.');
     }
 
     public function render(): View

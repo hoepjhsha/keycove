@@ -14,6 +14,7 @@ return [
         'actions'                      => 'Thao tác',
         'activate_now'                 => 'Kích hoạt ngay',
         'amount'                       => 'Số tiền',
+        'approve'                      => 'Duyệt',
         'apply_status'                 => 'Áp dụng trạng thái',
         'attributes'                   => 'Thuộc tính',
         'back_to_dashboard'            => 'Về bảng điều khiển',
@@ -125,6 +126,7 @@ return [
         'affects_balance'              => 'Ảnh hưởng số dư',
         'publisher'                    => 'Nhà phát hành',
         'reason'                       => 'Lý do',
+        'reject'                       => 'Từ chối',
         'release_date'                 => 'Ngày giải ngân',
         'retry'                        => 'Thử lại',
         'restore'                      => 'Khôi phục',
@@ -254,6 +256,7 @@ return [
         'user_details'                   => 'Chi tiết người dùng',
         'edit_system_setting'            => 'Chỉnh sửa cài đặt hệ thống #:id',
         'system_setting_details'         => 'Chi tiết cài đặt hệ thống',
+        'withdrawal_details'             => 'Chi tiết yêu cầu rút tiền',
     ],
 
     'placeholders' => [
@@ -323,6 +326,10 @@ return [
         'refund_vnpay_only'            => 'Hiện tại chỉ hỗ trợ hoàn tiền cho đơn hàng VNPay.',
         'release_processed'            => 'Đã xử lý giải ngân thành công',
         'import_failed'                => 'Nhập dữ liệu thất bại: :error',
+        'withdrawal_processed'         => 'Đã đưa yêu cầu rút tiền vào hàng chờ xử lý tự động.',
+        'withdrawal_process_failed'    => 'Không thể đưa yêu cầu rút tiền vào hàng chờ xử lý: :error',
+        'withdrawal_rejected'          => 'Đã từ chối yêu cầu rút tiền thành công.',
+        'withdrawal_reject_failed'     => 'Không thể từ chối yêu cầu rút tiền: :error',
     ],
 
     'validation' => [
@@ -398,6 +405,10 @@ return [
         'short_description_placeholder' => 'Mô tả ngắn cho cài đặt này',
         'add_setting'                   => 'Thêm cài đặt',
         'key_locked'                    => 'Không thể chỉnh sửa khóa.',
+    ],
+
+    'withdrawals' => [
+        'empty' => 'Chưa có yêu cầu rút tiền.',
     ],
 
     'errors' => [

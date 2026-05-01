@@ -9,6 +9,7 @@ use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Enums\WalletType;
 use App\Enums\WithdrawStatus;
+use App\Jobs\ProcessSellerWithdrawal;
 use App\Managers\PaymentManager;
 use App\Models\Seller;
 use App\Models\Transaction;
@@ -59,7 +60,7 @@ class SellerWithdrawalService
 
             $withdraw = $lockedWallet->withdraws()->create([
                 'amount'              => $amount,
-                'status'              => WithdrawStatus::Processing,
+                'status'              => WithdrawStatus::Pending,
                 'bank_name'           => $data['bank_name'],
                 'bank_account_number' => $data['bank_account_number'],
                 'bank_account_name'   => $data['bank_account_name'],
@@ -82,7 +83,7 @@ class SellerWithdrawalService
                     'account_number'  => $data['bank_account_number'],
                     'account_holder'  => $data['bank_account_name'],
                     'withdraw_id'     => $withdraw->id,
-                    'withdraw_status' => WithdrawStatus::Processing->name,
+                    'withdraw_status' => WithdrawStatus::Pending->name,
                 ],
                 'amount'   => -$amount,
                 'status'   => TransactionStatus::Pending,
@@ -96,28 +97,126 @@ class SellerWithdrawalService
             $this->internalWalletService->sellerPayoutRequested($withdraw);
         }
 
-        $response = $this->performWithdrawal($data, $withdraw);
+        return $withdraw->fresh();
+    }
 
-        $this->finalizeWithdrawal($withdraw, $transaction, $amount, $response);
+    public function approveWithdrawal(Withdraw $withdraw, User $actor): Withdraw
+    {
+        $preparedWithdrawal = DB::transaction(function () use ($withdraw, $actor): Withdraw {
+            $lockedWithdraw = Withdraw::query()->whereKey($withdraw->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedWithdraw->status !== WithdrawStatus::Pending) {
+                throw ValidationException::withMessages([
+                    'withdraw' => 'This withdrawal request is no longer pending.',
+                ]);
+            }
+
+            $lockedWithdraw->forceFill([
+                'status'       => WithdrawStatus::Processing,
+                'processed_by' => $actor->id,
+                'metadata'     => array_merge($lockedWithdraw->metadata ?? [], [
+                    'approved_by' => $actor->id,
+                ]),
+            ])->save();
+
+            Transaction::query()
+                ->where('source_type', Withdraw::class)
+                ->where('source_id', $lockedWithdraw->id)
+                ->update([
+                    'payment_info->withdraw_status' => WithdrawStatus::Processing->name,
+                ]);
+
+            return $lockedWithdraw->fresh();
+        });
+
+        ProcessSellerWithdrawal::dispatch($preparedWithdrawal->id)->afterCommit();
+
+        return $preparedWithdrawal->fresh();
+    }
+
+    public function processApprovedWithdrawal(int $withdrawId): void
+    {
+        $withdraw = Withdraw::query()->findOrFail($withdrawId);
+
+        if ($withdraw->status !== WithdrawStatus::Processing) {
+            return;
+        }
+
+        $response = $this->performWithdrawal($withdraw);
+
+        $this->finalizeApprovedWithdrawal($withdraw, $response);
+    }
+
+    public function rejectWithdrawal(Withdraw $withdraw, User $actor, string $reason): Withdraw
+    {
+        DB::transaction(function () use ($withdraw, $actor, $reason): void {
+            $lockedWithdraw = Withdraw::query()->whereKey($withdraw->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedWithdraw->status !== WithdrawStatus::Pending) {
+                throw ValidationException::withMessages([
+                    'withdraw' => 'This withdrawal request is no longer pending.',
+                ]);
+            }
+
+            $lockedWallet = Wallet::query()->whereKey($lockedWithdraw->wallet_id)->lockForUpdate()->firstOrFail();
+            $transaction = Transaction::query()
+                ->where('source_type', Withdraw::class)
+                ->where('source_id', $lockedWithdraw->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $amount = (float) $lockedWithdraw->amount;
+
+            $lockedWallet->forceFill([
+                'balance' => round((float) $lockedWallet->balance + $amount, 2),
+                'holding' => round((float) $lockedWallet->holding - $amount, 2),
+            ])->save();
+
+            $lockedWithdraw->forceFill([
+                'status'        => WithdrawStatus::Rejected,
+                'processed_by'  => $actor->id,
+                'processed_at'  => now(),
+                'reject_reason' => $reason,
+                'metadata'      => array_merge($lockedWithdraw->metadata ?? [], [
+                    'rejected_by' => $actor->id,
+                ]),
+            ])->save();
+
+            $transaction->forceFill([
+                'status'       => TransactionStatus::Cancelled,
+                'payment_info' => array_merge($transaction->payment_info ?? [], [
+                    'withdraw_status' => WithdrawStatus::Rejected->name,
+                    'reject_reason'   => $reason,
+                ]),
+                'metadata' => array_merge($transaction->metadata ?? [], [
+                    'reject_reason' => $reason,
+                    'processed_by'  => $actor->id,
+                ]),
+            ])->save();
+
+            $this->internalWalletService->sellerPayoutFailed($lockedWithdraw, $lockedWithdraw->processed_at ?? now(), [
+                'reject_reason' => $reason,
+                'processed_by'  => $actor->id,
+            ]);
+        });
 
         return $withdraw->fresh();
     }
 
     /**
-     * @param  array{amount: float|int|string, bank_name: string, bank_code: string, bank_account_number: string, bank_account_name: string}  $data
      * @return array{success: bool, message: string, payload?: array<string, mixed>}
      */
-    protected function performWithdrawal(array $data, ?Withdraw $withdraw): array
+    protected function performWithdrawal(Withdraw $withdraw): array
     {
         try {
             return $this->payments->driver('vnpay')->withdraw([
-                'amount'         => (float) $data['amount'],
-                'bank_code'      => $data['bank_code'],
-                'account_number' => $data['bank_account_number'],
-                'account_name'   => $data['bank_account_name'],
-                'order_info'     => 'Yêu cầu rút tiền người bán'.($withdraw ? ' #'.$withdraw->id : ''),
-                'txn_ref'        => $withdraw ? 'WD-'.$withdraw->id : null,
-                'request_id'     => $withdraw ? 'WDREQ-'.$withdraw->id : null,
+                'amount'         => (float) $withdraw->amount,
+                'bank_code'      => (string) ($withdraw->metadata['bank_code'] ?? ''),
+                'account_number' => $withdraw->bank_account_number,
+                'account_name'   => $withdraw->bank_account_name,
+                'order_info'     => 'Yêu cầu rút tiền người bán #'.$withdraw->id,
+                'txn_ref'        => 'WD-'.$withdraw->id,
+                'request_id'     => 'WDREQ-'.$withdraw->id,
             ]);
         } catch (Throwable $throwable) {
             return [
@@ -130,12 +229,22 @@ class SellerWithdrawalService
     /**
      * @param  array{success: bool, message: string, payload?: array<string, mixed>}  $response
      */
-    protected function finalizeWithdrawal(Withdraw $withdraw, Transaction $transaction, float $amount, array $response): void
+    protected function finalizeApprovedWithdrawal(Withdraw $withdraw, array $response): void
     {
-        DB::transaction(function () use ($withdraw, $transaction, $amount, $response): void {
+        DB::transaction(function () use ($withdraw, $response): void {
             $lockedWithdraw = Withdraw::query()->whereKey($withdraw->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedWithdraw->status !== WithdrawStatus::Processing) {
+                return;
+            }
+
             $lockedWallet = Wallet::query()->whereKey($lockedWithdraw->wallet_id)->lockForUpdate()->firstOrFail();
-            $lockedTransaction = Transaction::query()->whereKey($transaction->id)->lockForUpdate()->firstOrFail();
+            $lockedTransaction = Transaction::query()
+                ->where('source_type', Withdraw::class)
+                ->where('source_id', $lockedWithdraw->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $amount = (float) $lockedWithdraw->amount;
 
             $metadata = array_filter([
                 'bank_code'        => $lockedWithdraw->metadata['bank_code'] ?? null,
@@ -155,7 +264,10 @@ class SellerWithdrawalService
                 ])->save();
 
                 $lockedTransaction->forceFill([
-                    'status'   => TransactionStatus::Completed,
+                    'status'       => TransactionStatus::Completed,
+                    'payment_info' => array_merge($lockedTransaction->payment_info ?? [], [
+                        'withdraw_status' => WithdrawStatus::Completed->name,
+                    ]),
                     'metadata' => array_merge($lockedTransaction->metadata ?? [], $metadata),
                 ])->save();
 
@@ -176,7 +288,10 @@ class SellerWithdrawalService
             ])->save();
 
             $lockedTransaction->forceFill([
-                'status'   => TransactionStatus::Failed,
+                'status'       => TransactionStatus::Failed,
+                'payment_info' => array_merge($lockedTransaction->payment_info ?? [], [
+                    'withdraw_status' => WithdrawStatus::Failed->name,
+                ]),
                 'metadata' => array_merge($lockedTransaction->metadata ?? [], $metadata),
             ])->save();
 

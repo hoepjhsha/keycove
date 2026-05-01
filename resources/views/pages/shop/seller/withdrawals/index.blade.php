@@ -19,7 +19,7 @@
                 </p>
                 <div>
                     <h2 class="text-3xl font-semibold tracking-tight text-gray-950 dark:text-white">Rút số dư cửa hàng</h2>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">Yêu cầu rút tiền về tài khoản ngân hàng. Số dư khả dụng sẽ được trừ ngay và xác nhận VNPay được xử lý tự động.</p>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">Gửi yêu cầu rút tiền về tài khoản ngân hàng. Số dư khả dụng sẽ được giữ ngay, admin xác nhận trước khi hệ thống tự động xử lý qua VNPay.</p>
                 </div>
             </div>
 
@@ -110,7 +110,7 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-4 pt-2">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Yêu cầu được xử lý tự động qua VNPay.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Yêu cầu sẽ chờ duyệt trước khi được tự động xử lý qua VNPay.</p>
                     <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
                         Gửi yêu cầu rút tiền
                     </button>

@@ -18,6 +18,7 @@ use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Admin\Action\SystemConfig\SystemConfigIndex;
 use App\Livewire\Admin\Action\Transaction\TransactionIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
+use App\Livewire\Admin\Action\Withdraw\WithdrawalRequestIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use Illuminate\Support\Facades\Route;
@@ -110,6 +111,12 @@ Route::middleware('auth:admin')
             ->name('internal_wallet.')
             ->group(function () {
                 Route::get('/', InternalWalletIndex::class)->name('index');
+            });
+
+        Route::prefix('/withdrawal-requests')
+            ->name('withdrawals.')
+            ->group(function () {
+                Route::get('/', WithdrawalRequestIndex::class)->name('index');
             });
 
         Route::prefix('/orders')
