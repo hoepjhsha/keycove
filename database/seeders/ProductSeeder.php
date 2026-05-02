@@ -299,20 +299,18 @@ class ProductSeeder extends Seeder
     {
         $numKeys = $status === ProductListingStatus::Active ? random_int(10, 50) : random_int(2, 10);
 
-        $keysToInsert = [];
         for ($i = 0; $i < $numKeys; $i++) {
             $keyCode = $this->generateKeyCode();
-            $keysToInsert[] = [
+
+            ProductKey::forceCreate([
                 'listing_id' => $listing->id,
-                'key_code'   => encrypt($keyCode),
+                'key_code'   => $keyCode,
                 'key_hash'   => hash('sha256', $keyCode),
                 'status'     => ProductKeyStatus::Available,
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt,
-            ];
+            ]);
         }
-
-        ProductKey::insert($keysToInsert);
 
         $listing->update([
             'stock_count' => $listing->keys()->where('status', ProductKeyStatus::Available)->count(),
