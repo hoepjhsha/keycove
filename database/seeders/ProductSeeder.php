@@ -28,6 +28,9 @@ class ProductSeeder extends Seeder
 {
     private int $usdToVndRate = 25500;
 
+    /** @var list<int> */
+    private array $activeSellerIds = [];
+
     // Template quản lý Variant cho gọn gàng, bao phủ cấu trúc Steam thực tế
     private array $variantTemplates = [
         'steam_aaa' => [
@@ -105,6 +108,7 @@ class ProductSeeder extends Seeder
         $products = $this->getProductsData();
         $disk = config('filesystems.public_disk', 'public');
         $sellers = Seller::where('kyc_status', KycStatus::Approved)->get();
+        $this->activeSellerIds = $sellers->pluck('id')->all();
 
         Storage::disk($disk)->makeDirectory('products/thumbnails');
 
@@ -209,6 +213,7 @@ class ProductSeeder extends Seeder
     protected function createListings(ProductVariant $variant, array $priceRange, ?int $submittedBySellerId): void
     {
         $numListings = $submittedBySellerId === null ? random_int(1, 3) : 1;
+        $sellerIds = $this->resolveSellerIds($submittedBySellerId, $numListings);
 
         for ($i = 0; $i < $numListings; $i++) {
             $price = $this->randomVndPrice($priceRange);
@@ -217,13 +222,20 @@ class ProductSeeder extends Seeder
                 ProductListingStatus::Pending, ProductListingStatus::Hidden,
             ]);
             $displayName = $this->makeListingDisplayName($variant);
+            $sellerId = $sellerIds[$i] ?? $sellerIds[0] ?? null;
+
+            if ($sellerId === null) {
+                continue;
+            }
 
             $listing = ProductListing::firstOrNew([
                 'variant_id' => $variant->id,
+                'seller_id'  => $sellerId,
             ]);
 
             $listing->fill([
                 'display_name' => $listing->exists ? $listing->display_name : $displayName,
+                'seller_id'    => $sellerId,
                 'price'        => $price,
                 'stock_count'  => 0,
                 'status'       => $status,
@@ -247,6 +259,28 @@ class ProductSeeder extends Seeder
                 $this->createKeys($listing, $status, $createdAt);
             }
         }
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function resolveSellerIds(?int $submittedBySellerId, int $numListings): array
+    {
+        if ($submittedBySellerId !== null) {
+            return [$submittedBySellerId];
+        }
+
+        if ($this->activeSellerIds === []) {
+            return [];
+        }
+
+        $sellerIds = collect($this->activeSellerIds)
+            ->shuffle()
+            ->take($numListings)
+            ->values()
+            ->all();
+
+        return $sellerIds;
     }
 
     protected function makeListingDisplayName(ProductVariant $variant): ?string

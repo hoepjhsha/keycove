@@ -13,6 +13,7 @@ use App\Models\UserProfile;
 use App\Models\Wallet;
 use Exception;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,8 @@ use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
+    private const BUYER_COUNT = 320;
+
     private string $defaultPassword;
 
     private string $frontKycImageContent = '';
@@ -36,7 +39,7 @@ class UserSeeder extends Seeder
         $this->prepareKycImages();
 
         $this->createSellers();
-        $this->createBuyers(50);
+        $this->createBuyers(self::BUYER_COUNT);
     }
 
     protected function prepareKycImages(): void
@@ -100,8 +103,8 @@ class UserSeeder extends Seeder
             ['username' => 'buyer2', 'email' => 'buyer2@keycove.vn', 'first_name' => 'Test', 'last_name' => 'Buyer 2'],
         ];
 
-        foreach ($fixedBuyers as $data) {
-            $this->makeBuyer($data['email'], $data['username'], $data['first_name'], $data['last_name']);
+        foreach ($fixedBuyers as $index => $data) {
+            $this->makeBuyer($data['email'], $data['username'], $data['first_name'], $data['last_name'], $this->buyerCreatedAt($index));
         }
 
         for ($i = 0; $i < $count - count($fixedBuyers); $i++) {
@@ -110,25 +113,37 @@ class UserSeeder extends Seeder
             $username = Str::slug($firstName.$lastName).fake()->numberBetween(10, 9999);
             $email = $username.'@gmail.com';
 
-            $this->makeBuyer($email, $username, $firstName, $lastName);
+            $this->makeBuyer($email, $username, $firstName, $lastName, $this->buyerCreatedAt($i + count($fixedBuyers)));
         }
     }
 
-    protected function makeBuyer(string $email, string $username, string $firstName, string $lastName): void
+    protected function makeBuyer(string $email, string $username, string $firstName, string $lastName, Carbon $createdAt): void
     {
         $user = User::firstOrCreate(
             ['email' => $email],
             [
                 'username'          => $username,
                 'password'          => $this->defaultPassword,
-                'email_verified_at' => now(),
+                'email_verified_at' => $createdAt->copy()->addMinutes(random_int(5, 1440)),
                 'role'              => UserRole::User,
                 'status'            => UserStatus::Active,
+                'created_at'        => $createdAt,
+                'updated_at'        => $createdAt,
             ]
         );
 
         $this->ensureProfile($user, $firstName, $lastName, false);
         $this->ensureCart($user);
+    }
+
+    protected function buyerCreatedAt(int $index): Carbon
+    {
+        $daysAgo = max(1, 180 - (int) floor(($index / max(1, self::BUYER_COUNT)) * 175));
+
+        return now()
+            ->subDays($daysAgo)
+            ->subHours(random_int(0, 23))
+            ->subMinutes(random_int(0, 59));
     }
 
     protected function ensureProfile(User $user, string $firstName, string $lastName, bool $isSeller): void
