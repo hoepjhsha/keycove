@@ -1,136 +1,110 @@
-# 🔑 KeyCove - Smart Digital Product Trading Platform
+# KeyCove
 
-> **Slogan:** *Unlock your world, Securely & Smartly.*
+KeyCove is a digital product trading platform focused on C2C key sales, order management, escrow handling, dispute resolution, and platform administration.
 
-## 📖 Table of Contents
-- [About the Project](#-about-the-project)
-- [Business Model](#-business-model)
-- [Core Value Proposition](#-core-value-proposition)
-- [System Architecture](#-system-architecture)
-- [Key Features](#-key-features)
-- [User Roles & Workflows](#-user-roles--workflows)
-- [Order Workflow](#-order-workflow)
+## Overview
 
----
+KeyCove supports the core workflows of a digital key marketplace:
 
-## 🌍 About the Project
+- User registration, login, and profile management
+- Product browsing and detail viewing
+- Shopping cart and checkout
+- Online payment and secure key delivery
+- Seller onboarding with KYC verification
+- Complaint handling, dispute resolution, and platform configuration
 
-In the digital era, the demand for software, games (Steam, Epic, Origin), and online services (Netflix, Spotify) is growing rapidly. However, the current digital key trading market faces two major challenges:
-1. **Fraud Risks:** Buyers worry about receiving used keys or keys locked to the wrong geographical region.
-2. **Dispute Resolution Friction:** Existing platforms spend excessive time and human resources verifying evidence during disputes between buyers and sellers.
+## Technology Stack
 
-**KeyCove** solves this by providing a secure, automated, and escrow-backed e-commerce platform dedicated to digital products.
+- Laravel 13
+- Livewire 4
+- Tailwind CSS 4
+- Pest 4
+- PHP 8.4
+- MySQL
 
-## 💼 Business Model
+## User Roles
 
-KeyCove operates as a **Multi-model E-commerce Platform**:
-- **B2C (Business-to-Consumer):** The platform administration imports genuine keys and sells them directly to end-users.
-- **C2C (Consumer-to-Consumer):** Individual users can register as vendors (sellers), list their unused digital keys, and create a vibrant exchange ecosystem.
+- Guest: browse products and register an account
+- Buyer: checkout, receive keys, review products, submit complaints
+- Seller: list products, manage keys, track sales, withdraw funds
+- Admin: approve sellers, manage users, resolve disputes, configure the platform
 
-## 💎 Core Value Proposition
+## Core Features
 
-- **For Buyers:** Purchase digital keys at competitive prices with absolute safety, guaranteed by the platform's Escrow protection mechanism.
-- **For Sellers:** Access a streamlined platform to reach a broader customer base and manage cash flow professionally.
+### Customer Features
 
-## 🏗 System Architecture
+- Register and sign in
+- Manage personal profile and security settings
+- Browse products and view product details
+- Manage cart and place orders
+- Pay online
+- Receive the key after successful payment
+- View order history
+- Leave ratings, comments, and complaints
 
-- **Architecture Pattern:** Domain-Driven Design (DDD) & Modular Monolith architecture, ensuring the system is highly maintainable, scalable, and easy to transition to microservices in the future if needed.
-- **Security:** Database Encryption for keys, One-time Reveal mechanisms.
+### Seller Features
 
-## ✨ Key Features
+- Apply to become a seller with KYC verification
+- Manage categories and products
+- Update key inventory
+- Track orders and escrow status
+- Manage wallet balance and withdraw funds
+- Review sales analytics
 
-### 1. Identity & Access Management (IAM)
-- **Authentication:** Email/Password and Social Login (Google, Facebook).
-- **Security:** Multi-Factor Authentication (2FA) for enhanced security, especially for Sellers and Admins.
-- **Authorization:** Role-Based Access Control (RBAC) defining Buyers, Sellers, and Admins.
-- **Trust & Verification:** KYC (Know Your Customer) identity verification required for C2C Sellers.
+### Admin Features
 
-### 2. Catalog & Inventory Management
-- **Smart Categorization:** Filter by Games (Steam, Epic), Software (Office, Adobe), Services (Netflix, Spotify).
-- **Product Attributes:** Granular tagging for Region (Global, SEA, Turkey, etc.) and Platform (PC, Console).
-- **Secure Key Vault:**
-  - Bulk key imports via Excel/CSV.
-  - Database-level encryption for all stored keys.
-  - **"One-time Reveal":** Purchased keys are displayed only once to the buyer to prevent compromise.
-- **Inventory Tracking:** Automated low-stock warnings and auto-hiding of out-of-stock products.
+- Manage users
+- Approve sellers
+- Handle disputes and complaints
+- View aggregate reports
+- Configure fees and platform settings
 
-### 3. Trading & Order Processing
-- **Shopping Cart:** Add, remove, and update quantities from multiple sellers simultaneously.
-- **Automated Fulfillment:** System instantly fetches the key from the secure vault and delivers it via UI/Email upon successful payment.
-- **Payment Gateway:** Integrated with VNPay.
-- **Order Tracking:** Detailed history of order statuses (Completed, Disputed, Refunded).
+## Order Flow
 
-### 4. E-Wallet & Escrow System
-- **Internal Wallet:** Store user balances and track transaction history.
-- **Withdrawals:** Sellers can withdraw revenue to bank accounts (minus platform commission).
-- **Escrow Mechanism (Tạm giữ tiền):** 
-  - Buyer payments are held securely by the platform for a specific timeframe (e.g., 24-48 hours).
-  - Funds are only released to the seller when the buyer confirms the key works, or when the dispute window expires.
+1. A buyer adds a product to the cart.
+2. The system creates an order during checkout.
+3. The payment gateway confirms the transaction.
+4. The order status is updated.
+5. The key is securely delivered to the buyer.
+6. If issues occur, the buyer can submit a complaint.
+7. Admin or seller resolves the case according to the workflow.
 
-### 5. Vendor Dashboard
-- **Product Listing:** Intuitive interface for C2C sellers to create listings and upload keys.
-- **Analytics:** Revenue growth charts and best-selling product tracking.
-- **Order & Cashflow Management:** Track sold orders and monitor funds currently in Escrow.
+## Project Documentation
 
-### 6. Dispute & Support Center
-- **Ticketing System:** Buyers can submit support requests for faulty keys, attaching video/image evidence.
-- **Admin Intervention:** Administrators act as arbitrators, reviewing evidence from both parties to decide on a Refund (to buyer) or Release (to seller).
-- **Rating System:** Post-transaction star ratings and reviews to build seller reputation.
+- `BAO_CAO_USE_CASE_FLOW_SAN_C2C.md`
+- `USE_CASE_DIAGRAM_SAN_C2C.md`
+- `SRS_VA_ACTIVITY_FLOW_SAN_C2C.md`
 
-### 7. Administration
-- **User & Product Control:** Ban violating accounts, approve new product listings, and verify KYC requests.
-- **Platform Configuration:** Adjust platform commission rates dynamically.
-- **Global Reporting:** Comprehensive dashboards covering total platform revenue, transaction volumes, and dispute rates.
+## Installation
 
----
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+```
 
-## 👥 User Roles & Workflows
+## Run the Project
 
-### 🛒 Guest / Buyer
-- Register / Login and manage personal profile & security.
-- Browse catalog, view detailed product info (region, attributes, ratings).
-- Manage cart and proceed to checkout.
-- Receive "One-time Reveal" key immediately after payment.
-- Leave reviews/ratings after successful transactions.
-- Submit dispute tickets if a key is invalid.
+```bash
+composer run dev
+```
 
-### 🏪 Seller (Vendor)
-- Complete KYC verification to upgrade from Buyer to Seller.
-- Manage product categories and inventory (add/edit products, upload keys).
-- Track sold orders and Escrow balance.
-- Withdraw available wallet balance to a personal bank account.
-- Respond to buyer complaints and disputes.
-- View business analytics and sales statistics.
+Or run separately:
 
-### 🛡️ Administrator
-- Manage all users (lock violating accounts, change permissions).
-- Approve C2C seller applications (KYC verification).
-- Act as the final judge in dispute resolution.
-- Configure system settings and platform commission fees.
-- Monitor overall platform health and financial reports.
+```bash
+php artisan serve
+npm run dev
+```
 
-## 🧾 Order Workflow
+## Testing
 
-Use this as the source of truth when writing prompts, seeders, tests, or admin screens around checkout.
+```bash
+php artisan test
+```
 
-1. A buyer browses product listings and adds one or more listings to the cart.
-2. Each cart item points to a specific `listing_id` and quantity.
-3. When the buyer checks out, the system creates an `order` plus one or more `order_items`.
-4. Each `order_item` stores a snapshot of the purchased product data so history stays stable even if the product changes later.
-5. The order starts with `payment_status = Pending` and is paid through VNPay.
-6. After VNPay returns/IPN confirms success, the order payment state is updated and payment records are stored.
-7. If the listing belongs to a seller, the order item may create an escrow record and the platform commission is applied.
-8. If the listing belongs to Shop Admin, there is no escrow and no seller settlement calculation.
-9. After payment, the buyer receives the key once and can later open a complaint if the key is invalid.
-10. If a complaint is approved, the order item becomes refunded and the escrow is refunded.
-11. If a complaint is rejected, the escrow is released and the order item is completed.
+## Notes
 
-### Order Data Notes
-
-- `orders` is the parent payment record for the purchase.
-- `order_items` are the real source of truth for what was bought.
-- `order_items.product_name_snapshot` preserves the product name at purchase time.
-- `order_items.listing_id` and `order_items.variant_snapshot` identify the exact listing/variant that was bought.
-- `order_items.seller_id` can be `null` for Shop Admin-owned stock.
-- Seller-owned listings can have escrow; Shop Admin-owned listings do not.
-- `platform_fee` and `seller_amount` should only be meaningful for seller-owned listings.
+- Some business flows are described from a system-analysis perspective and may require adaptation to the actual implementation.
+- Additional UML diagrams can be derived from the existing documentation set.
