@@ -42,10 +42,10 @@ class OperatingSystemIndex extends Component
         $result = $this->createForm->store();
         if ($result) {
             $this->createForm->reset();
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('OperatingSystem created successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.operating_systems')]));
             $this->dispatch('pg:eventRefresh-operatingSystemTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to create operatingSystem');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.operating_systems')]));
         }
 
         $this->showCreateModal = false;
@@ -55,10 +55,10 @@ class OperatingSystemIndex extends Component
     {
         $result = $this->editForm->update();
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('OperatingSystem updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.operating_systems')]));
             $this->dispatch('pg:eventRefresh-operatingSystemTable');
         } else {
-            sweetalert()->error('Failed to update operatingSystem');
+            sweetalert()->error(__('admin.messages.update_failed', ['name' => __('admin.nav.operating_systems')]));
         }
         $this->showEditModal = false;
     }
@@ -70,7 +70,7 @@ class OperatingSystemIndex extends Component
             ->where('status', GeneralStatus::Deleted)
             ->exists()
         ) {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Cannot change status of deleted items.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
             return;
@@ -79,14 +79,14 @@ class OperatingSystemIndex extends Component
         $result = $this->bulkChangeStatusForm->setStatus($this->bulkSelectedIds);
 
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('Status updated successfully for selected items.');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.status_updated_selected'));
 
             $this->bulkChangeStatusForm->reset();
             $this->bulkSelectedIds = [];
 
             $this->dispatch('pg:eventRefresh-operatingSystemTable');
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update status.');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.failed_update_status'));
         }
 
         $this->showBulkStatusModal = false;

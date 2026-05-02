@@ -69,7 +69,7 @@ class ProductVariantForm extends Form
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'general' => 'This variant already exists for the selected product.',
+                'general' => __('admin.validation.variant_duplicate'),
             ]);
         }
 
@@ -91,7 +91,7 @@ class ProductVariantForm extends Form
 
         if ($this->status === ProductVariantStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'status' => 'Cannot set status to Deleted via update.',
+                'status' => __('admin.validation.status_deleted_update'),
             ]);
         }
 
@@ -113,7 +113,7 @@ class ProductVariantForm extends Form
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'general' => 'This variant already exists for the selected product.',
+                'general' => __('admin.validation.variant_duplicate'),
             ]);
         }
 
@@ -130,7 +130,7 @@ class ProductVariantForm extends Form
     {
         if (! in_array($status, array_column(ProductVariantStatus::cases(), 'value'))) {
             throw ValidationException::withMessages([
-                'status' => 'Invalid status value.',
+                'status' => __('admin.validation.invalid_status'),
             ]);
         }
 
@@ -143,7 +143,7 @@ class ProductVariantForm extends Form
 
         if ($hasActiveListings && $status === ProductVariantStatus::Discontinued->value) {
             throw ValidationException::withMessages([
-                'status' => 'Cannot set variant to Discontinued while it has active listings.',
+                'status' => __('admin.validation.variant_discontinue_active_listings'),
             ]);
         }
 
@@ -156,7 +156,7 @@ class ProductVariantForm extends Form
 
         if ($variant->listings()->where('status', ProductListingStatus::Active)->exists()) {
             throw ValidationException::withMessages([
-                'general' => 'Cannot delete variant with active listings.',
+                'general' => __('admin.validation.variant_delete_active_listings'),
             ]);
         }
 

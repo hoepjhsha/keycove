@@ -179,10 +179,10 @@ class ProductDetail extends Component
     {
         if ($this->editingVariantId) {
             $result = $this->variantForm->update();
-            $message = 'Variant updated successfully';
+            $message = __('admin.messages.updated', ['Name' => __('admin.common.variant')]);
         } else {
             $result = $this->variantForm->store();
-            $message = 'Variant created successfully';
+            $message = __('admin.messages.created', ['Name' => __('admin.common.variant')]);
         }
 
         if ($result) {
@@ -225,10 +225,10 @@ class ProductDetail extends Component
 
         if ($this->editingListingId) {
             $result = $this->listingForm->update();
-            $message = 'Listing updated successfully';
+            $message = __('admin.messages.updated', ['Name' => __('admin.common.listing')]);
         } else {
             $result = $this->listingForm->store();
-            $message = 'Listing created successfully';
+            $message = __('admin.messages.created', ['Name' => __('admin.common.listing')]);
         }
 
         if ($result) {
@@ -255,7 +255,7 @@ class ProductDetail extends Component
 
         if ($result) {
             $this->keyForm->resetForm();
-            $this->dispatch('swal:success', ['message' => 'Key created successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.created', ['Name' => __('admin.common.product_key')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->dispatch('pg:eventRefresh-productKeysTable');
         }
@@ -264,8 +264,8 @@ class ProductDetail extends Component
     public function deleteKey(int $keyId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Key?',
-            'text'   => 'Are you sure you want to delete this key?',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.product_key')]),
+            'text'   => __('admin.swal.delete_text', ['name' => __('admin.common.product_key')]),
             'method' => 'performDeleteKey',
             'id'     => $keyId,
         ]);
@@ -276,7 +276,7 @@ class ProductDetail extends Component
     {
         try {
             $this->keyForm->deleteKey($id);
-            $this->dispatch('swal:success', ['message' => 'Key deleted successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.product_key')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
@@ -286,8 +286,8 @@ class ProductDetail extends Component
     public function deleteVariant(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Variant?',
-            'text'   => 'Are you sure you want to delete this variant?',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.variant')]),
+            'text'   => __('admin.swal.delete_text', ['name' => __('admin.common.variant')]),
             'method' => 'performDeleteVariant',
             'id'     => $rowId,
         ]);
@@ -298,7 +298,7 @@ class ProductDetail extends Component
     {
         try {
             $this->variantForm->deleteVariant($id);
-            $this->dispatch('swal:success', ['message' => 'Variant deleted successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.variant')])]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {
@@ -310,7 +310,7 @@ class ProductDetail extends Component
     {
         try {
             $this->variantForm->restoreVariant($id);
-            $this->dispatch('swal:success', ['message' => 'Variant restored successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.restored_sentence', ['Name' => __('admin.common.variant')])]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {
@@ -324,7 +324,7 @@ class ProductDetail extends Component
             $this->variantForm->bulkChangeStatus($this->variantBulkSelectedIds, $this->variantBulkStatusForm_status);
             $this->showVariantBulkStatusModal = false;
             $this->variantBulkStatusForm_status = 0;
-            $this->dispatch('swal:success', ['message' => 'Variants status updated successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.status_updated_selected')]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {
@@ -338,7 +338,7 @@ class ProductDetail extends Component
             $this->listingForm->bulkChangeStatus($this->listingBulkSelectedIds, $this->listingBulkStatusForm_status);
             $this->showListingBulkStatusModal = false;
             $this->listingBulkStatusForm_status = 0;
-            $this->dispatch('swal:success', ['message' => 'Listings status updated successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.status_updated_selected')]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {
@@ -391,8 +391,8 @@ class ProductDetail extends Component
     public function deleteListing(int $listingId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Listing?',
-            'text'   => 'Are you sure you want to delete this listing?',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.listing')]),
+            'text'   => __('admin.swal.delete_text', ['name' => __('admin.common.listing')]),
             'method' => 'performDeleteListing',
             'id'     => $listingId,
         ]);
@@ -403,7 +403,7 @@ class ProductDetail extends Component
     {
         try {
             $this->listingForm->deleteListing($id);
-            $this->dispatch('swal:success', ['message' => 'Listing deleted successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.listing')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {
@@ -415,7 +415,7 @@ class ProductDetail extends Component
     {
         try {
             $this->listingForm->restoreListing($id);
-            $this->dispatch('swal:success', ['message' => 'Listing restored successfully']);
+            $this->dispatch('swal:success', ['message' => __('admin.messages.restored_sentence', ['Name' => __('admin.common.listing')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
         } catch (\Exception $e) {

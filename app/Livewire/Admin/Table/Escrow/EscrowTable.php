@@ -14,6 +14,7 @@ use App\Exceptions\Admin\EscrowException;
 use App\Models\AuditLog;
 use App\Models\Escrow;
 use App\Models\Wallet;
+use App\Services\InternalWalletService;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -72,7 +73,7 @@ final class EscrowTable extends PowerGridComponent
             ->add('id')
             ->add('order_code', fn (Escrow $model) => $model->orderItem?->order?->order_code ?? '-')
             ->add('buyer', fn (Escrow $model) => $model->orderItem?->order?->buyer?->username ?? '-')
-            ->add('seller', fn (Escrow $model) => $model?->seller?->shop_name ?? 'Shop Admin')
+            ->add('seller', fn (Escrow $model) => $model?->seller?->shop_name ?? __('admin.common.shop_admin'))
             ->add('amount_formatted', fn (Escrow $model) => number_format((float) $model->amount, 2).' VND')
             ->add('release_date_formatted', fn (Escrow $model) => Carbon::parse($model->release_date)->format('d/m/Y H:i:s'))
             ->add('status_label', function (Escrow $model) {
@@ -98,26 +99,26 @@ final class EscrowTable extends PowerGridComponent
         return [
             Column::make('#', 'id')
                 ->index(),
-            Column::make('Order Code', 'order_code', 'order.order_code'),
-            Column::make('Buyer', 'buyer', 'buyer.id'),
-            Column::make('Seller', 'seller', 'seller.id'),
-            Column::make('Amount', 'amount_formatted', 'amount')
+            Column::make(__('admin.common.order_code'), 'order_code', 'order.order_code'),
+            Column::make(__('admin.common.buyer'), 'buyer', 'buyer.id'),
+            Column::make(__('admin.common.seller'), 'seller', 'seller.id'),
+            Column::make(__('admin.common.amount'), 'amount_formatted', 'amount')
                 ->sortable()
                 ->bodyAttribute('text-right'),
 
-            Column::make('Release date', 'release_date_formatted', 'release_date')
+            Column::make(__('admin.common.release_date'), 'release_date_formatted', 'release_date')
                 ->sortable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable(),
 
-            Column::make('Created at', 'created_at_formatted', 'created_at')
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-            Column::make('Updated at', 'updated_at_formatted', 'updated_at')
+            Column::make(__('admin.common.updated_at_short'), 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Actions'),
+            Column::action(__('admin.common.actions')),
         ];
     }
 
@@ -157,7 +158,7 @@ final class EscrowTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewEscrowDetail', ['rowId' => $row->id]),
 
@@ -166,7 +167,7 @@ final class EscrowTable extends PowerGridComponent
                 ->id()
                 ->class('text-purple-600 hover:text-purple-800 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'Freeze Escrow',
+                    'x-tooltip' => __('admin.common.freeze_escrow'),
                 ])
                 ->dispatch('freezeEscrow', ['rowId' => $row->id]),
 
@@ -175,7 +176,7 @@ final class EscrowTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-600 hover:text-yellow-800 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'Extend Holding Time',
+                    'x-tooltip' => __('admin.common.extend_holding_time'),
                 ])
                 ->dispatch('extendHolding', ['rowId' => $row->id]),
 
@@ -184,7 +185,7 @@ final class EscrowTable extends PowerGridComponent
                 ->id()
                 ->class('text-green-600 hover:text-green-800 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'Release Escrow',
+                    'x-tooltip' => __('admin.common.release_escrow'),
                 ])
                 ->dispatch('releaseEscrow', ['rowId' => $row->id]),
         ];
@@ -221,15 +222,15 @@ final class EscrowTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Release Escrow?',
-            'text'   => 'Are you sure you want to release this escrow amount to the seller? This action cannot be undone.',
+            'title'  => __('admin.swal.release_escrow'),
+            'text'   => __('admin.swal.release_escrow_text'),
             'method' => 'performReleaseEscrow',
             'id'     => $rowId,
         ]);
     }
 
     #[On('performReleaseEscrow')]
-    public function performReleaseEscrow($id): void
+    public function performReleaseEscrow($id, InternalWalletService $internalWalletService): void
     {
         try {
             DB::transaction(function () use ($id) {
@@ -296,12 +297,18 @@ final class EscrowTable extends PowerGridComponent
                 ]);
             });
 
+            $escrow = Escrow::query()->with('orderItem')->findOrFail($id);
+            $internalWalletService->escrowReleased($escrow, $escrow->updated_at ?? now(), [
+                'escrow_id' => $escrow->id,
+                'source'    => 'admin_release',
+            ]);
+
             $this->dispatch('swal:success', [
-                'message' => 'Escrow released successfully.',
+                'message' => __('admin.messages.escrow_released'),
             ]);
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
-                'message' => 'Failed to release escrow: '.$e->getMessage(),
+                'message' => __('admin.messages.escrow_release_failed', ['error' => $e->getMessage()]),
             ]);
         }
     }
@@ -320,8 +327,8 @@ final class EscrowTable extends PowerGridComponent
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Freeze Escrow?',
-            'text'   => 'Are you sure you want to freeze this escrow? The holding timer will be paused. This action can be undone by extending the holding time.',
+            'title'  => __('admin.swal.freeze_escrow'),
+            'text'   => __('admin.swal.freeze_escrow_text'),
             'method' => 'performFreezeEscrow',
             'id'     => $rowId,
         ]);
@@ -365,11 +372,11 @@ final class EscrowTable extends PowerGridComponent
             });
 
             $this->dispatch('swal:success', [
-                'message' => 'Escrow frozen successfully.',
+                'message' => __('admin.messages.escrow_frozen'),
             ]);
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
-                'message' => 'Failed to freeze escrow: '.$e->getMessage(),
+                'message' => __('admin.messages.escrow_freeze_failed', ['error' => $e->getMessage()]),
             ]);
         }
     }

@@ -27,7 +27,7 @@ class PlatformBulkChangeStatusForm extends Form
 
         if ($this->status === GeneralStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'editForm.status' => 'Cannot set status to Deleted via bulk update.',
+                'editForm.status' => __('admin.validation.status_deleted_bulk'),
             ]);
         }
 

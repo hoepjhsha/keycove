@@ -94,55 +94,67 @@ class AttributeSeeder extends Seeder
     protected function seedRegions(): void
     {
         $regions = [
-            // Global/Universal regions
-            ['name' => 'Global', 'code' => 'GLOBAL', 'parent' => null],
-            ['name' => 'Asia', 'code' => 'ASIA', 'parent' => null],
-            ['name' => 'Europe', 'code' => 'EU', 'parent' => null],
-            ['name' => 'North America', 'code' => 'NA', 'parent' => null],
-            ['name' => 'South America', 'code' => 'SA', 'parent' => null],
+            // 1. Nhóm khu vực chung / Phổ quát (Cấp 1)
+            ['name' => 'Toàn cầu (Global)', 'code' => 'GLOBAL', 'parent' => null],
+            ['name' => 'Châu Âu (EU)', 'code' => 'EU', 'parent' => null],
+            ['name' => 'Bắc Mỹ (NA)', 'code' => 'NA', 'parent' => null],
+            ['name' => 'Châu Á (Asia)', 'code' => 'ASIA', 'parent' => null],
+            ['name' => 'Mỹ Latinh (LATAM)', 'code' => 'LATAM', 'parent' => null],
+            ['name' => 'Cộng đồng các QG độc lập (CIS/RU)', 'code' => 'CIS', 'parent' => null],
+            ['name' => 'Trung Đông & Bắc Phi (MENA)', 'code' => 'MENA', 'parent' => null],
+            ['name' => 'Phần còn lại của thế giới (ROW)', 'code' => 'ROW', 'parent' => null],
+            ['name' => 'Châu Đại Dương (Oceania)', 'code' => 'OCE', 'parent' => null],
 
-            // Country-level regions
-            ['name' => 'Vietnam', 'code' => 'VN', 'parent' => 'Asia'],
-            ['name' => 'Southeast Asia', 'code' => 'SEA', 'parent' => 'Asia'],
-            ['name' => 'Singapore', 'code' => 'SG', 'parent' => 'Asia'],
-            ['name' => 'Thailand', 'code' => 'TH', 'parent' => 'Asia'],
-            ['name' => 'Japan', 'code' => 'JP', 'parent' => 'Asia'],
-            ['name' => 'South Korea', 'code' => 'KR', 'parent' => 'Asia'],
-            ['name' => 'China', 'code' => 'CN', 'parent' => 'Asia'],
-            ['name' => 'India', 'code' => 'IN', 'parent' => 'Asia'],
-            ['name' => 'Philippines', 'code' => 'PH', 'parent' => 'Asia'],
-            ['name' => 'Indonesia', 'code' => 'ID', 'parent' => 'Asia'],
-            ['name' => 'Malaysia', 'code' => 'MY', 'parent' => 'Asia'],
+            // 2. Các quốc gia ĐẶC BIỆT phổ biến (Giá rẻ / Hay bị Region Lock)
+            ['name' => 'Thổ Nhĩ Kỳ (Turkey)', 'code' => 'TR', 'parent' => 'EU'], // TR thường được xếp vào EU hoặc MENA tuỳ nền tảng
+            ['name' => 'Argentina', 'code' => 'AR', 'parent' => 'LATAM'],
+            ['name' => 'Nga (Russia)', 'code' => 'RU', 'parent' => 'CIS'],
+            ['name' => 'Brazil', 'code' => 'BR', 'parent' => 'LATAM'],
+            ['name' => 'Ai Cập (Egypt)', 'code' => 'EG', 'parent' => 'MENA'],
+            ['name' => 'Nigeria', 'code' => 'NG', 'parent' => 'MENA'], // Xbox dạo này rất chuộng key Nigeria
+            ['name' => 'Ukraine', 'code' => 'UA', 'parent' => 'CIS'],
 
-            ['name' => 'United States', 'code' => 'US', 'parent' => 'North America'],
-            ['name' => 'Canada', 'code' => 'CA', 'parent' => 'North America'],
-            ['name' => 'Mexico', 'code' => 'MX', 'parent' => 'North America'],
+            // 3. Châu Á
+            ['name' => 'Việt Nam', 'code' => 'VN', 'parent' => 'ASIA'],
+            ['name' => 'Đông Nam Á (SEA)', 'code' => 'SEA', 'parent' => 'ASIA'],
+            ['name' => 'Hàn Quốc', 'code' => 'KR', 'parent' => 'ASIA'],
+            ['name' => 'Nhật Bản', 'code' => 'JP', 'parent' => 'ASIA'],
+            ['name' => 'Trung Quốc', 'code' => 'CN', 'parent' => 'ASIA'],
+            ['name' => 'Ấn Độ', 'code' => 'IN', 'parent' => 'ASIA'],
+            ['name' => 'Đài Loan', 'code' => 'TW', 'parent' => 'ASIA'],
+            ['name' => 'Hồng Kông', 'code' => 'HK', 'parent' => 'ASIA'],
+            ['name' => 'Indonesia', 'code' => 'ID', 'parent' => 'ASIA'],
+            ['name' => 'Thái Lan', 'code' => 'TH', 'parent' => 'ASIA'],
+            ['name' => 'Philippines', 'code' => 'PH', 'parent' => 'ASIA'],
+            ['name' => 'Malaysia', 'code' => 'MY', 'parent' => 'ASIA'],
+            ['name' => 'Singapore', 'code' => 'SG', 'parent' => 'ASIA'],
 
-            ['name' => 'United Kingdom', 'code' => 'GB', 'parent' => 'Europe'],
-            ['name' => 'Germany', 'code' => 'DE', 'parent' => 'Europe'],
-            ['name' => 'France', 'code' => 'FR', 'parent' => 'Europe'],
-            ['name' => 'Spain', 'code' => 'ES', 'parent' => 'Europe'],
-            ['name' => 'Italy', 'code' => 'IT', 'parent' => 'Europe'],
-            ['name' => 'Netherlands', 'code' => 'NL', 'parent' => 'Europe'],
-            ['name' => 'Poland', 'code' => 'PL', 'parent' => 'Europe'],
-            ['name' => 'Russia', 'code' => 'RU', 'parent' => 'Europe'],
-            ['name' => 'Turkey', 'code' => 'TR', 'parent' => 'Europe'],
-            ['name' => 'Ukraine', 'code' => 'UA', 'parent' => 'Europe'],
-            ['name' => 'Sweden', 'code' => 'SE', 'parent' => 'Europe'],
-            ['name' => 'Norway', 'code' => 'NO', 'parent' => 'Europe'],
+            // 4. Châu Âu
+            ['name' => 'Vương quốc Anh (UK)', 'code' => 'GB', 'parent' => 'EU'],
+            ['name' => 'Đức', 'code' => 'DE', 'parent' => 'EU'],
+            ['name' => 'Pháp', 'code' => 'FR', 'parent' => 'EU'],
+            ['name' => 'Tây Ban Nha', 'code' => 'ES', 'parent' => 'EU'],
+            ['name' => 'Ý', 'code' => 'IT', 'parent' => 'EU'],
+            ['name' => 'Ba Lan', 'code' => 'PL', 'parent' => 'EU'],
+            ['name' => 'Hà Lan', 'code' => 'NL', 'parent' => 'EU'],
 
-            ['name' => 'Brazil', 'code' => 'BR', 'parent' => 'South America'],
-            ['name' => 'Argentina', 'code' => 'AR', 'parent' => 'South America'],
-            ['name' => 'Chile', 'code' => 'CL', 'parent' => 'South America'],
+            // 5. Bắc Mỹ
+            ['name' => 'Hoa Kỳ (US)', 'code' => 'US', 'parent' => 'NA'],
+            ['name' => 'Canada', 'code' => 'CA', 'parent' => 'NA'],
+            ['name' => 'Mexico', 'code' => 'MX', 'parent' => 'NA'],
 
-            ['name' => 'Australia', 'code' => 'AU', 'parent' => null],
-            ['name' => 'New Zealand', 'code' => 'NZ', 'parent' => null],
-            ['name' => 'Middle East', 'code' => 'ME', 'parent' => null],
-            ['name' => 'Africa', 'code' => 'AF', 'parent' => null],
+            // 6. Nam Mỹ bổ sung
+            ['name' => 'Chile', 'code' => 'CL', 'parent' => 'LATAM'],
+            ['name' => 'Colombia', 'code' => 'CO', 'parent' => 'LATAM'],
+
+            // 7. Châu Đại Dương
+            ['name' => 'Úc (Australia)', 'code' => 'AU', 'parent' => 'OCE'],
+            ['name' => 'New Zealand', 'code' => 'NZ', 'parent' => 'OCE'],
         ];
 
         $createdRegions = [];
 
+        // Seed Parent Regions First
         foreach ($regions as $regionData) {
             if ($regionData['parent'] === null) {
                 $region = Region::firstOrCreate(
@@ -157,6 +169,7 @@ class AttributeSeeder extends Seeder
             }
         }
 
+        // Seed Child Regions
         foreach ($regions as $regionData) {
             if ($regionData['parent'] !== null && isset($createdRegions[$regionData['parent']])) {
                 Region::firstOrCreate(

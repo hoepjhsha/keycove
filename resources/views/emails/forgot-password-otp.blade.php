@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Reset OTP - Keycove</title>
+    <title>Mã OTP đặt lại mật khẩu - Keycove</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -138,41 +138,41 @@
     </div>
 
     <div class="content">
-        <h1 class="title">🔐 Password Reset Request</h1>
+        <h1 class="title">Yêu cầu đặt lại mật khẩu</h1>
 
-        <p class="greeting">Hi there,</p>
+        <p class="greeting">Xin chào,</p>
         <p class="message">
-            We received a request to reset the password for your Keycove account. Please use the One-Time Password (OTP) below to securely change your password.
+            Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Keycove của bạn. Vui lòng dùng mã OTP bên dưới để đổi mật khẩu an toàn.
         </p>
 
         <div class="otp-section">
-            <div class="otp-label">Your Verification Code</div>
+            <div class="otp-label">Mã xác minh của bạn</div>
             <p class="otp-code">{{ $otp }}</p>
             <div class="expiration">
-                ⏳ This code expires in <strong>15 minutes</strong>
+                Mã này hết hạn sau <strong>15 phút</strong>
             </div>
         </div>
 
         <div class="warning">
-            <div class="warning-title">⚠️ Security Notice</div>
+            <div class="warning-title">Lưu ý bảo mật</div>
             <p style="margin: 0;">
-                Never share this OTP with anyone. If you didn't request a password reset, you can safely ignore this email. Your account remains secure.
+                Không chia sẻ mã OTP này với bất kỳ ai. Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này. Tài khoản của bạn vẫn an toàn.
             </p>
         </div>
 
         <p class="message" style="margin-top: 30px; margin-bottom: 0;">
-            Best regards,<br>
-            <strong>The Keycove Team</strong>
+            Trân trọng,<br>
+            <strong>Đội ngũ Keycove</strong>
         </p>
     </div>
 
     <div class="footer">
         <p class="footer-text">
-            {{ config('app.name') }} - Secure Password Management
+            {{ config('app.name') }} - Quản lý tài khoản an toàn
         </p>
         <p class="footer-text" style="font-size: 12px;">
-            This is an automated security email. Please do not reply.<br>
-            Need help? <a href="#" class="footer-link">Visit our Support Center</a>
+            Đây là email bảo mật tự động. Vui lòng không trả lời.<br>
+            Cần hỗ trợ? <a href="#" class="footer-link">Truy cập trung tâm hỗ trợ</a>
         </p>
     </div>
 </div>

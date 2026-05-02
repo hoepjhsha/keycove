@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Product Detail')]
+#[Title('Chi tiết sản phẩm')]
 class ProductShow extends Component
 {
     public Product $product;
@@ -67,18 +67,31 @@ class ProductShow extends Component
             ->findOrFail($listingId);
 
         if ($this->currentSellerId() !== null && $this->currentSellerId() === $listing->seller_id) {
-            session()->flash('seller-status', 'You cannot buy your own listing.');
+            session()->flash('seller-status', 'Bạn không thể mua listing của chính mình.');
 
             return;
         }
 
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $cartItem = $cart->items()->firstOrNew(['listing_id' => $listing->id]);
+
+        if ((int) $listing->stock_count < 1) {
+            session()->flash('seller-status', __('shop.checkout.item_out_of_stock'));
+
+            return;
+        }
+
+        if ($cartItem->exists && (int) $cartItem->quantity >= (int) $listing->stock_count) {
+            session()->flash('seller-status', __('shop.checkout.insufficient_available_keys'));
+
+            return;
+        }
+
         $cartItem->quantity = $cartItem->exists ? $cartItem->quantity + 1 : 1;
         $cartItem->save();
 
         $product = $listing->variant?->product;
-        $title = $listing->display_name ?: ($product?->name ?? 'Untitled listing');
+        $title = $listing->display_name ?: ($product?->name ?? 'Listing chưa có tên');
 
         $this->dispatch('shop:cart:add', item: [
             'id'         => $cartItem->id,
@@ -113,7 +126,7 @@ class ProductShow extends Component
             ->map(function (Review $review): array {
                 return [
                     'id'         => $review->id,
-                    'user_name'  => $review->user?->username ?? 'Buyer',
+                    'user_name'  => $review->user?->username ?? 'Người mua',
                     'rating'     => $review->rating,
                     'comment'    => $review->comment,
                     'created_at' => $review->created_at?->format('d/m/Y H:i'),
@@ -178,6 +191,10 @@ class ProductShow extends Component
     protected function canAddToCart(): bool
     {
         $currentSellerId = $this->currentSellerId();
+
+        if ((int) $this->listing->stock_count < 1) {
+            return false;
+        }
 
         if ($currentSellerId === null) {
             return true;

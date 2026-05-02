@@ -89,13 +89,10 @@ it('shows the seller withdrawals page', function (): void {
         ->get('/seller/withdrawals')
         ->assertOk()
         ->assertSeeLivewire(Withdrawals::class)
-        ->assertSee('Withdraw your shop balance');
+        ->assertSee('Rút số dư cửa hàng');
 });
 
-it('processes a successful withdrawal request', function (): void {
-    config()->set('services.payment.default', 'vnpay');
-    config()->set('services.payment.vnpay.withdraw_mock', true);
-
+it('submits a withdrawal request for admin review', function (): void {
     $user = User::factory()->seller()->create();
     $seller = Seller::query()->create([
         'user_id'             => $user->id,
@@ -116,7 +113,7 @@ it('processes a successful withdrawal request', function (): void {
 
     Livewire::actingAs($user)
         ->test(Withdrawals::class)
-        ->set('amount', '1000')
+        ->set('amount', '10000')
         ->set('bankName', 'Vietcombank')
         ->set('bankCode', 'VCB')
         ->set('bankAccountNumber', '0123456789')
@@ -126,20 +123,20 @@ it('processes a successful withdrawal request', function (): void {
 
     $wallet->refresh();
 
-    expect($wallet->balance)->toBe('11000.00');
-    expect($wallet->holding)->toBe('2000.00');
+    expect($wallet->balance)->toBe('2000.00');
+    expect($wallet->holding)->toBe('12000.00');
 
     $withdrawal = Withdraw::query()->first();
 
     expect($withdrawal)->not->toBeNull();
-    expect($withdrawal?->status)->toBe(WithdrawStatus::Completed);
-    expect($withdrawal?->amount)->toBe('1000.00');
+    expect($withdrawal?->status)->toBe(WithdrawStatus::Pending);
+    expect($withdrawal?->amount)->toBe('10000.00');
 
     $transaction = $wallet->transactions()->latest('id')->first();
 
     expect($transaction?->type)->toBe(TransactionType::Withdraw);
-    expect($transaction?->status)->toBe(TransactionStatus::Completed);
-    expect($transaction?->amount)->toBe('-1000.00');
+    expect($transaction?->status)->toBe(TransactionStatus::Pending);
+    expect($transaction?->amount)->toBe('-10000.00');
 });
 
 it('rejects withdrawal requests above available balance', function (): void {
@@ -173,53 +170,4 @@ it('rejects withdrawal requests above available balance', function (): void {
         ->assertHasErrors(['amount']);
 
     expect(Withdraw::query()->count())->toBe(0);
-});
-
-it('restores the wallet when withdrawal fails', function (): void {
-    config()->set('services.payment.default', 'vnpay');
-    config()->set('services.payment.vnpay.withdraw_mock', true);
-
-    $user = User::factory()->seller()->create();
-    $seller = Seller::query()->create([
-        'user_id'             => $user->id,
-        'shop_name'           => 'KeyCove Store',
-        'cccd_number'         => '123456789012',
-        'cccd_front_image'    => null,
-        'cccd_back_image'     => null,
-        'kyc_status'          => KycStatus::Approved,
-        'kyc_rejected_reason' => null,
-    ]);
-    $wallet = Wallet::query()->create([
-        'seller_id' => $seller->id,
-        'type'      => WalletType::Seller,
-        'code'      => 'WALLET123459',
-        'balance'   => 12_000,
-        'holding'   => 2_000,
-    ]);
-
-    Livewire::actingAs($user)
-        ->test(Withdrawals::class)
-        ->set('amount', '9999')
-        ->set('bankName', 'Vietcombank')
-        ->set('bankCode', 'VCB')
-        ->set('bankAccountNumber', '0123456789')
-        ->set('bankAccountName', 'Nguyen Van A')
-        ->call('submit')
-        ->assertHasNoErrors();
-
-    $wallet->refresh();
-
-    expect($wallet->balance)->toBe('12000.00');
-    expect($wallet->holding)->toBe('2000.00');
-
-    $withdrawal = Withdraw::query()->first();
-
-    expect($withdrawal)->not->toBeNull();
-    expect($withdrawal?->status)->toBe(WithdrawStatus::Failed);
-
-    $transaction = $wallet->transactions()->latest('id')->first();
-
-    expect($transaction?->type)->toBe(TransactionType::Withdraw);
-    expect($transaction?->status)->toBe(TransactionStatus::Failed);
-    expect($transaction?->amount)->toBe('-9999.00');
 });

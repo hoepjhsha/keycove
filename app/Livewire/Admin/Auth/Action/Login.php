@@ -21,7 +21,7 @@ class Login extends Component
 
         session()->regenerate();
 
-        sweetalert()->success('Welcome back, Admin!');
+        sweetalert()->success(__('admin.auth.welcome_back'));
 
         return redirect()->intended(route('admin.dashboard.index'));
     }

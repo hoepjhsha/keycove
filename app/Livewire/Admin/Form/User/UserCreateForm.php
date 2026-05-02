@@ -68,13 +68,13 @@ class UserCreateForm extends Form
 
         if ($targetRole === UserRole::SuperAdmin) {
             throw ValidationException::withMessages([
-                'createForm.role' => 'You do not have permission to create a Super Admin.',
+                'createForm.role' => __('admin.validation.user_no_permission_create_super_admin'),
             ]);
         }
 
         if ($currentUserRole !== UserRole::SuperAdmin && $targetRole === UserRole::Admin) {
             throw ValidationException::withMessages([
-                'createForm.role' => 'You do not have permission to assign this role.',
+                'createForm.role' => __('admin.validation.user_no_permission_assign_role'),
             ]);
         }
 

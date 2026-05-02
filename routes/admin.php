@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\Auth\Logout;
 use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\Complaint\ComplaintIndex;
+use App\Livewire\Admin\Action\Dashboard\DashboardIndex;
 use App\Livewire\Admin\Action\Escrow\EscrowIndex;
+use App\Livewire\Admin\Action\InternalWallet\InternalWalletIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Order\OrderDetail;
 use App\Livewire\Admin\Action\Order\OrderIndex;
@@ -17,11 +19,12 @@ use App\Livewire\Admin\Action\SellerKyc\SellerKycIndex;
 use App\Livewire\Admin\Action\SystemConfig\SystemConfigIndex;
 use App\Livewire\Admin\Action\Transaction\TransactionIndex;
 use App\Livewire\Admin\Action\User\UserIndex;
+use App\Livewire\Admin\Action\Withdraw\WithdrawalRequestIndex;
 use App\Livewire\Admin\Auth\Action\Login;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')
+Route::middleware('guest:admin')
     ->prefix('/admin/auth')
     ->name('admin.auth.')
     ->group(function () {
@@ -39,9 +42,7 @@ Route::middleware('auth:admin')
     ->prefix('/admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('pages.landing.admin-dashboard');
-        })->name('dashboard.index');
+        Route::livewire('/dashboard', DashboardIndex::class)->name('dashboard.index');
 
         Route::prefix('/system-settings')
             ->name('system_settings.')
@@ -103,6 +104,18 @@ Route::middleware('auth:admin')
             ->name('transactions.')
             ->group(function () {
                 Route::get('/', TransactionIndex::class)->name('index');
+            });
+
+        Route::prefix('/internal-wallet')
+            ->name('internal_wallet.')
+            ->group(function () {
+                Route::get('/', InternalWalletIndex::class)->name('index');
+            });
+
+        Route::prefix('/withdrawal-requests')
+            ->name('withdrawals.')
+            ->group(function () {
+                Route::get('/', WithdrawalRequestIndex::class)->name('index');
             });
 
         Route::prefix('/orders')

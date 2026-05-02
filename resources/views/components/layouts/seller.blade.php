@@ -36,17 +36,17 @@
         : url('/auth/login');
 
     $navItems = [
-        ['label' => 'Dashboard', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
-        ['label' => 'Application', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
-        ['label' => 'Listings', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
-        ['label' => 'Complaints', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
-        ['label' => 'Withdrawals', 'url' => $withdrawalsUrl, 'section' => 'withdrawals', 'icon' => 'fa-solid fa-money-bill-transfer'],
-        ['label' => 'Back to shop', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
+        ['label' => 'Tổng quan', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
+        ['label' => 'Hồ sơ đăng ký', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
+        ['label' => 'Listing', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
+        ['label' => 'Khiếu nại', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
+        ['label' => 'Rút tiền', 'url' => $withdrawalsUrl, 'section' => 'withdrawals', 'icon' => 'fa-solid fa-money-bill-transfer'],
+        ['label' => 'Về cửa hàng', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
     ];
 @endphp
 
-<x-layouts.app :title="$title ?? 'Seller Portal'">
-    @section('pre-app-name', 'Seller')
+<x-layouts.app :title="$title ?? 'Kênh người bán'">
+    @section('pre-app-name', 'Người bán')
 
     <div x-data="{ mobileMenuOpen: false }" class="min-h-screen bg-[#FCF9F4] text-gray-950 dark:bg-gray-950 dark:text-gray-100">
         <header class="sticky top-0 z-40 border-b border-black/8 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-gray-900/90">
@@ -56,8 +56,8 @@
                         <i class="fa-solid fa-store"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] dark:text-[#ff9c9c]">Seller Portal</p>
-                        <h1 class="truncate text-lg font-semibold text-gray-950 dark:text-white">{{ $portalSeller?->shop_name ?: ($portalUser?->username ?? 'Seller Portal') }}</h1>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] dark:text-[#ff9c9c]">Kênh người bán</p>
+                        <h1 class="truncate text-lg font-semibold text-gray-950 dark:text-white">{{ $portalSeller?->shop_name ?: ($portalUser?->username ?? 'Kênh người bán') }}</h1>
                     </div>
                 </div>
 
@@ -71,14 +71,14 @@
 
                     <a href="{{ $logoutUrl }}" class="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-4 py-2 text-rose-700 transition-colors hover:bg-rose-500/15 dark:text-rose-300">
                         <i class="fa-solid fa-right-from-bracket text-[12px]"></i>
-                        Logout
+                        Đăng xuất
                     </a>
                 </nav>
 
                 <div class="flex items-center gap-2 lg:hidden">
                     @if($portalSeller)
                         <span class="rounded-full px-3 py-1 text-[11px] font-semibold {{ $portalSeller->kyc_status === \App\Enums\KycStatus::Approved ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300' }}">
-                            {{ $portalSeller->kyc_status?->label() ?? 'Pending' }}
+                            {{ $portalSeller->kyc_status?->label() ?? 'Đang chờ' }}
                         </span>
                     @endif
 
@@ -99,7 +99,7 @@
 
                     <a href="{{ $logoutUrl }}" class="flex items-center gap-3 rounded-2xl bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-700 dark:text-rose-300">
                         <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
-                        Logout
+                        Đăng xuất
                     </a>
                 </div>
             </div>

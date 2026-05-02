@@ -27,7 +27,7 @@ class CategoryEditForm extends Form
     #[Validate([
         'required',
         'string',
-        'regex:/^[\pL\s]+$/u',
+        'regex:/^[\pL\s()]+$/u',
     ])]
     public string $name = '';
 
@@ -64,13 +64,13 @@ class CategoryEditForm extends Form
 
         if (Category::where('slug', $this->slug)->where('id', '!=', $this->category->id)->exists()) {
             throw ValidationException::withMessages([
-                'editForm.slug' => 'Category already exists. Write your own slug or change category name',
+                'editForm.slug' => __('admin.validation.duplicate_category_slug'),
             ]);
         }
 
         if ($this->status === GeneralStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'editForm.status' => 'Cannot set status to Deleted via update.',
+                'editForm.status' => __('admin.validation.status_deleted_update'),
             ]);
         }
 

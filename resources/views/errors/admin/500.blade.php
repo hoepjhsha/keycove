@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>500 - Server Error</title>
+        <title>{{ __('admin.errors.500.meta') }}</title>
 
         @vite(['resources/css/app.css'])
     </head>
@@ -18,7 +18,7 @@
             <div class="w-full max-w-md">
                 <!-- Logo/Header -->
                 <div class="text-center mb-12">
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Admin Panel</h1>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('admin.brand.admin_panel') }}</h1>
                 </div>
 
                 <!-- Error Box -->
@@ -30,12 +30,12 @@
 
                     <!-- Error Title -->
                     <h2 class="text-2xl font-bold mb-3 text-slate-900 dark:text-white">
-                        Server Error
+                        {{ __('admin.errors.500.title') }}
                     </h2>
 
                     <!-- Error Description -->
                     <p class="text-slate-600 dark:text-slate-400 mb-8">
-                        Something went wrong on our server. Our team has been notified.
+                        {{ __('admin.errors.500.description') }}
                     </p>
 
                     <!-- Divider -->
@@ -44,17 +44,17 @@
                     <!-- Action Buttons -->
                     <div class="flex flex-col gap-3">
                         <a href="/admin/dashboard" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-md font-semibold text-white bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 transition-colors duration-200">
-                            Back to Dashboard
+                            {{ __('admin.common.back_to_dashboard') }}
                         </a>
                         <button onclick="window.location.reload()" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-md font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200">
-                            Retry
+                            {{ __('admin.common.retry') }}
                         </button>
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <p class="text-center text-sm text-slate-500 dark:text-slate-500 mt-8">
-                    Error 500 - Server Error
+                    {{ __('admin.errors.footer_with_title', ['code' => 500, 'title' => __('admin.errors.500.title')]) }}
                 </p>
             </div>
         </div>

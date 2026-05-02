@@ -16,7 +16,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('Complaint Thread')]
+#[Title('Hội thoại khiếu nại')]
 class Thread extends Component
 {
     use WithFileUploads;
@@ -79,7 +79,7 @@ class Thread extends Component
         $this->replyAttachments = [];
         $this->refreshComplaint();
 
-        session()->flash('complaint-status', 'Your message has been added to the complaint thread.');
+        session()->flash('complaint-status', 'Tin nhắn của bạn đã được thêm vào hội thoại khiếu nại.');
     }
 
     public function refundBuyer(ComplaintService $complaintService): void
@@ -90,14 +90,14 @@ class Thread extends Component
             'resolutionNote' => ['required', 'string', 'min:3'],
         ]);
 
-        $complaintService->resolveRefund(
+        $complaintService->refundComplaint(
             $this->complaint,
             $this->currentUser(),
             trim($this->resolutionNote),
         );
 
         $this->refreshComplaint();
-        session()->flash('complaint-status', 'Complaint marked as refund approved.');
+        session()->flash('complaint-status', 'Khiếu nại đã được đánh dấu chấp thuận hoàn tiền.');
     }
 
     public function releaseFunds(ComplaintService $complaintService): void
@@ -115,7 +115,7 @@ class Thread extends Component
         );
 
         $this->refreshComplaint();
-        session()->flash('complaint-status', 'Complaint marked as resolved and funds released.');
+        session()->flash('complaint-status', 'Khiếu nại đã được đánh dấu đã xử lý và tiền đã được giải phóng.');
     }
 
     #[On('echo-private:complaints.{complaint.id},ComplaintThreadUpdated')]
@@ -169,8 +169,8 @@ class Thread extends Component
                 return [
                     'id'          => $message->id,
                     'sender_id'   => $message->sender?->id,
-                    'sender_name' => $message->sender?->username ?? 'Support',
-                    'sender_role' => $message->sender?->role?->label() ?? 'Unknown',
+                    'sender_name' => $message->sender?->username ?? 'Hỗ trợ',
+                    'sender_role' => $message->sender?->role?->label() ?? 'Không xác định',
                     'message'     => $message->message,
                     'created_at'  => $message->created_at?->format('d/m/Y H:i') ?? '--',
                     'attachments' => $this->formatAttachments($message->attachments),

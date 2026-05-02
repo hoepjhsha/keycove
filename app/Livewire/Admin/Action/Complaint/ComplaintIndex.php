@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Action\Complaint;
 
 use App\Enums\ComplaintStatus;
-use App\Enums\PaymentMethod;
-use App\Managers\PaymentManager;
 use App\Models\Complaint;
 use App\Services\Shop\ComplaintService;
 use App\Utilities\StorageUtility;
@@ -31,13 +29,6 @@ class ComplaintIndex extends Component
     public ?string $resolutionNote = null;
 
     public ?string $resolvedAt = null;
-
-    private PaymentManager $paymentManager;
-
-    public function boot(PaymentManager $paymentManager): void
-    {
-        $this->paymentManager = $paymentManager;
-    }
 
     /**
      * @return array<int, ComplaintStatus>
@@ -89,7 +80,7 @@ class ComplaintIndex extends Component
                 'order_code'      => $complaint->orderItem?->order?->order_code ?? '-',
                 'buyer_username'  => $complaint->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'     => $complaint->orderItem?->order?->buyer?->email ?? '-',
-                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? 'Shop Admin',
+                'seller_username' => $complaint->orderItem?->listing?->seller?->user?->username ?? __('admin.common.shop_admin'),
                 'seller_email'    => $complaint->orderItem?->listing?->seller?->user?->email ?? 'KeyCove',
                 'product_name'    => $complaint->orderItem?->product_name_snapshot ?? '-',
                 'reason'          => $complaint->reason,
@@ -103,7 +94,7 @@ class ComplaintIndex extends Component
                     ->get()
                     ->map(fn ($msg) => [
                         'id'          => $msg->id,
-                        'sender_name' => $msg->sender?->username ?? 'Unknown',
+                        'sender_name' => $msg->sender?->username ?? __('admin.common.unknown'),
                         'message'     => $msg->message,
                         'attachments' => $this->resolveStoredPaths($msg->attachments),
                         'created_at'  => $msg->created_at->format('d/m/Y H:i:s'),
@@ -138,7 +129,7 @@ class ComplaintIndex extends Component
             $this->showViewModal = false;
             $this->dispatch('notify', [
                 'type'    => 'success',
-                'message' => 'Complaint status updated successfully',
+                'message' => __('admin.messages.updated', ['Name' => __('admin.nav.dispute_center')]),
             ]);
 
             $this->dispatch('pg:eventRefresh-complaintTable');
@@ -160,57 +151,14 @@ class ComplaintIndex extends Component
             return;
         }
 
-        $complaint = Complaint::with(['orderItem.order.transaction', 'orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
+        $complaint = Complaint::with(['orderItem.order.paymentTransactions', 'orderItem.escrow', 'orderItem.order.buyer', 'orderItem.seller.user'])->find($this->complaintId);
 
         if (! $complaint) {
             return;
         }
 
-        $transaction = $complaint->orderItem?->order?->transaction;
-        $paymentMethod = $complaint->orderItem?->order?->payment_method;
-
-        if ($paymentMethod !== PaymentMethod::VNPay) {
-            $this->dispatch('notify', [
-                'type'    => 'error',
-                'message' => 'Refund is only available for VNPay orders at the moment.',
-            ]);
-
-            return;
-        }
-
-        if (! $transaction) {
-            $this->dispatch('notify', [
-                'type'    => 'error',
-                'message' => 'Refund failed: payment transaction was not found.',
-            ]);
-
-            return;
-        }
-
         try {
-            // TODO: refund stuff
-            //            $refundResponse = $this->paymentManager->driver('vnpay')->refund([
-            //                'txn_ref'          => $complaint->orderItem?->order?->order_code ?? (string) $complaint->id,
-            //                'amount'           => (float) $complaint->orderItem?->subtotal,
-            //                'order_info'       => 'Refund complaint #'.$complaint->id,
-            //                'transaction_no'   => $transaction->payment_info['transaction_id'] ?? null,
-            //                'transaction_date' => $transaction->payment_info['pay_date'] ?? now()->format('YmdHis'),
-            //                'create_by'        => (string) auth()->id(),
-            //                'ip_address'       => request()->ip(),
-            //            ]);
-            //
-            //            if (! ($refundResponse['success'] ?? false)) {
-            //                $message = $refundResponse['message'] ?? 'Refund request was rejected by the payment gateway.';
-            //
-            //                $this->dispatch('notify', [
-            //                    'type'    => 'error',
-            //                    'message' => $message,
-            //                ]);
-            //
-            //                return;
-            //            }
-
-            $complaintService->resolveRefund(
+            $complaintService->refundComplaint(
                 $complaint,
                 auth()->guard('admin')->user() ?? auth()->user(),
                 (string) $this->resolutionNote,
@@ -220,13 +168,13 @@ class ComplaintIndex extends Component
             $this->showViewModal = false;
             $this->dispatch('notify', [
                 'type'    => 'success',
-                'message' => 'Refund processed successfully',
+                'message' => __('admin.messages.refund_processed'),
             ]);
             $this->dispatch('pg:eventRefresh-complaintTable');
         } catch (Throwable $throwable) {
             $this->dispatch('notify', [
                 'type'    => 'error',
-                'message' => 'Refund failed: '.$throwable->getMessage(),
+                'message' => __('admin.messages.refund_failed', ['error' => $throwable->getMessage()]),
             ]);
         }
     }
@@ -264,7 +212,7 @@ class ComplaintIndex extends Component
         $this->showViewModal = false;
         $this->dispatch('notify', [
             'type'    => 'success',
-            'message' => 'Release processed successfully',
+            'message' => __('admin.messages.release_processed'),
         ]);
         $this->dispatch('pg:eventRefresh-complaintTable');
     }

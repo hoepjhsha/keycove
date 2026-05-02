@@ -18,39 +18,39 @@
                             <li>
                                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
                             </li>
-                            <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">Products</li>
+                            <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">Sản phẩm</li>
                         </ol>
                     </nav>
 
                     <div class="space-y-3">
                         <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
                             <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                            Shop catalog
+                            Catalog cửa hàng
                         </p>
                         <div class="space-y-2">
-                            <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Browse curated admin listings with a cleaner storefront feel</h1>
-                            <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Find ready-to-buy game keys faster with richer cards, sharper filters, and a calmer browsing layout that feels closer to a premium digital shelf.</p>
+                            <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Duyệt các key game và phần mềm đã sẵn sàng để mua</h1>
+                            <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Tìm key nhanh hơn với thẻ sản phẩm rõ ràng, bộ lọc chi tiết và trải nghiệm mua sắm gọn gàng.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Live catalog</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Catalog đang bán</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($availableListings) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listings currently searchable</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing có thể tìm kiếm</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Visible now</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Đang hiển thị</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $listings->count() }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listings on this page</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing trên trang này</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">View mode</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Kiểu hiển thị</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ ucfirst($viewMode) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Switch between grid and list</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Chuyển giữa lưới và danh sách</p>
                     </div>
                 </div>
             </div>
@@ -73,15 +73,15 @@
                 || (bool) $inStock;
 
             $activeFilterTags = collect([
-                filled($search) ? 'Search: '.trim($search) : null,
-                $selectedCategory ? 'Category: '.data_get($selectedCategory, 'name', $selectedCategory->name ?? '') : null,
-                $selectedPlatform ? 'Platform: '.data_get($selectedPlatform, 'name', $selectedPlatform->name ?? '') : null,
-                $selectedRegion ? 'Region: '.data_get($selectedRegion, 'name', $selectedRegion->name ?? '') : null,
+                filled($search) ? 'Tìm: '.trim($search) : null,
+                $selectedCategory ? 'Danh mục: '.data_get($selectedCategory, 'name', $selectedCategory->name ?? '') : null,
+                $selectedPlatform ? 'Nền tảng: '.data_get($selectedPlatform, 'name', $selectedPlatform->name ?? '') : null,
+                $selectedRegion ? 'Khu vực: '.data_get($selectedRegion, 'name', $selectedRegion->name ?? '') : null,
                 $selectedOs ? 'OS: '.data_get($selectedOs, 'name', $selectedOs->name ?? '') : null,
-                filled($edition) ? 'Edition: '.trim($edition) : null,
-                filled($minPrice) ? 'Min: '.number_format((float) $minPrice, 0, ',', '.').' VND' : null,
-                filled($maxPrice) ? 'Max: '.number_format((float) $maxPrice, 0, ',', '.').' VND' : null,
-                $inStock ? 'Only in stock' : null,
+                filled($edition) ? 'Phiên bản: '.trim($edition) : null,
+                filled($minPrice) ? 'Tối thiểu: '.number_format((float) $minPrice, 0, ',', '.').' VND' : null,
+                filled($maxPrice) ? 'Tối đa: '.number_format((float) $maxPrice, 0, ',', '.').' VND' : null,
+                $inStock ? 'Chỉ còn hàng' : null,
             ])->filter()->values();
 
             $activeFilterCount = $activeFilterTags->count();
@@ -92,14 +92,14 @@
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                     <div class="space-y-2">
                         <div class="flex flex-wrap items-center gap-2">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Refine storefront</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Tinh chỉnh kết quả</p>
 
                             @if($hasActiveFilters)
-                                <span class="rounded-full bg-[#D32F2F]/10 px-2.5 py-1 text-[11px] font-semibold text-[#D32F2F] dark:bg-[#D32F2F]/15 dark:text-[#ff9c9c]">{{ $activeFilterCount }} active</span>
+                                <span class="rounded-full bg-[#D32F2F]/10 px-2.5 py-1 text-[11px] font-semibold text-[#D32F2F] dark:bg-[#D32F2F]/15 dark:text-[#ff9c9c]">{{ $activeFilterCount }} bộ lọc</span>
                             @endif
                         </div>
 
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Use the quick panel to zero in on edition, platform, region, and price without overwhelming the product grid.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Dùng bộ lọc nhanh để chọn phiên bản, nền tảng, khu vực và khoảng giá phù hợp.</p>
 
                         @if($hasActiveFilters)
                             <div class="flex flex-wrap gap-2 pt-1">
@@ -113,11 +113,11 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <button type="button" x-on:click="filtersOpen = ! filtersOpen" x-bind:aria-expanded="filtersOpen.toString()" aria-controls="shop-filters-panel" class="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
                             <i class="fa-solid fa-sliders"></i>
-                            <span x-text="filtersOpen ? 'Hide filters' : 'Show filters'"></span>
+                            <span x-text="filtersOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'"></span>
                         </button>
 
                         <button type="button" wire:click="clearFilters" @disabled(! $hasActiveFilters) class="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
-                            Clear filters
+                            Xóa bộ lọc
                         </button>
                     </div>
                 </div>
@@ -125,14 +125,14 @@
                 <div id="shop-filters-panel" x-show="filtersOpen" x-transition.opacity.duration.200ms style="display: none;" class="mt-5 border-t border-black/8 pt-5 dark:border-white/10">
                     <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <div class="md:col-span-2 xl:col-span-2">
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Search</label>
-                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Title, product, edition..." class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Tìm kiếm</label>
+                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Tên, sản phẩm, phiên bản..." class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Danh mục</label>
                             <select wire:model.live="category" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="">All categories</option>
+                                <option value="">Tất cả danh mục</option>
                                 @foreach($categories as $category)
                                     <option value="{{ data_get($category, 'slug') }}">{{ data_get($category, 'name') }}</option>
                                 @endforeach
@@ -140,7 +140,7 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Sort</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Sắp xếp</label>
                             <select wire:model.live="sortBy" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                                 @foreach($sortOptions as $option)
                                     <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
@@ -149,9 +149,9 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Platform</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Nền tảng</label>
                             <select wire:model.live="platform" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="">All</option>
+                                <option value="">Tất cả</option>
                                 @foreach($platforms as $platform)
                                     <option value="{{ $platform->slug }}">{{ $platform->name }}</option>
                                 @endforeach
@@ -159,9 +159,9 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Region</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Khu vực</label>
                             <select wire:model.live="region" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="">All</option>
+                                <option value="">Tất cả</option>
                                 @foreach($regions as $region)
                                     <option value="{{ $region->slug }}">{{ $region->name }}</option>
                                 @endforeach
@@ -169,9 +169,9 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Operating system</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Hệ điều hành</label>
                             <select wire:model.live="os" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                                <option value="">All operating systems</option>
+                                <option value="">Tất cả hệ điều hành</option>
                                 @foreach($operatingSystems as $os)
                                     <option value="{{ $os->slug }}">{{ $os->name }}</option>
                                 @endforeach
@@ -179,24 +179,24 @@
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Edition</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Phiên bản</label>
                             <input wire:model.live.debounce.300ms="edition" type="text" placeholder="Standard, Deluxe..." class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Min price</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Giá tối thiểu</label>
                             <input wire:model.live.debounce.300ms="minPrice" type="number" min="0" step="0.01" placeholder="0" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </div>
 
                         <div>
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Max price</label>
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">Giá tối đa</label>
                             <input wire:model.live.debounce.300ms="maxPrice" type="number" min="0" step="0.01" placeholder="0" class="mt-1 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </div>
 
                         <div class="flex items-end">
                             <label class="flex w-full items-center gap-3 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm dark:border-white/10 dark:bg-gray-950 dark:text-gray-200">
                                 <input wire:model.live="inStock" type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                Only in stock
+                                Chỉ còn hàng
                             </label>
                         </div>
                     </div>
@@ -207,25 +207,25 @@
                 <div class="flex flex-col gap-3 rounded-[1.75rem] border border-black/8 bg-white/85 px-4 py-4 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.45)] backdrop-blur sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-gray-900/80">
                     <div class="space-y-1">
                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Showing <span class="font-semibold text-gray-900 dark:text-white">{{ $listings->count() }}</span> of <span class="font-semibold text-gray-900 dark:text-white">{{ $availableListings }}</span>
+                            Đang hiển thị <span class="font-semibold text-gray-900 dark:text-white">{{ $listings->count() }}</span> / <span class="font-semibold text-gray-900 dark:text-white">{{ $availableListings }}</span>
                         </p>
-                        <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Fresh layout, same filtering engine</p>
+                        <p class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Giao diện mới, bộ lọc quen thuộc</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
                         @if($hasActiveFilters)
-                            <span class="rounded-full bg-[#D32F2F]/10 px-3 py-1 text-[11px] font-semibold text-[#D32F2F] dark:bg-[#D32F2F]/15 dark:text-[#ff9c9c]">{{ $activeFilterCount }} filters active</span>
+                            <span class="rounded-full bg-[#D32F2F]/10 px-3 py-1 text-[11px] font-semibold text-[#D32F2F] dark:bg-[#D32F2F]/15 dark:text-[#ff9c9c]">{{ $activeFilterCount }} bộ lọc đang bật</span>
                         @endif
 
-                        <span class="rounded-full border border-black/8 bg-[#FCF9F4] px-3 py-1 text-[11px] font-medium text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">{{ ucfirst($viewMode) }} mode</span>
+                        <span class="rounded-full border border-black/8 bg-[#FCF9F4] px-3 py-1 text-[11px] font-medium text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">Chế độ {{ $viewMode === 'grid' ? 'lưới' : 'danh sách' }}</span>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="inline-flex rounded-2xl border border-black/8 bg-[#FCF9F4] p-1.5 dark:border-white/10 dark:bg-gray-950">
-                            <button type="button" wire:click="setViewMode('grid')" title="Grid view" aria-label="Grid view" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm transition-colors {{ $viewMode === 'grid' ? 'bg-white text-[#D32F2F] shadow-sm dark:bg-gray-800 dark:text-[#ff9c9c]' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                            <button type="button" wire:click="setViewMode('grid')" title="Xem dạng lưới" aria-label="Xem dạng lưới" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm transition-colors {{ $viewMode === 'grid' ? 'bg-white text-[#D32F2F] shadow-sm dark:bg-gray-800 dark:text-[#ff9c9c]' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' }}">
                                 <i class="fa-solid fa-grip"></i>
                             </button>
-                            <button type="button" wire:click="setViewMode('list')" title="List view" aria-label="List view" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm transition-colors {{ $viewMode === 'list' ? 'bg-white text-[#D32F2F] shadow-sm dark:bg-gray-800 dark:text-[#ff9c9c]' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                            <button type="button" wire:click="setViewMode('list')" title="Xem dạng danh sách" aria-label="Xem dạng danh sách" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm transition-colors {{ $viewMode === 'list' ? 'bg-white text-[#D32F2F] shadow-sm dark:bg-gray-800 dark:text-[#ff9c9c]' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200' }}">
                                 <i class="fa-solid fa-list"></i>
                             </button>
                         </div>
@@ -237,13 +237,13 @@
                         @foreach($listings as $listing)
                             @php
                                 $product = $listing->variant?->product;
-                                $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Untitled listing');
+                            $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Listing chưa có tên');
                                 $imageUrl = $product?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($product->image_thumbnail_path) : null;
                                 $categories = $product?->display_categories ?? collect();
                             @endphp
 
                             <div wire:key="listing-{{ $listing->id }}" class="group relative overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900/95">
-                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
+                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="Xem {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
                                     <div class="relative aspect-[5/4] overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         @if($imageUrl)
                                             <img src="{{ $imageUrl }}" alt="{{ $title }}" class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
@@ -274,7 +274,7 @@
                                         <div>
                                             <h2 class="line-clamp-1 text-base font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
                                             <p class="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
-                                                {{ $product?->name ?? 'Unknown product' }}
+                                                 {{ $product?->name ?? 'Sản phẩm chưa xác định' }}
                                                 @if($listing->variant?->edition)
                                                     <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
                                                 @endif
@@ -283,11 +283,11 @@
 
                                         <div class="grid grid-cols-2 gap-2 text-[11px]">
                                             <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
+                                                 <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Khu vực</div>
                                                 <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
                                             </div>
                                             <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Platform</div>
+                                                 <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Nền tảng</div>
                                                 <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->platform?->name ?? '--' }}</div>
                                             </div>
                                             <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
@@ -295,8 +295,8 @@
                                                 <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->operatingSystem?->name ?? '--' }}</div>
                                             </div>
                                             <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                                <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
+                                                 <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Tồn kho</div>
+                                                 <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' key' : 'Hết hàng' }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -316,18 +316,24 @@
                                         x-bind:class="wishlistPulse ? 'scale-[1.03] border-[#D32F2F]/35 text-[#D32F2F] shadow-lg shadow-[#D32F2F]/10 dark:text-[#ffb1b1]' : ''"
                                         class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
                                         <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
-                                        Wishlist
+                                         Yêu thích
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        x-on:click="pulse('cartPulse')"
-                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
-                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
-                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                        Add to cart
-                                    </button>
+                                    @if($listing->stock_count > 0)
+                                        <button
+                                            type="button"
+                                            x-on:click="pulse('cartPulse')"
+                                            wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                            x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                            <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                             Thêm vào giỏ
+                                        </button>
+                                    @else
+                                        <button type="button" disabled class="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-gray-300 px-3 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                            Hết hàng
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -337,13 +343,13 @@
                         @foreach($listings as $listing)
                             @php
                                 $product = $listing->variant?->product;
-                                $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Untitled listing');
+                                $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Listing chưa có tên');
                                 $imageUrl = $product?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($product->image_thumbnail_path) : null;
                                 $categories = $product?->display_categories ?? collect();
                             @endphp
 
                             <div wire:key="listing-list-{{ $listing->id }}" class="group overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/95 shadow-[0_24px_60px_-38px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:border-[#D32F2F]/15 hover:shadow-[0_32px_80px_-38px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900/95">
-                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="View {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
+                                <a href="{{ route('app.products.show', ['product' => $product?->slug, 'listing' => $listing->slug]) }}" wire:navigate.hover aria-label="Xem {{ $title }}" class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950">
                                     <div class="flex flex-col gap-0 sm:flex-row">
                                         <div class="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-gray-100 sm:w-44 sm:aspect-auto sm:min-h-[170px] lg:w-56 dark:bg-gray-800">
                                             @if($imageUrl)
@@ -371,7 +377,7 @@
                                                     <div>
                                                         <h2 class="text-lg font-semibold text-gray-950 dark:text-white">{{ $title }}</h2>
                                                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                            {{ $product?->name ?? 'Unknown product' }}
+                                                            {{ $product?->name ?? 'Sản phẩm chưa xác định' }}
                                                             @if($listing->variant?->edition)
                                                                 <span class="text-gray-300 dark:text-gray-600">•</span> {{ $listing->variant->edition }}
                                                             @endif
@@ -380,18 +386,18 @@
                                                 </div>
 
                                                 <div class="rounded-2xl border border-black/8 bg-[#FCF9F4] px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-gray-800/70 lg:text-right">
-                                                    <div class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Price</div>
+                                                     <div class="text-xs uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Giá</div>
                                                     <div class="mt-1 text-lg font-semibold text-gray-950 dark:text-white">{{ number_format((float) $listing->price, 0, ',', '.') }} VND</div>
                                                 </div>
                                             </div>
 
                                             <div class="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
                                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Region</div>
+                                                     <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Khu vực</div>
                                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->region?->name ?? '--' }}</div>
                                                 </div>
                                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Platform</div>
+                                                     <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Nền tảng</div>
                                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->platform?->name ?? '--' }}</div>
                                                 </div>
                                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
@@ -399,8 +405,8 @@
                                                     <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->variant?->operatingSystem?->name ?? '--' }}</div>
                                                 </div>
                                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                                    <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
+                                                     <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Tồn kho</div>
+                                                     <div class="mt-1 font-medium {{ $listing->stock_count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">{{ $listing->stock_count > 0 ? $listing->stock_count.' key' : 'Hết hàng' }}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -421,18 +427,24 @@
                                         x-bind:class="wishlistPulse ? 'scale-[1.03] border-[#D32F2F]/35 text-[#D32F2F] shadow-lg shadow-[#D32F2F]/10 dark:text-[#ffb1b1]' : ''"
                                         class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D32F2F]/25 hover:text-[#D32F2F] dark:border-white/10 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-[#D32F2F]/25 dark:hover:text-[#ff9c9c]">
                                         <i class="fa-regular fa-heart text-[12px] transition-transform duration-300" x-bind:class="wishlistPulse ? 'scale-125' : ''"></i>
-                                        Wishlist
+                                         Yêu thích
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        x-on:click="pulse('cartPulse')"
-                                        wire:click.stop.prevent="addToCart({{ $listing->id }})"
-                                        x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
-                                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                                        <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
-                                        Add to cart
-                                    </button>
+                                    @if($listing->stock_count > 0)
+                                        <button
+                                            type="button"
+                                            x-on:click="pulse('cartPulse')"
+                                            wire:click.stop.prevent="addToCart({{ $listing->id }})"
+                                            x-bind:class="cartPulse ? 'scale-[1.03] bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/20 dark:bg-[#D32F2F] dark:text-white' : ''"
+                                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-black px-3 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D32F2F] data-loading:pointer-events-none data-loading:scale-[0.98] data-loading:opacity-90 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                                            <i class="fa-solid fa-cart-shopping text-[12px] transition-transform duration-300" x-bind:class="cartPulse ? 'scale-125' : ''"></i>
+                                             Thêm vào giỏ
+                                        </button>
+                                    @else
+                                        <button type="button" disabled class="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-gray-300 px-3 py-2.5 text-sm font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                            Hết hàng
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -444,10 +456,10 @@
                         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FCF9F4] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                             <i class="fa-solid fa-box-open"></i>
                         </div>
-                        <h3 class="mt-5 text-lg font-semibold text-gray-950 dark:text-white">No listings found</h3>
-                        <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Try clearing filters, widening the price range, or browsing a broader platform mix.</p>
+                        <h3 class="mt-5 text-lg font-semibold text-gray-950 dark:text-white">Không tìm thấy listing</h3>
+                        <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">Thử xóa bộ lọc, mở rộng khoảng giá hoặc chọn thêm nền tảng khác.</p>
                         <button type="button" wire:click="clearFilters" class="mt-5 inline-flex items-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Clear filters
+                            Xóa bộ lọc
                         </button>
                     </div>
                 @endif

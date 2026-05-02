@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Login')]
+#[Title('Đăng nhập')]
 class Login extends Component
 {
     public LoginForm $form;
@@ -21,7 +21,7 @@ class Login extends Component
 
         session()->regenerate();
 
-        sweetalert()->success('Welcome back!');
+        flash()->success('Chào mừng bạn quay lại!');
 
         return redirect()->intended(route('app.shop.index'));
     }

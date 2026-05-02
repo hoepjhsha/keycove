@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your Email - Keycove</title>
+    <title>Xác minh email - Keycove</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -134,34 +134,34 @@
 
     <div class="content">
         <div class="icon-wrapper">✉️</div>
-        <h1 class="title">Verify Your Email Address</h1>
+        <h1 class="title">Xác minh địa chỉ email</h1>
 
         <p class="message">
-            Welcome to Keycove! To complete your registration and unlock full access to your secure account, please verify your email address by clicking the button below.
+            Chào mừng bạn đến với Keycove! Để hoàn tất đăng ký và mở đầy đủ quyền truy cập tài khoản, vui lòng xác minh email bằng nút bên dưới.
         </p>
 
         <div class="cta-container">
-            <a href="{{ $verificationLink }}" class="cta-button">Verify Email Address</a>
+            <a href="{{ $verificationLink }}" class="cta-button">Xác minh email</a>
         </div>
 
         <div class="alternative-box">
-            <div class="alternative-label">Or copy and paste this link into your browser:</div>
+            <div class="alternative-label">Hoặc sao chép liên kết này vào trình duyệt:</div>
             <p class="verification-link">{{ $verificationLink }}</p>
         </div>
 
         <p class="message" style="margin-top: 30px; margin-bottom: 0; font-size: 14px;">
-            This verification link is valid for <strong>24 hours</strong>.<br>
-            If you didn't create an account, you can safely delete this email.
+            Liên kết xác minh có hiệu lực trong <strong>24 giờ</strong>.<br>
+            Nếu bạn không tạo tài khoản, bạn có thể bỏ qua email này.
         </p>
     </div>
 
     <div class="footer">
         <p class="footer-text">
-            {{ config('app.name') }} - Secure Password Management
+            {{ config('app.name') }} - Quản lý tài khoản an toàn
         </p>
         <p class="footer-text" style="font-size: 12px;">
-            Automated email. Please do not reply.<br>
-            Questions? <a href="#" class="footer-link">Check our Help Center</a>
+            Đây là email tự động. Vui lòng không trả lời.<br>
+            Cần hỗ trợ? <a href="#" class="footer-link">Truy cập trung tâm hỗ trợ</a>
         </p>
     </div>
 </div>

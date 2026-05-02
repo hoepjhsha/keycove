@@ -23,7 +23,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('Products')]
+#[Title('Sản phẩm')]
 class ProductIndex extends Component
 {
     use WithPagination;
@@ -119,11 +119,24 @@ class ProductIndex extends Component
 
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $cartItem = $cart->items()->firstOrNew(['listing_id' => $listing->id]);
+
+        if ((int) $listing->stock_count < 1) {
+            session()->flash('seller-status', __('shop.checkout.item_out_of_stock'));
+
+            return;
+        }
+
+        if ($cartItem->exists && (int) $cartItem->quantity >= (int) $listing->stock_count) {
+            session()->flash('seller-status', __('shop.checkout.insufficient_available_keys'));
+
+            return;
+        }
+
         $cartItem->quantity = $cartItem->exists ? $cartItem->quantity + 1 : 1;
         $cartItem->save();
 
         $product = $listing->variant?->product;
-        $title = $listing->display_name ?: ($product?->name ?? 'Untitled listing');
+        $title = $listing->display_name ?: ($product?->name ?? 'Listing chưa có tên');
 
         $this->dispatch('shop:cart:add', item: [
             'id'         => $cartItem->id,
@@ -306,11 +319,11 @@ class ProductIndex extends Component
     protected function sortOptions(): array
     {
         return [
-            ['value' => 'newest', 'label' => 'Newest first'],
-            ['value' => 'price_asc', 'label' => 'Price: low to high'],
-            ['value' => 'price_desc', 'label' => 'Price: high to low'],
-            ['value' => 'name_asc', 'label' => 'Name: A-Z'],
-            ['value' => 'name_desc', 'label' => 'Name: Z-A'],
+            ['value' => 'newest', 'label' => 'Mới nhất trước'],
+            ['value' => 'price_asc', 'label' => 'Giá: thấp đến cao'],
+            ['value' => 'price_desc', 'label' => 'Giá: cao đến thấp'],
+            ['value' => 'name_asc', 'label' => 'Tên: A-Z'],
+            ['value' => 'name_desc', 'label' => 'Tên: Z-A'],
         ];
     }
 }

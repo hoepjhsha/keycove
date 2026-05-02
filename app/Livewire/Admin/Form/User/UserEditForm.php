@@ -73,13 +73,13 @@ class UserEditForm extends Form
 
         if (User::where('username', $this->username)->where('id', '!=', $this->user->id)->exists()) {
             throw ValidationException::withMessages([
-                'editForm.username' => 'The username has already been taken.',
+                'editForm.username' => __('admin.validation.duplicate_username'),
             ]);
         }
 
         if (User::where('email', $this->email)->where('id', '!=', $this->user->id)->exists()) {
             throw ValidationException::withMessages([
-                'editForm.email' => 'The email has already been taken.',
+                'editForm.email' => __('admin.validation.duplicate_user_email'),
             ]);
         }
 
@@ -88,44 +88,44 @@ class UserEditForm extends Form
 
         if ($this->status === UserStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'editForm.status' => 'Cannot set status to Deleted via update.',
+                'editForm.status' => __('admin.validation.status_deleted_update'),
             ]);
         }
 
         if ($targetRole === UserRole::SuperAdmin) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'Cannot assign Super Admin role.',
+                'editForm.role' => __('admin.validation.user_cannot_assign_super_admin'),
             ]);
         }
 
         if ($this->user->role === UserRole::SuperAdmin) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'Super Admin cannot be edited.',
+                'editForm.role' => __('admin.validation.user_cannot_edit_super_admin'),
             ]);
         }
 
         if ($this->user->role === UserRole::Admin && $targetRole !== UserRole::Admin) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'Cannot change the role of an Admin user.',
+                'editForm.role' => __('admin.validation.user_cannot_change_admin_role'),
             ]);
         }
 
         if ($targetRole === UserRole::Admin && $this->user->role !== UserRole::Admin) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'Cannot promote an existing user to Admin.',
+                'editForm.role' => __('admin.validation.user_cannot_assign_admin'),
             ]);
         }
 
         if ($currentUserRole !== UserRole::SuperAdmin && $targetRole === UserRole::Admin) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'You do not have permission to assign this role.',
+                'editForm.role' => __('admin.validation.user_no_permission_assign_role'),
             ]);
         }
 
         // Prevent admin from editing existing admin or super admin
         if ($currentUserRole !== UserRole::SuperAdmin && in_array($this->user->role, [UserRole::SuperAdmin, UserRole::Admin], true)) {
             throw ValidationException::withMessages([
-                'editForm.role' => 'You do not have permission to edit this user.',
+                'editForm.role' => __('admin.validation.user_no_permission_edit'),
             ]);
         }
 

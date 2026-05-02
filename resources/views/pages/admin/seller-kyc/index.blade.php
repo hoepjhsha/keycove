@@ -56,7 +56,7 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">
                                 {!! $viewData['status_label'] !!}
                             </dd>
@@ -101,7 +101,7 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3 border-b-0">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Updated At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.updated_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['updated_at'] }}</dd>
                         </div>
 
@@ -146,7 +146,7 @@
 
             <div class="flex items-center justify-end space-x-2">
                 <button wire:target="processSellerKycSubmit" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">Confirm</button>
-                <button wire:click="$set('showProcessModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">Cancel</button>
+                <button wire:click="$set('showProcessModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
             </div>
         </form>
     </x-reusable.modal>

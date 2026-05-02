@@ -59,7 +59,7 @@ class BulkImportIndex extends Component
                     [
                         'rowNumber' => 0,
                         'field'     => 'import',
-                        'message'   => 'Import failed: '.$e->getMessage(),
+                        'message'   => __('admin.messages.import_failed', ['error' => $e->getMessage()]),
                         'rowData'   => [],
                     ],
                 ],
@@ -73,9 +73,9 @@ class BulkImportIndex extends Component
     public function downloadTemplate(): BinaryFileResponse
     {
         $csv = Writer::createFromString();
-        $csv->insertOne(['listing_id', 'key_code', 'status']);
-        $csv->insertOne([1, 'XXXX-YYYY-ZZZZ-AAAA', 'Available']);
-        $csv->insertOne([1, 'BBBB-CCCC-DDDD-EEEE', 'Available']);
+        $csv->insertOne(['listing_slug', 'key_code', 'status']);
+        $csv->insertOne(['example-listing-slug', 'XXXX-YYYY-ZZZZ-AAAA', 'Available']);
+        $csv->insertOne(['another-listing-slug', 'BBBB-CCCC-DDDD-EEEE', 'Available']);
 
         $tempFile = tempnam(sys_get_temp_dir(), 'template_');
         file_put_contents($tempFile, $csv->getContent());
@@ -86,18 +86,25 @@ class BulkImportIndex extends Component
     public function downloadErrorReport(): BinaryFileResponse
     {
         if (! $this->importResult || empty($this->importResult['errors'])) {
-            abort(400, 'No errors to download');
+            abort(400, __('admin.validation.no_errors_to_download'));
         }
 
         $csv = Writer::createFromString();
-        $csv->insertOne(['Row', 'Field', 'Error', 'Listing ID', 'Key Code', 'Status']);
+        $csv->insertOne([
+            __('admin.common.row'),
+            __('admin.common.field'),
+            __('admin.common.error'),
+            __('admin.common.listing_slug'),
+            __('admin.common.key_code'),
+            __('admin.common.status'),
+        ]);
 
         foreach ($this->importResult['errors'] as $error) {
             $csv->insertOne([
                 $error['rowNumber'],
                 $error['field'],
                 $error['message'],
-                $error['rowData']['listing_id'] ?? '',
+                $error['rowData']['listing_slug'] ?? '',
                 $error['rowData']['key_code'] ?? '',
                 $error['rowData']['status'] ?? '',
             ]);

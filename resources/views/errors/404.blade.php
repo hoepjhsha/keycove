@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>404 - Not Found</title>
+        <title>404 - Không tìm thấy</title>
 
         @vite(['resources/css/app.css'])
         <style>
@@ -40,26 +40,26 @@
                 </div>
 
                 <!-- Title -->
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">Page Not Found</h1>
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Không tìm thấy trang</h1>
 
                 <!-- Description -->
                 <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg mb-8">
-                    Sorry, we couldn't find what you're looking for. The page may have been moved or deleted.
+                    Rất tiếc, chúng tôi không tìm thấy nội dung bạn đang tìm. Trang có thể đã được di chuyển hoặc xóa.
                 </p>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-200">
-                        Go Home
+                        Về trang chủ
                     </a>
                     <button onclick="window.history.back()" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-                        Go Back
+                        Quay lại
                     </button>
                 </div>
 
                 <!-- Footer Message -->
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-12">
-                    Error Code: 404
+                    Mã lỗi: 404
                 </p>
             </div>
         </div>

@@ -79,26 +79,26 @@ final class CategoryTable extends PowerGridComponent
         return [
             Column::make('#', 'id')
                 ->index(),
-            Column::make('Parent', 'parent', 'parent_id'),
-            Column::make('Name', 'name')
+            Column::make(__('admin.common.parent'), 'parent', 'parent_id'),
+            Column::make(__('admin.common.name'), 'name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Slug', 'slug')
+            Column::make(__('admin.common.slug'), 'slug')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make(__('admin.common.status'), 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Created at', 'created_at_formatted', 'created_at')
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')
                 ->sortable(),
 
-            Column::make('Updated at', 'updated_at_formatted', 'updated_at')
+            Column::make(__('admin.common.updated_at_short'), 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -132,17 +132,17 @@ final class CategoryTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm transition-colors duration-200')
                 ->dispatch('openCreateModal', []),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('bulkDelete', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-2 px-4 border border-yellow-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('triggerBulkStatus', []),
         ];
@@ -158,7 +158,7 @@ final class CategoryTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewCategory', ['rowId' => $row->id]),
 
@@ -167,7 +167,7 @@ final class CategoryTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Category',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('editCategory', ['rowId' => $row->id]),
 
@@ -178,7 +178,7 @@ final class CategoryTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === GeneralStatus::Active ? 'Deactivate Now' : 'Activate Now',
+                    'x-tooltip' => $row->status === GeneralStatus::Active ? __('admin.common.deactivate_now') : __('admin.common.activate_now'),
                 ])
                 ->dispatch('toggleStatus', ['rowId' => $row->id]),
 
@@ -187,7 +187,7 @@ final class CategoryTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deleteCategory', ['rowId' => $row->id]),
 
@@ -196,7 +196,7 @@ final class CategoryTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === GeneralStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('revertDelete', ['rowId' => $row->id]),
         ];
@@ -206,8 +206,8 @@ final class CategoryTable extends PowerGridComponent
     public function toggleStatus($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the status of this category?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.nav.categories')]),
             'method' => 'performToggleStatus',
             'id'     => $rowId,
         ]);
@@ -223,15 +223,15 @@ final class CategoryTable extends PowerGridComponent
         };
         $category->save();
 
-        $this->dispatch('swal:success', ['message' => 'Category Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.categories')])]);
     }
 
     #[On('deleteCategory')]
     public function deleteCategory($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Category?',
-            'text'   => 'Are you sure you want to delete this category? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.nav.categories')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.nav.categories')]),
             'method' => 'performDelete',
             'id'     => $rowId,
         ]);
@@ -252,15 +252,15 @@ final class CategoryTable extends PowerGridComponent
             $category->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Category Deleted Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.nav.categories')])]);
     }
 
     #[On('revertDelete')]
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Category?',
-            'text'   => 'Are you sure you want to restore this category? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.nav.categories')]),
+            'text'   => __('admin.swal.restore_text_irreversible', ['name' => __('admin.nav.categories')]),
             'method' => 'performRevertDelete',
             'id'     => $rowId,
         ]);
@@ -276,20 +276,20 @@ final class CategoryTable extends PowerGridComponent
         $category->status = GeneralStatus::Inactive;
         $category->save();
 
-        $this->dispatch('swal:success', ['message' => 'Category Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.categories')])]);
     }
 
     #[On('bulkDelete')]
     public function bulkDelete(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one category!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.categories')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => __('admin.swal.delete_selected', ['count' => count($this->checkboxValues)]),
             'method' => 'performBulkDelete',
             'id'     => null,
         ]);
@@ -304,7 +304,7 @@ final class CategoryTable extends PowerGridComponent
 
         if ($alreadyDeletedExists) {
             $this->dispatch('swal:error', [
-                'message' => 'Some selected items are already deleted or in the trash.',
+                'message' => __('admin.messages.cannot_change_deleted_status'),
             ]);
 
             return;
@@ -322,14 +322,14 @@ final class CategoryTable extends PowerGridComponent
             Category::whereIn('id', $this->checkboxValues)->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed')]);
     }
 
     #[On('triggerBulkStatus')]
     public function triggerBulkStatus(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one category!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.nav.categories')])]);
 
             return;
         }

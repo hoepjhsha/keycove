@@ -3,10 +3,10 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                    Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}
+                    {{ __('admin.common.page_of', ['current' => $paginator->currentPage(), 'last' => $paginator->lastPage()]) }}
                 </span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ number_format($paginator->total()) }} results
+                    {{ number_format($paginator->total()) }} {{ __('admin.common.results') }}
                 </span>
             </div>
 
@@ -16,7 +16,7 @@
                         wire:loading.attr="disabled"
                         @disabled($paginator->onFirstPage())
                         class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
-                    First
+                    {{ __('admin.common.first') }}
                 </button>
 
                 <button type="button"
@@ -24,7 +24,7 @@
                         wire:loading.attr="disabled"
                         @disabled($paginator->onFirstPage())
                         class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
-                    Previous
+                    {{ __('pagination.previous') }}
                 </button>
 
                 <button type="button"
@@ -32,7 +32,7 @@
                         wire:loading.attr="disabled"
                         @disabled($paginator->hasMorePages() === false)
                         class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
-                    Next
+                    {{ __('pagination.next') }}
                 </button>
 
                 <button type="button"
@@ -40,11 +40,11 @@
                         wire:loading.attr="disabled"
                         @disabled($paginator->onLastPage())
                         class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900">
-                    Last
+                    {{ __('admin.common.last') }}
                 </button>
 
                 <div class="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-950">
-                    <label for="go-to-page" class="text-xs font-medium text-gray-500 dark:text-gray-400">Go to</label>
+                    <label for="go-to-page" class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('admin.common.go_to') }}</label>
                     <input id="go-to-page"
                            type="number"
                            min="1"

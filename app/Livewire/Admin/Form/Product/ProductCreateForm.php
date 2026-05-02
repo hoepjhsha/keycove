@@ -126,7 +126,7 @@ class ProductCreateForm extends Form
 
         if (Product::where('slug', $this->slug)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.slug' => 'Product already exists. Write your own slug or change product name',
+                'createForm.slug' => __('admin.validation.duplicate_product_slug'),
             ]);
         }
 

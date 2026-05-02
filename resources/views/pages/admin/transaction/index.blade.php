@@ -1,5 +1,5 @@
 <div>
-    @section('pageTitle', 'Transactions')
+    @section('pageTitle', __('admin.nav.transactions'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
@@ -10,14 +10,14 @@
 
     <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-            <h4 class="font-medium">Manage Transactions</h4>
+            <h4 class="font-medium">{{ __('admin.nav.transactions') }}</h4>
         </div>
         <div class="flex-auto p-4">
             <livewire:admin.table.transaction.transaction-table />
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showViewModal" title="Transaction Details" max-width="2xl">
+    <x-reusable.modal wire:model="showViewModal" :title="__('admin.modal.transaction_details')" max-width="2xl">
         @if($viewData)
             <div class="space-y-5">
                 <!-- Main Transaction Info -->
@@ -28,7 +28,7 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white font-semibold">#{{ $viewData['id'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Order Code</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.order_code') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['order_code'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
@@ -44,11 +44,11 @@
                             <dd class="col-span-2 text-slate-900 dark:text-white font-semibold text-lg">{{ $viewData['amount'] }}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{!! $viewData['status_label'] !!}</dd>
                         </div>
                         <div class="grid grid-cols-3 gap-4 py-3 border-b-0">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Created At</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.created_at') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white">{{ $viewData['created_at'] }}</dd>
                         </div>
                     </dl>
@@ -59,7 +59,7 @@
                     <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-4">
                             <i class="fa-solid fa-credit-card text-slate-600 dark:text-slate-400"></i>
-                            <h4 class="font-semibold text-slate-700 dark:text-slate-300">Payment Information</h4>
+                            <h4 class="font-semibold text-slate-700 dark:text-slate-300">{{ __('admin.common.payment_information') }}</h4>
                         </div>
 
                         <div class="space-y-3">

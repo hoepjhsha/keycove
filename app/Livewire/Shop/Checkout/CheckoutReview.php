@@ -11,7 +11,7 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Checkout')]
+#[Title('Thanh toán')]
 class CheckoutReview extends Component
 {
     /**
@@ -30,7 +30,7 @@ class CheckoutReview extends Component
             ->values()
             ->all();
 
-        abort_if($this->selectedCartItemCodes === [], 422, 'Please select at least one item to checkout.');
+        abort_if($this->selectedCartItemCodes === [], 422, 'Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
     }
 
     public function render(): View
@@ -52,7 +52,7 @@ class CheckoutReview extends Component
             ->orderBy('id')
             ->get();
 
-        abort_if($items->count() !== count($this->selectedCartItemCodes), 422, 'One or more selected items are no longer available.');
+        abort_if($items->count() !== count($this->selectedCartItemCodes), 422, __('shop.checkout.selected_items_unavailable'));
 
         $subtotal = $items->sum(function (CartItem $item): float {
             return (float) ($item->listing?->price ?? 0) * (int) $item->quantity;

@@ -92,12 +92,12 @@ final class TransactionTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'id')->index(),
-            Column::make('Order Code', 'order_code', 'order_id')->sortable()->searchable(),
-            Column::make('Type', 'type_label', 'type')->sortable(),
-            Column::make('Amount', 'amount_formatted', 'amount')->sortable()->bodyAttribute('text-right'),
-            Column::make('Status', 'status_label', 'status')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::make(__('admin.common.order_code'), 'order_code', 'order_id')->sortable()->searchable(),
+            Column::make(__('admin.common.type'), 'type_label', 'type')->sortable(),
+            Column::make(__('admin.common.amount'), 'amount_formatted', 'amount')->sortable()->bodyAttribute('text-right'),
+            Column::make(__('admin.common.status'), 'status_label', 'status')->sortable(),
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')->sortable(),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -139,7 +139,7 @@ final class TransactionTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewTransactionModal', ['rowId' => $row->id]),
         ];

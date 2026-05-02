@@ -51,7 +51,7 @@ class OperatingSystemCreateForm extends Form
 
         if (OperatingSystem::where('slug', $this->slug)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.slug' => 'OperatingSystem already exists. Write your own slug or change operating system name',
+                'createForm.slug' => __('admin.validation.duplicate_operating_system_slug'),
             ]);
         }
 

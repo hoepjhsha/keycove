@@ -51,13 +51,13 @@ class ProductKeyForm extends Form
 
         if ($key->status !== ProductKeyStatus::Available) {
             throw ValidationException::withMessages([
-                'general' => 'Cannot delete a key that is not available.',
+                'general' => __('admin.validation.product_key_delete_available'),
             ]);
         }
 
         if ($key->order_item_id !== null) {
             throw ValidationException::withMessages([
-                'general' => 'Cannot delete a key that has been assigned to an order.',
+                'general' => __('admin.validation.product_key_delete_assigned'),
             ]);
         }
 

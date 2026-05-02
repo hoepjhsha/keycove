@@ -26,7 +26,7 @@ class SystemConfigFactory extends Factory
             ['key' => 'site_description', 'value' => 'Buy and sell digital game keys', 'description' => 'Site meta description'],
             ['key' => 'maintenance_mode', 'value' => 'false', 'description' => 'Enable/disable maintenance mode'],
             ['key' => 'commission_rate', 'value' => '5.0', 'description' => 'Platform commission rate in percentage'],
-            ['key' => 'min_withdrawal_amount', 'value' => '50.00', 'description' => 'Minimum amount for seller withdrawals'],
+            ['key' => 'min_withdrawal_amount', 'value' => '10000.00', 'description' => 'Minimum amount for seller withdrawals'],
             ['key' => 'max_withdrawal_amount', 'value' => '10000.00', 'description' => 'Maximum amount for single withdrawal'],
             ['key' => 'escrow_release_days', 'value' => '7', 'description' => 'Days before escrow is automatically released'],
             ['key' => 'max_keys_per_listing', 'value' => '1000', 'description' => 'Maximum product keys per listing'],

@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Forgot Password')]
+#[Title('Quên mật khẩu')]
 class ForgotPassword extends Component
 {
     public ForgotPasswordForm $form;
@@ -19,7 +19,7 @@ class ForgotPassword extends Component
     {
         $this->form->sendOtpProcess();
 
-        flash()->use('theme.aurora')->success('OTP has been sent to your email.');
+        flash()->use('theme.aurora')->success('Mã OTP đã được gửi đến email của bạn.');
 
         return redirect()->route('app.auth.password.verify');
     }

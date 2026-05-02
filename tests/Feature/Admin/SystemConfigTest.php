@@ -9,10 +9,9 @@ use Livewire\Livewire;
 it('admin can access the system settings page', function () {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-    $response = $this->actingAs($admin, 'admin')->get(route('admin.system_settings.index'));
-
-    $response->assertOk();
-    $response->assertSeeLivewire(SystemConfigIndex::class);
+    Livewire::actingAs($admin, 'admin')
+        ->test(SystemConfigIndex::class)
+        ->assertOk();
 });
 
 it('can create a system config from the admin page', function () {

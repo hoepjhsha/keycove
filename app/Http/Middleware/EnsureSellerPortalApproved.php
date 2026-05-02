@@ -27,7 +27,7 @@ class EnsureSellerPortalApproved
             if ($user->seller === null || $user->role !== UserRole::Seller || $user->seller->kyc_status !== KycStatus::Approved) {
                 return redirect()
                     ->route('seller.apply')
-                    ->with('seller-status', 'Complete and submit your seller application first.');
+                    ->with('seller-status', 'Vui lòng hoàn tất và gửi hồ sơ người bán trước.');
             }
         }
 

@@ -31,7 +31,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('Seller Listings')]
+#[Title('Listing người bán')]
 class SellerListings extends Component
 {
     use WithFileUploads;
@@ -120,7 +120,7 @@ class SellerListings extends Component
                 return [
                     'id'     => $product->id,
                     'label'  => $product->name,
-                    'source' => $product->submitted_by_seller_id === $seller->id ? 'My Product' : 'Shop Admin',
+                    'source' => $product->submitted_by_seller_id === $seller->id ? 'Sản phẩm của tôi' : 'Quản trị cửa hàng',
                     'status' => $product->status->label(),
                 ];
             });
@@ -163,7 +163,7 @@ class SellerListings extends Component
                         $variant->platform?->name,
                         $variant->operatingSystem?->name,
                     ])->filter()->implode(' · '),
-                    'product' => $variant->product?->name ?? 'Unknown product',
+                    'product' => $variant->product?->name ?? 'Sản phẩm chưa xác định',
                     'status'  => $variant->status->label(),
                 ];
             });
@@ -240,7 +240,7 @@ class SellerListings extends Component
             'seller'  => $this->seller,
             'metrics' => $this->metrics,
         ])->layout('components.layouts.seller', [
-            'title'         => 'Seller Listings',
+            'title'         => 'Listing người bán',
             'user'          => auth()->user(),
             'seller'        => $this->seller,
             'activeSection' => 'listings',
@@ -277,7 +277,7 @@ class SellerListings extends Component
                 $this->listingForm->seller_id = $this->seller->id;
                 $this->listingForm->update();
 
-                $message = 'Listing updated successfully.';
+                $message = 'Listing đã được cập nhật thành công.';
             } else {
                 $this->listingForm->seller_id = $this->seller->id;
 
@@ -286,7 +286,7 @@ class SellerListings extends Component
                     'existing_product_variant' => $this->createListingFromExistingProduct(),
                     'new_product'              => $this->createListingWithNewProduct(),
                     default                    => throw ValidationException::withMessages([
-                        'createMode' => 'Invalid creation mode.',
+                        'createMode' => 'Cách tạo không hợp lệ.',
                     ]),
                 };
             }
@@ -325,7 +325,7 @@ class SellerListings extends Component
 
         if (ProductKey::query()->where('listing_id', $listing->id)->where('key_hash', $keyHash)->exists()) {
             throw ValidationException::withMessages([
-                'keyCode' => 'This key already exists for the selected listing.',
+                'keyCode' => 'Key này đã tồn tại trong listing đã chọn.',
             ]);
         }
 
@@ -341,7 +341,7 @@ class SellerListings extends Component
         $this->keyCode = '';
 
         $this->dispatch('pg:eventRefresh-sellerListingsTable');
-        $this->dispatch('swal:success', ['message' => 'Key created successfully.']);
+        $this->dispatch('swal:success', ['message' => 'Key đã được tạo thành công.']);
     }
 
     #[On('deleteKey')]
@@ -356,7 +356,7 @@ class SellerListings extends Component
                 ->firstOrFail();
 
             if ($key->status !== ProductKeyStatus::Available || $key->order_item_id !== null) {
-                throw new \RuntimeException('Cannot delete a key that is not available.');
+                throw new \RuntimeException('Không thể xóa key không ở trạng thái khả dụng.');
             }
 
             $listingId = $key->listing_id;
@@ -364,7 +364,7 @@ class SellerListings extends Component
 
             $this->syncListingStockCount($listingId);
             $this->dispatch('pg:eventRefresh-sellerListingsTable');
-            $this->dispatch('swal:success', ['message' => 'Key deleted successfully.']);
+            $this->dispatch('swal:success', ['message' => 'Key đã được xóa thành công.']);
         } catch (\Throwable $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -429,7 +429,7 @@ class SellerListings extends Component
 
         $this->listingForm->store();
 
-        return 'Listing created successfully.';
+        return 'Listing đã được tạo thành công.';
     }
 
     protected function createListingFromExistingProduct(): string
@@ -455,7 +455,7 @@ class SellerListings extends Component
         $this->listingForm->variant_id = $variant->id;
         $this->listingForm->store();
 
-        return 'Listing created successfully.';
+        return 'Listing đã được tạo thành công.';
     }
 
     protected function createListingWithNewProduct(): string
@@ -489,7 +489,7 @@ class SellerListings extends Component
         $this->listingForm->seller_id = $this->seller->id;
         $this->listingForm->store();
 
-        return 'Listing created successfully.';
+        return 'Listing đã được tạo thành công.';
     }
 
     protected function resolveOwnedListing(int $listingId, bool $withTrashed = false): ProductListing

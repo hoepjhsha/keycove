@@ -1,5 +1,5 @@
 <div>
-    @section('pageTitle', 'Manage Complaints')
+    @section('pageTitle', __('admin.titles.manage_complaints'))
 
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
@@ -10,14 +10,14 @@
 
     <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
         <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 dark:text-slate-300/70">
-            <h4 class="font-medium">Complaint Centre</h4>
+            <h4 class="font-medium">{{ __('admin.nav.dispute_center') }}</h4>
         </div>
         <div class="flex-auto p-4">
             <livewire:admin.table.complaint.complaint-table />
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showViewModal" title="Complaint Details" max-width="4xl">
+    <x-reusable.modal wire:model="showViewModal" :title="__('admin.modal.complaint_details')" max-width="4xl">
         @if($viewData)
             <div class="space-y-4">
                 <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
@@ -28,12 +28,12 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Order Code</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.order_code') }}</dt>
                             <dd class="col-span-2 text-slate-900 dark:text-white font-semibold">{{ $viewData['order_code'] }}</dd>
                         </div>
 
                         <div class="grid grid-cols-3 gap-4 py-3">
-                            <dt class="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                            <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.status') }}</dt>
                             <dd class="col-span-2">{!! $viewData['status_badge'] !!}</dd>
                         </div>
 
@@ -84,14 +84,14 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
-                        <h5 class="font-semibold text-slate-900 dark:text-white mb-3">Buyer Information</h5>
+                        <h5 class="font-semibold text-slate-900 dark:text-white mb-3">{{ __('admin.common.buyer') }}</h5>
                         <dl class="space-y-2">
                             <div>
-                                <dt class="text-slate-500 dark:text-slate-400">Username</dt>
+                                <dt class="text-slate-500 dark:text-slate-400">{{ __('admin.common.username') }}</dt>
                                 <dd class="text-slate-900 dark:text-white">{{ $viewData['buyer_username'] }}</dd>
                             </div>
                             <div>
-                                <dt class="text-slate-500 dark:text-slate-400">Email</dt>
+                                <dt class="text-slate-500 dark:text-slate-400">{{ __('admin.common.email') }}</dt>
                                 <dd class="text-slate-900 dark:text-white break-all">{{ $viewData['buyer_email'] }}</dd>
                             </div>
                         </dl>
@@ -101,11 +101,11 @@
                         <h5 class="font-semibold text-slate-900 dark:text-white mb-3">Seller Information</h5>
                         <dl class="space-y-2">
                             <div>
-                                <dt class="text-slate-500 dark:text-slate-400">Username</dt>
+                                <dt class="text-slate-500 dark:text-slate-400">{{ __('admin.common.username') }}</dt>
                                 <dd class="text-slate-900 dark:text-white">{{ $viewData['seller_username'] }}</dd>
                             </div>
                             <div>
-                                <dt class="text-slate-500 dark:text-slate-400">Email</dt>
+                                <dt class="text-slate-500 dark:text-slate-400">{{ __('admin.common.email') }}</dt>
                                 <dd class="text-slate-900 dark:text-white break-all">{{ $viewData['seller_email'] }}</dd>
                             </div>
                         </dl>
@@ -159,7 +159,7 @@
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Select Status</label>
                                 <select wire:model.live="selectedStatus" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm">
-                                    <option value="">-- Select Status --</option>
+                                    <option value="">{{ __('admin.common.select_status') }}</option>
                                     @foreach(\App\Enums\ComplaintStatus::cases() as $statusOption)
                                         <option value="{{ $statusOption->value }}" @selected($selectedStatusValue === $statusOption->value)>
                                             {{ $statusOption->label() }}

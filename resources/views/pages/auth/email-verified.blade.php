@@ -3,11 +3,11 @@
 
         <div class="hidden lg:flex lg:w-1/2 bg-[#F6EBD9] dark:bg-gray-900 relative flex-col pt-32 px-16 lg:px-24 overflow-hidden border-r border-gray-200 dark:border-gray-800">
             <div class="relative z-20">
-                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Success</h1>
+                <h1 class="text-[42px] font-bold text-black dark:text-white mb-2 tracking-tight">Thành công</h1>
                 <div class="flex items-center text-[15px] font-medium text-black/70 dark:text-gray-400 space-x-3">
-                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Home</a>
+                    <a href="/" class="hover:text-black dark:hover:text-white transition-colors">Trang chủ</a>
                     <i class="fa-solid fa-angle-right text-[12px]"></i>
-                    <span class="text-black dark:text-white">Verified</span>
+                    <span class="text-black dark:text-white">Đã xác minh</span>
                 </div>
             </div>
 
@@ -24,16 +24,16 @@
                     <i class="fa-solid fa-check text-4xl"></i>
                 </div>
 
-                <h2 class="text-3xl font-bold text-black dark:text-white mb-4">Email Verified!</h2>
+                <h2 class="text-3xl font-bold text-black dark:text-white mb-4">Email đã được xác minh!</h2>
 
                 <p class="text-[15px] text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
-                    Your email address has been successfully verified.<br>
-                    Thank you for confirming your account.
+                    Địa chỉ email của bạn đã được xác minh thành công.<br>
+                    Cảm ơn bạn đã xác nhận tài khoản.
                 </p>
 
                 <a href="{{ route('app.shop.index') }}"
                    class="flex justify-center items-center w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:bg-[#D32F2F] dark:hover:bg-[#D32F2F] dark:hover:text-white transition-colors text-[14px] tracking-wide uppercase">
-                    Continue to App
+                    Tiếp tục vào Keycove
                 </a>
             </div>
         </div>

@@ -113,19 +113,19 @@ test('seller can open their complaints index and complaint thread', function ():
     $this->actingAs($sellerUser)
         ->get(route('seller.complaints.index'))
         ->assertOk()
-        ->assertSee('Seller complaints')
+        ->assertSee('Khiếu nại của người bán')
         ->assertSee('CMP-THREAD-SELLER');
 
     $this->actingAs($sellerUser)
         ->get(route('seller.complaints.show', ['complaint' => $complaint->complaint_code]))
         ->assertOk()
-        ->assertSee('Complaint thread')
-        ->assertSee('Buyer, seller, and admin');
+        ->assertSee('Hội thoại khiếu nại')
+        ->assertSee('người mua, người bán và quản trị viên');
 
     Livewire::actingAs($admin, 'admin')
         ->test(ComplaintThread::class, ['complaint' => $complaint])
-        ->assertSee('Complaint thread')
-        ->assertSee('Buyer, seller, and admin');
+        ->assertSee('Hội thoại khiếu nại')
+        ->assertSee('người mua, người bán và quản trị viên');
 });
 
 test('admin and seller can open complaint threads without a complaint code', function (): void {
@@ -215,11 +215,11 @@ test('admin and seller can open complaint threads without a complaint code', fun
     $this->actingAs($sellerUser)
         ->get('/seller/complaints/'.$complaint->id)
         ->assertOk()
-        ->assertSee('Complaint thread');
+        ->assertSee('Hội thoại khiếu nại');
 
     Livewire::actingAs($admin, 'admin')
         ->test(ComplaintThread::class, ['complaint' => $complaint])
-        ->assertSee('Complaint thread');
+        ->assertSee('Hội thoại khiếu nại');
 });
 
 test('admin can reply to complaint without a complaint code', function (): void {

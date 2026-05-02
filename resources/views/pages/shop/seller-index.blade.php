@@ -9,49 +9,49 @@
                 <div class="space-y-4">
                     <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
                         <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                        Browse sellers
+                        Duyệt người bán
                     </p>
 
                     <div class="space-y-2">
-                        <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">All listings sold by sellers</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Browse every active seller listing in one flat catalog, with direct links to product details.</p>
+                        <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Tất cả listing từ người bán</h1>
+                        <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Duyệt các listing đang hoạt động từ người bán và mở nhanh trang chi tiết sản phẩm.</p>
                     </div>
 
                     <div class="flex flex-col gap-3 rounded-[1.6rem] border border-black/8 bg-white/90 p-3 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.45)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-gray-950/80">
                         <label class="flex-1">
-                            <span class="sr-only">Search seller listings</span>
-                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Search listing, product, seller..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <span class="sr-only">Tìm listing người bán</span>
+                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Tìm listing, sản phẩm, người bán..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </label>
 
                         <select wire:model.live="sortBy" class="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                            <option value="newest">Newest first</option>
-                            <option value="price_asc">Price: low to high</option>
-                            <option value="price_desc">Price: high to low</option>
+                            <option value="newest">Mới nhất trước</option>
+                            <option value="price_asc">Giá: thấp đến cao</option>
+                            <option value="price_desc">Giá: cao đến thấp</option>
                         </select>
 
                         <button type="button" wire:click="clearFilters" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Clear
+                            Xóa lọc
                         </button>
                     </div>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Seller listings</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Listing người bán</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($availableListings) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Active listings from sellers</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing đang hoạt động từ người bán</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Search</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $search === '' ? 'All' : 'Filtered' }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Find sellers, listings, or products</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Tìm kiếm</p>
+                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $search === '' ? 'Tất cả' : 'Đã lọc' }}</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tìm người bán, listing hoặc sản phẩm</p>
                     </div>
 
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Sort</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Sắp xếp</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ ucfirst(str_replace('_', ' ', $sortBy)) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Quick ordering</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sắp xếp nhanh</p>
                     </div>
                 </div>
             </section>
@@ -61,9 +61,9 @@
                 @foreach($listings as $listing)
                     @php
                         $product = $listing->variant?->product;
-                        $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Untitled listing');
+                        $title = data_get($listing, 'display_name') ?: ($product?->name ?? 'Listing chưa có tên');
                         $imageUrl = $product?->image_thumbnail_path ? \App\Utilities\StorageUtility::getUrl($product->image_thumbnail_path) : null;
-                        $sellerName = $listing->seller?->shop_name ?: $listing->seller?->user?->username ?: 'Seller';
+                        $sellerName = $listing->seller?->shop_name ?: $listing->seller?->user?->username ?: 'Người bán';
                         $categories = $product?->display_categories ?? collect();
                     @endphp
 
@@ -85,16 +85,16 @@
                         <div class="p-4">
                             <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D32F2F] dark:text-[#ff9c9c]">{{ $sellerName }}</p>
                             <h3 class="mt-1 line-clamp-2 text-base font-semibold text-gray-950 dark:text-white">{{ $title }}</h3>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $product?->name ?? 'Unknown product' }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $product?->name ?? 'Sản phẩm chưa xác định' }}</p>
 
                             <div class="mt-4 grid grid-cols-2 gap-2 text-[11px]">
                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Stock</div>
-                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->stock_count > 0 ? $listing->stock_count.' keys' : 'Sold out' }}</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Tồn kho</div>
+                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">{{ $listing->stock_count > 0 ? $listing->stock_count.' key' : 'Hết hàng' }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-[#FCF9F4] px-3 py-2.5 dark:bg-gray-800/80">
-                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Type</div>
-                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">Seller listing</div>
+                                    <div class="text-[10px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">Loại</div>
+                                    <div class="mt-1 font-medium text-gray-900 dark:text-white">Listing người bán</div>
                                 </div>
                             </div>
 

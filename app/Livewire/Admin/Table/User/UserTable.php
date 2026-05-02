@@ -102,12 +102,12 @@ final class UserTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'id')->index(),
-            Column::make('Username', 'username')->sortable()->searchable(),
-            Column::make('Email', 'email')->sortable()->searchable(),
-            Column::make('Role', 'role_label', 'role')->sortable(),
-            Column::make('Status', 'status_label', 'status')->sortable(),
-            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
-            Column::action('Action'),
+            Column::make(__('admin.common.username'), 'username')->sortable()->searchable(),
+            Column::make(__('admin.common.email'), 'email')->sortable()->searchable(),
+            Column::make(__('admin.common.role'), 'role_label', 'role')->sortable(),
+            Column::make(__('admin.common.status'), 'status_label', 'status')->sortable(),
+            Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')->sortable(),
+            Column::action(__('admin.common.action')),
         ];
     }
 
@@ -151,17 +151,17 @@ final class UserTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create')
+                ->slot(__('admin.common.create'))
                 ->class('bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded text-sm transition-colors duration-200')
                 ->dispatch('openCreateModal', []),
 
             Button::add('bulk-delete')
-                ->slot('Bulk Delete (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.bulk_delete').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('bulkDelete', []),
 
             Button::add('bulk-status')
-                ->slot('Change Status (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
+                ->slot(__('admin.common.change_status').' (<span x-text="window.pgBulkActions.count(\''.$this->tableName.'\')"></span>)')
                 ->class('bg-transparent hover:bg-yellow-500 text-yellow-700 font-semibold hover:text-white py-2 px-4 border border-yellow-500 hover:border-transparent rounded text-sm ml-2 transition-colors duration-200')
                 ->dispatch('triggerBulkStatus', []),
         ];
@@ -177,7 +177,7 @@ final class UserTable extends PowerGridComponent
                 ->id()
                 ->class('text-indigo-600 hover:text-indigo-900 px-1 py-1 transition-all hover:scale-110')
                 ->attributes([
-                    'x-tooltip' => 'View Details',
+                    'x-tooltip' => __('admin.common.view_details'),
                 ])
                 ->dispatch('viewUser', ['rowId' => $row->id]),
 
@@ -186,7 +186,7 @@ final class UserTable extends PowerGridComponent
                 ->id()
                 ->class('text-blue-600 hover:text-blue-800 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit User',
+                    'x-tooltip' => __('admin.common.edit'),
                 ])
                 ->dispatch('editUser', ['rowId' => $row->id]),
 
@@ -197,7 +197,7 @@ final class UserTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 transition-all hover:scale-110 text-lg '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === UserStatus::Blocked ? 'Unblock Now' : 'Block Now',
+                    'x-tooltip' => $row->status === UserStatus::Blocked ? __('admin.common.unblock_now') : __('admin.common.block_now'),
                 ])
                 ->dispatch('toggleBlock', ['rowId' => $row->id]),
 
@@ -206,7 +206,7 @@ final class UserTable extends PowerGridComponent
                 ->id()
                 ->class('text-red-500 hover:text-red-700 px-1 py-1 transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => __('admin.common.delete'),
                 ])
                 ->dispatch('deleteUser', ['rowId' => $row->id]),
 
@@ -215,7 +215,7 @@ final class UserTable extends PowerGridComponent
                 ->id()
                 ->class('text-yellow-500 hover:text-yellow-700 px-1 py-1 transition-all hover:scale-110 '.($row->status === UserStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => __('admin.common.restore'),
                 ])
                 ->dispatch('revertDelete', ['rowId' => $row->id]),
         ];
@@ -225,8 +225,8 @@ final class UserTable extends PowerGridComponent
     public function toggleBlock($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change the block status of this user?',
+            'title'  => __('admin.swal.confirm_change_status'),
+            'text'   => __('admin.swal.change_status_text', ['name' => __('admin.common.user')]),
             'method' => 'performToggleBlock',
             'id'     => $rowId,
         ]);
@@ -239,7 +239,7 @@ final class UserTable extends PowerGridComponent
 
         $currentUserRole = auth('admin')->user()->role;
         if ($currentUserRole !== UserRole::SuperAdmin && in_array($user->role, [UserRole::SuperAdmin, UserRole::Admin], true)) {
-            $this->dispatch('swal:error', ['message' => 'You do not have permission to modify this user.']);
+            $this->dispatch('swal:error', ['message' => __('admin.validation.user_no_permission_modify')]);
 
             return;
         }
@@ -250,15 +250,15 @@ final class UserTable extends PowerGridComponent
         };
         $user->save();
 
-        $this->dispatch('swal:success', ['message' => 'User Status Changed Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.common.user')])]);
     }
 
     #[On('deleteUser')]
     public function deleteUser($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete User?',
-            'text'   => 'Are you sure you want to delete this user?',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.common.user')]),
+            'text'   => __('admin.swal.delete_text', ['name' => __('admin.common.user')]),
             'method' => 'performDelete',
             'id'     => $rowId,
         ]);
@@ -272,7 +272,7 @@ final class UserTable extends PowerGridComponent
 
             $currentUserRole = auth('admin')->user()->role;
             if ($currentUserRole !== UserRole::SuperAdmin && in_array($user->role, [UserRole::SuperAdmin, UserRole::Admin], true)) {
-                $this->dispatch('swal:error', ['message' => 'You do not have permission to delete this user.']);
+                $this->dispatch('swal:error', ['message' => __('admin.validation.user_no_permission_delete')]);
 
                 return;
             }
@@ -283,15 +283,15 @@ final class UserTable extends PowerGridComponent
             $user->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'User Deleted Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.common.user')])]);
     }
 
     #[On('revertDelete')]
     public function revertDelete($rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore User?',
-            'text'   => 'Are you sure you want to restore this user?',
+            'title'  => __('admin.swal.confirm_restore', ['name' => __('admin.common.user')]),
+            'text'   => __('admin.swal.restore_text', ['name' => __('admin.common.user')]),
             'method' => 'performRevertDelete',
             'id'     => $rowId,
         ]);
@@ -304,7 +304,7 @@ final class UserTable extends PowerGridComponent
 
         $currentUserRole = auth('admin')->user()->role;
         if ($currentUserRole !== UserRole::SuperAdmin && in_array($user->role, [UserRole::SuperAdmin, UserRole::Admin], true)) {
-            $this->dispatch('swal:error', ['message' => 'You do not have permission to modify this user.']);
+            $this->dispatch('swal:error', ['message' => __('admin.validation.user_no_permission_modify')]);
 
             return;
         }
@@ -313,20 +313,20 @@ final class UserTable extends PowerGridComponent
         $user->status = UserStatus::Inactive;
         $user->save();
 
-        $this->dispatch('swal:success', ['message' => 'User Restored Successfully']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.common.user')])]);
     }
 
     #[On('bulkDelete')]
     public function bulkDelete(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one user!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.user')])]);
 
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete '.count($this->checkboxValues).' selected items?',
+            'title'  => __('admin.swal.delete_selected', ['count' => count($this->checkboxValues)]),
             'method' => 'performBulkDelete',
             'id'     => null,
         ]);
@@ -340,7 +340,7 @@ final class UserTable extends PowerGridComponent
             ->exists();
 
         if ($alreadyDeletedExists) {
-            $this->dispatch('swal:error', ['message' => 'Some selected items are already deleted.']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.cannot_change_deleted_status')]);
 
             return;
         }
@@ -354,7 +354,7 @@ final class UserTable extends PowerGridComponent
                 ->whereIn('role', [UserRole::SuperAdmin, UserRole::Admin])->exists();
 
             if ($invalidUsers) {
-                $this->dispatch('swal:error', ['message' => 'You do not have permission to delete some of the selected users.']);
+                $this->dispatch('swal:error', ['message' => __('admin.validation.user_no_permission_delete')]);
 
                 return;
             }
@@ -365,14 +365,14 @@ final class UserTable extends PowerGridComponent
             User::whereIn('id', $this->checkboxValues)->delete();
         });
 
-        $this->dispatch('swal:success', ['message' => 'Bulk delete completed successfully.']);
+        $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed')]);
     }
 
     #[On('triggerBulkStatus')]
     public function triggerBulkStatus(): void
     {
         if (empty($this->checkboxValues)) {
-            $this->dispatch('swal:error', ['message' => 'Please select at least one user!']);
+            $this->dispatch('swal:error', ['message' => __('admin.messages.select_at_least_one', ['name' => __('admin.common.user')])]);
 
             return;
         }

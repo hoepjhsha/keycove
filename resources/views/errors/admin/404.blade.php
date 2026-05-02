@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>404 - Not Found</title>
+        <title>{{ __('admin.errors.404.meta') }}</title>
 
         @vite(['resources/css/app.css'])
     </head>
@@ -18,7 +18,7 @@
             <div class="w-full max-w-md">
                 <!-- Logo/Header -->
                 <div class="text-center mb-12">
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Admin Panel</h1>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('admin.brand.admin_panel') }}</h1>
                 </div>
 
                 <!-- Error Box -->
@@ -30,12 +30,12 @@
 
                     <!-- Error Title -->
                     <h2 class="text-2xl font-bold mb-3 text-slate-900 dark:text-white">
-                        Page Not Found
+                        {{ __('admin.errors.404.title') }}
                     </h2>
 
                     <!-- Error Description -->
                     <p class="text-slate-600 dark:text-slate-400 mb-8">
-                        The admin page you're looking for doesn't exist.
+                        {{ __('admin.errors.404.description') }}
                     </p>
 
                     <!-- Divider -->
@@ -44,17 +44,17 @@
                     <!-- Action Buttons -->
                     <div class="flex flex-col gap-3">
                         <a href="/admin/dashboard" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-md font-semibold text-white bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 transition-colors duration-200">
-                            Back to Dashboard
+                            {{ __('admin.common.back_to_dashboard') }}
                         </a>
                         <button onclick="window.history.back()" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-md font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200">
-                            Go Back
+                            {{ __('admin.common.go_back') }}
                         </button>
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <p class="text-center text-sm text-slate-500 dark:text-slate-500 mt-8">
-                    Error 404 - Not Found
+                    {{ __('admin.errors.footer_with_title', ['code' => 404, 'title' => __('admin.errors.404.title')]) }}
                 </p>
             </div>
         </div>

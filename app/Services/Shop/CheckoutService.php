@@ -9,29 +9,19 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductKeyStatus;
-use App\Enums\TransactionBalanceType;
-use App\Enums\TransactionStatus;
-use App\Enums\TransactionType;
-use App\Enums\WalletType;
 use App\Models\Cart;
 use App\Models\Escrow;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\ProductKey;
-use App\Models\ProductListing;
 use App\Models\SystemConfig;
-use App\Models\Transaction;
-use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class CheckoutService
 {
-    /**
-     * @param  list<int>  $selectedCartItemIds
-     */
     public function createOrderFromCart(
         Cart $cart,
         PaymentMethod $paymentMethod = PaymentMethod::VNPay,
@@ -63,7 +53,7 @@ class CheckoutService
                 })
                 ->values();
 
-            abort_if($items->isEmpty(), 422, 'Your cart is empty.');
+            abort_if($items->isEmpty(), 422, __('shop.checkout.cart_empty'));
 
             $order = Order::create([
                 'buyer_id'       => (int) $cart->user_id,
@@ -85,11 +75,11 @@ class CheckoutService
                 }
 
                 if ($buyerSellerId !== null && $buyerSellerId === $listing->seller_id) {
-                    abort(422, 'You cannot purchase your own listing.');
+                    abort(422, __('shop.checkout.cannot_buy_own_listing'));
                 }
 
                 $quantity = min(max(1, (int) $cartItem->quantity), max(0, (int) $listing->stock_count));
-                abort_if($quantity < 1, 422, 'One of the cart items is out of stock.');
+                abort_if($quantity < 1, 422, __('shop.checkout.item_out_of_stock'));
 
                 $keys = ProductKey::query()
                     ->where('listing_id', $listing->id)
@@ -98,10 +88,10 @@ class CheckoutService
                     ->limit($quantity)
                     ->get();
 
-                abort_if($keys->count() < $quantity, 422, 'One of the cart items does not have enough available keys.');
+                abort_if($keys->count() < $quantity, 422, __('shop.checkout.insufficient_available_keys'));
 
                 $subtotal = (float) $listing->price * $quantity;
-                $commissionRate = $this->commissionRate();
+                $commissionRate = $listing->seller_id !== null ? $this->commissionRate() : 0.0;
                 $platformFee = round($subtotal * ($commissionRate / 100), 2);
                 $sellerAmount = round($subtotal - $platformFee, 2);
 
@@ -109,7 +99,7 @@ class CheckoutService
                     'order_id'              => $order->id,
                     'listing_id'            => $listing->id,
                     'seller_id'             => $listing->seller_id,
-                    'product_name_snapshot' => $listing->display_name ?: ($listing->variant?->product?->name ?? 'Unknown item'),
+                    'product_name_snapshot' => $listing->display_name ?: ($listing->variant?->product?->name ?? 'Sản phẩm chưa xác định'),
                     'variant_snapshot'      => [
                         'variant_id'       => $listing->variant_id,
                         'product_id'       => $listing->variant?->product_id,
@@ -138,25 +128,6 @@ class CheckoutService
                         'order_item_id' => $orderItem->id,
                     ])->save();
                 }
-
-                $wallet = $this->resolveWallet($listing);
-
-                Transaction::create([
-                    'wallet_id'    => $wallet->id,
-                    'order_id'     => $order->id,
-                    'source_type'  => $listing->seller_id !== null ? Escrow::class : OrderItem::class,
-                    'source_id'    => $orderItem->id,
-                    'type'         => TransactionType::PaymentReceived,
-                    'balance_type' => $listing->seller_id !== null
-                        ? TransactionBalanceType::Holding
-                        : TransactionBalanceType::Available,
-                    'payment_info' => null,
-                    'amount'       => $sellerAmount,
-                    'status'       => TransactionStatus::Pending,
-                    'metadata'     => [
-                        'order_item_id' => $orderItem->id,
-                    ],
-                ]);
 
                 if ($listing->seller_id !== null) {
                     Escrow::create([
@@ -209,20 +180,5 @@ class CheckoutService
             ->value('value');
 
         return max(0.0, (float) ($configuredValue ?: 10));
-    }
-
-    protected function resolveWallet(ProductListing $listing): Wallet
-    {
-        if ($listing->seller_id !== null) {
-            return Wallet::firstOrCreate(
-                ['seller_id' => $listing->seller_id],
-                ['type' => WalletType::Seller, 'code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
-            );
-        }
-
-        return Wallet::firstOrCreate(
-            ['seller_id' => null, 'type' => WalletType::Internal],
-            ['code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
-        );
     }
 }

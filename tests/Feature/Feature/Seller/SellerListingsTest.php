@@ -32,7 +32,7 @@ test('seller listings page is accessible to approved sellers', function (): void
     $this->actingAs($user)
         ->get('/seller/listings')
         ->assertOk()
-        ->assertSee('Manage your listings and keys');
+        ->assertSee('Quản lý listing và key');
 });
 
 test('seller can create a listing from an existing variant and reuse a seller product', function (): void {

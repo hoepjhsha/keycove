@@ -24,7 +24,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Seller Dashboard')]
+#[Title('Bảng điều khiển người bán')]
 class Dashboard extends Component
 {
     public function render(): View
@@ -42,7 +42,7 @@ class Dashboard extends Component
             'recentListings' => $this->recentListings($seller),
             'portalStatus'   => $this->portalStatus($seller),
         ])->layout('components.layouts.seller', [
-            'title'         => 'Seller Dashboard',
+            'title'         => 'Bảng điều khiển người bán',
             'user'          => $user,
             'seller'        => $seller,
             'activeSection' => 'dashboard',
@@ -153,8 +153,8 @@ class Dashboard extends Component
     protected function portalStatus(Seller $seller): array
     {
         return [
-            'headline'    => 'Seller portal ready',
-            'description' => 'Track catalog health, wallet balances, and active inventory from one place.',
+            'headline'    => 'Cổng người bán đã sẵn sàng',
+            'description' => 'Theo dõi tình trạng danh mục, số dư ví và tồn kho đang bán tại một nơi.',
             'badge'       => $seller->kyc_status->label(),
             'badgeClass'  => match ($seller->kyc_status) {
                 KycStatus::Approved => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',

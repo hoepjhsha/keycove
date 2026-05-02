@@ -21,7 +21,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Title('My Profile')]
+#[Title('Hồ sơ của tôi')]
 class MyProfile extends Component
 {
     use WithFileUploads;
@@ -68,14 +68,14 @@ class MyProfile extends Component
         $user = $this->resolveUser();
 
         if ($user->hasVerifiedEmail()) {
-            session()->flash('profile-status', 'Your email is already verified.');
+            session()->flash('profile-status', 'Email của bạn đã được xác minh.');
 
             return;
         }
 
         $user->sendEmailVerificationNotification();
 
-        session()->flash('profile-status', 'A verification link has been sent to your email address.');
+        session()->flash('profile-status', 'Liên kết xác minh đã được gửi đến email của bạn.');
         $this->section = 'security';
     }
 
@@ -128,7 +128,7 @@ class MyProfile extends Component
         $user->load('profile');
         $this->syncProfileForm($user->profile);
 
-        session()->flash('profile-status', 'Your profile has been updated successfully.');
+        session()->flash('profile-status', 'Hồ sơ của bạn đã được cập nhật thành công.');
     }
 
     public function changePassword(): void
@@ -140,11 +140,11 @@ class MyProfile extends Component
             'newPassword'             => ['required', 'string', Password::min(8)],
             'newPasswordConfirmation' => ['required', 'same:newPassword'],
         ], [
-            'newPasswordConfirmation.same' => 'The new password confirmation does not match.',
+            'newPasswordConfirmation.same' => 'Xác nhận mật khẩu mới không khớp.',
         ]);
 
         if (Hash::check($validated['newPassword'], $user->password)) {
-            $this->addError('newPassword', 'Please choose a different password from your current one.');
+            $this->addError('newPassword', 'Vui lòng chọn mật khẩu khác với mật khẩu hiện tại.');
 
             return;
         }
@@ -154,7 +154,7 @@ class MyProfile extends Component
         ]);
 
         $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
-        session()->flash('profile-status', 'Your password has been updated successfully.');
+        session()->flash('profile-status', 'Mật khẩu của bạn đã được cập nhật thành công.');
         $this->section = 'security';
     }
 

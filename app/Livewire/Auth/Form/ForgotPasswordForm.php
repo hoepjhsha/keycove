@@ -51,7 +51,7 @@ class ForgotPasswordForm extends Form
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
         throw ValidationException::withMessages([
-            'form.email' => 'Too many requests. Please try again in '.$seconds.' seconds.',
+            'form.email' => 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau '.$seconds.' giây.',
         ]);
     }
 

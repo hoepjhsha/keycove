@@ -63,9 +63,9 @@ class SystemConfigIndex extends Component
             $this->reset('createForm');
             $this->syncInlineValues();
 
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('System setting created successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.system_settings')]));
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to create system setting');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.system_settings')]));
         }
 
         $this->showCreateModal = false;
@@ -76,9 +76,9 @@ class SystemConfigIndex extends Component
         $result = $this->editForm->update();
 
         if ($result) {
-            sweetalert()->title('Success!')->showConfirmButton(false)->success('System setting updated successfully');
+            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.system_settings')]));
         } else {
-            sweetalert()->title('Error!')->showConfirmButton(false)->error('Failed to update system setting');
+            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.update_failed', ['name' => __('admin.nav.system_settings')]));
         }
 
         $this->showEditModal = false;
@@ -127,8 +127,8 @@ class SystemConfigIndex extends Component
     public function deleteSystemConfig(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete System Setting?',
-            'text'   => 'Are you sure you want to delete this system setting? This action cannot be undone.',
+            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.nav.system_settings')]),
+            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.nav.system_settings')]),
             'method' => 'performDeleteSystemConfig',
             'id'     => $rowId,
         ]);
@@ -142,7 +142,7 @@ class SystemConfigIndex extends Component
 
         unset($this->inlineValues[$id]);
 
-        sweetalert()->title('Success!')->showConfirmButton(false)->success('System setting deleted successfully');
+        sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.deleted_sentence', ['Name' => __('admin.nav.system_settings')]));
     }
 
     public function saveInlineValue(int $id): void
@@ -158,7 +158,7 @@ class SystemConfigIndex extends Component
         $systemConfig = SystemConfig::findOrFail($id);
         $systemConfig->update(['value' => $value]);
 
-        sweetalert()->title('Success!')->showConfirmButton(false)->success('System setting updated successfully');
+        sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.system_settings')]));
     }
 
     public function isJsonValue(?string $value): bool

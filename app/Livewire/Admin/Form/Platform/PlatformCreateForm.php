@@ -58,7 +58,7 @@ class PlatformCreateForm extends Form
 
         if (Platform::where('slug', $this->slug)->exists()) {
             throw ValidationException::withMessages([
-                'createForm.slug' => 'Platform already exists. Write your own slug or change platform name',
+                'createForm.slug' => __('admin.validation.duplicate_platform_slug'),
             ]);
         }
 

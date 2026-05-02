@@ -11,7 +11,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
-#[Title('Register')]
+#[Title('Đăng ký')]
 class Register extends Component
 {
     public RegisterForm $form;
@@ -22,7 +22,7 @@ class Register extends Component
 
         Auth::login($user);
 
-        sweetalert()->success('Account created successfully. Welcome!');
+        sweetalert()->success('Tạo tài khoản thành công. Chào mừng bạn!');
 
         return redirect()->route('app.shop.index');
     }

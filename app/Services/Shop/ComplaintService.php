@@ -7,27 +7,39 @@ namespace App\Services\Shop;
 use App\Enums\ComplaintStatus;
 use App\Enums\EscrowStatus;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\TransactionBalanceType;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Enums\UserRole;
 use App\Enums\WalletType;
 use App\Events\ComplaintThreadUpdated;
+use App\Managers\PaymentManager;
 use App\Models\Complaint;
 use App\Models\ComplaintMessage;
 use App\Models\Escrow;
+use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PaymentTransaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Notifications\ComplaintActivityNotification;
+use App\Services\InternalWalletService;
 use App\Utilities\StorageUtility;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class ComplaintService
 {
+    public function __construct(
+        private InternalWalletService $internalWalletService,
+        private PaymentManager $paymentManager,
+    ) {}
+
     public function openComplaint(OrderItem $item, User $actor, string $reason, array $evidence = []): Complaint
     {
         $complaint = DB::transaction(function () use ($item, $actor, $reason, $evidence): Complaint {
@@ -99,40 +111,117 @@ class ComplaintService
         return $this->resolve($complaint, $actor, $resolutionNote, ComplaintStatus::ApprovedRefund, OrderStatus::Refunded, $resolvedAt);
     }
 
+    public function refundComplaint(Complaint $complaint, User $actor, string $resolutionNote, ?string $resolvedAt = null): Complaint
+    {
+        $complaint->loadMissing(['orderItem.order.paymentTransactions', 'orderItem.escrow']);
+
+        $order = $complaint->orderItem?->order;
+
+        if ($order === null || $order->payment_method !== PaymentMethod::VNPay) {
+            throw new RuntimeException((string) __('admin.messages.refund_vnpay_only'));
+        }
+
+        $paymentTransaction = $order->paymentTransactions()
+            ->where('status', PaymentStatus::Completed)
+            ->latest('id')
+            ->first();
+
+        if ($paymentTransaction === null) {
+            throw new RuntimeException((string) __('admin.messages.refund_payment_not_found'));
+        }
+
+        $transactionNumber = $this->resolveRefundTransactionNumber($paymentTransaction);
+
+        if ($transactionNumber === null) {
+            throw new RuntimeException((string) __('admin.messages.refund_payment_not_found'));
+        }
+
+        $refundResponse = $this->paymentManager->driver('vnpay')->refund([
+            'txn_ref'          => $order->order_code,
+            'amount'           => (float) ($complaint->orderItem?->subtotal ?? 0),
+            'order_info'       => 'Refund complaint #'.$complaint->id,
+            'transaction_no'   => $transactionNumber,
+            'transaction_date' => $this->resolveRefundTransactionDate($paymentTransaction),
+            'create_by'        => (string) $actor->id,
+            'ip_address'       => request()->ip(),
+        ]);
+
+        if (! ($refundResponse['success'] ?? false)) {
+            throw new RuntimeException((string) ($refundResponse['message'] ?? 'Refund request was rejected by the payment gateway.'));
+        }
+
+        return $this->resolve(
+            complaint: $complaint,
+            actor: $actor,
+            resolutionNote: $resolutionNote,
+            status: ComplaintStatus::ApprovedRefund,
+            orderStatus: OrderStatus::Refunded,
+            resolvedAt: $resolvedAt,
+            refundData: $refundResponse,
+        );
+    }
+
     public function resolveRelease(Complaint $complaint, User $actor, string $resolutionNote, ?string $resolvedAt = null): Complaint
     {
         return $this->resolve($complaint, $actor, $resolutionNote, ComplaintStatus::RejectedRelease, OrderStatus::Completed, $resolvedAt);
     }
 
-    protected function resolve(Complaint $complaint, User $actor, string $resolutionNote, ComplaintStatus $status, OrderStatus $orderStatus, ?string $resolvedAt = null): Complaint
-    {
-        $complaint->loadMissing(['orderItem.order.buyer', 'orderItem.seller.user', 'orderItem.escrow']);
+    protected function resolve(
+        Complaint $complaint,
+        User $actor,
+        string $resolutionNote,
+        ComplaintStatus $status,
+        OrderStatus $orderStatus,
+        ?string $resolvedAt = null,
+        ?array $refundData = null,
+    ): Complaint {
+        $complaint->loadMissing(['orderItem.order.buyer', 'orderItem.order.paymentTransactions', 'orderItem.seller.user', 'orderItem.escrow']);
+        $resolvedAt = Carbon::parse($resolvedAt ?? now());
 
-        $resolvedComplaint = DB::transaction(function () use ($complaint, $actor, $resolutionNote, $status, $orderStatus, $resolvedAt): Complaint {
+        $resolvedComplaint = DB::transaction(function () use ($complaint, $actor, $resolutionNote, $status, $orderStatus, $resolvedAt, $refundData): Complaint {
+            $complaint = Complaint::query()
+                ->whereKey($complaint->id)
+                ->lockForUpdate()
+                ->with(['orderItem.order.buyer', 'orderItem.order.paymentTransactions', 'orderItem.seller.user', 'orderItem.escrow'])
+                ->firstOrFail();
+
             $complaint->forceFill([
                 'status'          => $status,
                 'resolved_by'     => $actor->id,
                 'resolution_note' => $resolutionNote,
-                'resolved_at'     => Carbon::parse($resolvedAt ?? now()),
+                'resolved_at'     => $resolvedAt,
             ])->save();
 
-            $complaint->orderItem?->forceFill([
+            $orderItem = $complaint->orderItem;
+            $order = $orderItem?->order;
+            $escrow = $orderItem?->escrow;
+            $paymentTransaction = $order?->paymentTransactions?->sortByDesc('id')->first();
+
+            $orderItem?->forceFill([
                 'status' => $orderStatus,
             ])->save();
 
-            $complaint->orderItem?->escrow?->forceFill([
+            if ($status === ComplaintStatus::ApprovedRefund && $paymentTransaction !== null && $refundData !== null) {
+                $paymentTransaction->forceFill([
+                    'response_payload' => array_merge($paymentTransaction->response_payload ?? [], [
+                        'refund' => $refundData,
+                    ]),
+                ])->save();
+            }
+
+            $escrow?->forceFill([
                 'status' => $status === ComplaintStatus::ApprovedRefund ? EscrowStatus::Refunded : EscrowStatus::Released,
             ])->save();
 
-            if ($complaint->orderItem?->seller_id !== null && $complaint->orderItem?->escrow !== null) {
+            if ($orderItem?->seller_id !== null && $escrow !== null) {
                 $wallet = Wallet::firstOrCreate(
-                    ['seller_id' => $complaint->orderItem->seller_id],
+                    ['seller_id' => $orderItem->seller_id],
                     ['type' => WalletType::Seller, 'code' => Str::upper(Str::random(12)), 'balance' => 0, 'holding' => 0]
                 );
 
                 $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
 
-                $amount = (float) $complaint->orderItem->escrow->amount;
+                $amount = (float) $escrow->amount;
 
                 if ($status === ComplaintStatus::ApprovedRefund) {
                     $wallet->forceFill([
@@ -140,22 +229,25 @@ class ComplaintService
                     ])->save();
 
                     $wallet->transactions()->create([
-                        'order_id'     => $complaint->orderItem->order_id,
+                        'order_id'     => $orderItem->order_id,
                         'source_type'  => Escrow::class,
-                        'source_id'    => $complaint->orderItem->escrow->id,
+                        'source_id'    => $escrow->id,
                         'type'         => TransactionType::Refund,
                         'balance_type' => TransactionBalanceType::Holding,
                         'payment_info' => [
                             'complaint_code' => $complaint->complaint_code,
                             'resolution'     => 'refund',
+                            'gateway_refund' => $refundData,
                         ],
                         'amount'   => -$amount,
                         'status'   => TransactionStatus::Completed,
                         'metadata' => [
                             'complaint_id'  => $complaint->id,
-                            'order_item_id' => $complaint->orderItem->id,
+                            'order_item_id' => $orderItem->id,
                         ],
                     ]);
+
+                    $this->internalWalletService->refundPaid($complaint, $complaint->resolved_at ?? now());
                 } else {
                     $wallet->forceFill([
                         'holding' => round((float) $wallet->holding - $amount, 2),
@@ -163,9 +255,9 @@ class ComplaintService
                     ])->save();
 
                     $wallet->transactions()->create([
-                        'order_id'     => $complaint->orderItem->order_id,
+                        'order_id'     => $orderItem->order_id,
                         'source_type'  => Escrow::class,
-                        'source_id'    => $complaint->orderItem->escrow->id,
+                        'source_id'    => $escrow->id,
                         'type'         => TransactionType::EscrowRelease,
                         'balance_type' => TransactionBalanceType::Available,
                         'payment_info' => [
@@ -176,14 +268,52 @@ class ComplaintService
                         'status'   => TransactionStatus::Completed,
                         'metadata' => [
                             'complaint_id'  => $complaint->id,
-                            'order_item_id' => $complaint->orderItem->id,
+                            'order_item_id' => $orderItem->id,
                         ],
                     ]);
+
+                    $this->internalWalletService->escrowReleased($escrow, $complaint->resolved_at ?? now(), [
+                        'complaint_id'  => $complaint->id,
+                        'order_item_id' => $orderItem->id,
+                        'resolution'    => 'release',
+                    ]);
                 }
+            } elseif ($status === ComplaintStatus::ApprovedRefund && $orderItem !== null) {
+                $internalWallet = Wallet::query()
+                    ->whereKey($this->internalWalletService->wallet()->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $amount = (float) $orderItem->subtotal;
+
+                $internalWallet->transactions()->create([
+                    'order_id'     => $orderItem->order_id,
+                    'source_type'  => Complaint::class,
+                    'source_id'    => $complaint->id,
+                    'type'         => TransactionType::Refund,
+                    'balance_type' => TransactionBalanceType::Available,
+                    'payment_info' => [
+                        'complaint_code' => $complaint->complaint_code,
+                        'resolution'     => 'refund',
+                        'gateway_refund' => $refundData,
+                    ],
+                    'amount'   => -$amount,
+                    'status'   => TransactionStatus::Completed,
+                    'metadata' => [
+                        'complaint_id'  => $complaint->id,
+                        'order_item_id' => $orderItem->id,
+                    ],
+                ]);
+
+                $this->internalWalletService->refundPaid($complaint, $complaint->resolved_at ?? now());
+            }
+
+            if ($status === ComplaintStatus::ApprovedRefund && $order instanceof Order) {
+                $this->syncRefundedPaymentStatus($order);
             }
 
             return $complaint;
-        });
+        }, 5);
 
         $this->notifyActivity(
             $resolvedComplaint,
@@ -195,6 +325,49 @@ class ComplaintService
         $this->broadcastThreadUpdate($resolvedComplaint, $actor, $status === ComplaintStatus::ApprovedRefund ? 'refund-approved' : 'release-approved');
 
         return $resolvedComplaint;
+    }
+
+    protected function resolveRefundTransactionNumber(PaymentTransaction $paymentTransaction): ?string
+    {
+        return data_get($paymentTransaction->response_payload, 'vnp_TransactionNo')
+            ?? data_get($paymentTransaction->response_payload, 'transaction_no');
+    }
+
+    protected function resolveRefundTransactionDate(PaymentTransaction $paymentTransaction): string
+    {
+        return data_get($paymentTransaction->response_payload, 'vnp_PayDate')
+            ?? data_get($paymentTransaction->response_payload, 'pay_date')
+            ?? ($paymentTransaction->paid_at?->format('YmdHis') ?? now()->format('YmdHis'));
+    }
+
+    protected function syncRefundedPaymentStatus(Order $order): void
+    {
+        $lockedOrder = Order::query()
+            ->whereKey($order->id)
+            ->lockForUpdate()
+            ->with(['items', 'paymentTransactions'])
+            ->first();
+
+        if (! $lockedOrder instanceof Order) {
+            return;
+        }
+
+        $allItemsRefunded = $lockedOrder->items->isNotEmpty()
+            && $lockedOrder->items->every(fn (OrderItem $item): bool => $item->status === OrderStatus::Refunded);
+
+        if (! $allItemsRefunded) {
+            return;
+        }
+
+        $lockedOrder->forceFill([
+            'payment_status' => PaymentStatus::Refunded,
+        ])->save();
+
+        $lockedOrder->paymentTransactions
+            ->sortByDesc('id')
+            ->first()?->forceFill([
+                'status' => PaymentStatus::Refunded,
+            ])->save();
     }
 
     protected function broadcastThreadUpdate(Complaint $complaint, User $actor, string $action, ?int $messageId = null): void

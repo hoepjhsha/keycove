@@ -58,7 +58,7 @@ class EscrowIndex extends Component
                 'order_code'       => $escrow->orderItem?->order?->order_code ?? '-',
                 'buyer_username'   => $escrow->orderItem?->order?->buyer?->username ?? '-',
                 'buyer_email'      => $escrow->orderItem?->order?->buyer?->email ?? '-',
-                'seller_shop_name' => $escrow->seller?->shop_name ?? 'Shop Admin',
+                'seller_shop_name' => $escrow->seller?->shop_name ?? __('admin.common.shop_admin'),
                 'amount'           => number_format((float) $escrow->amount, 2).' VND',
                 'status_badge'     => $statusBadge,
                 'release_date'     => $escrow->release_date?->format('d/m/Y H:i:s') ?? '-',
@@ -77,7 +77,7 @@ class EscrowIndex extends Component
 
         if ($escrow->status !== EscrowStatus::Holding && $escrow->status !== EscrowStatus::Frozen) {
             $this->dispatch('swal:error', [
-                'message' => 'Only escrows with Holding or Frozen status can be extended.',
+                'message' => __('admin.validation.escrow_invalid_extension_status'),
             ]);
 
             return;
@@ -86,7 +86,7 @@ class EscrowIndex extends Component
         $maxAllowedDate = $escrow->created_at->copy()->addDays(EscrowConstant::MAX_EXTEND_DAYS_FROM_CREATED);
         if ($escrow->release_date->greaterThanOrEqualTo($maxAllowedDate)) {
             $this->dispatch('swal:error', [
-                'message' => 'This escrow has reached the maximum extension limit.',
+                'message' => __('admin.validation.escrow_extension_limit'),
             ]);
 
             return;
@@ -103,7 +103,7 @@ class EscrowIndex extends Component
             $this->extendExtendHoldingForm->submit($this->extendEscrowId);
 
             $this->dispatch('swal:success', [
-                'message' => 'Escrow holding time extended successfully by '.$this->extendExtendHoldingForm->duration.' day(s).',
+                'message' => __('admin.messages.escrow_extended', ['duration' => $this->extendExtendHoldingForm->duration]),
             ]);
 
             $this->showExtendModal = false;
@@ -111,7 +111,7 @@ class EscrowIndex extends Component
             $this->extendExtendHoldingForm->duration = '';
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
-                'message' => 'Failed to extend escrow: '.$e->getMessage(),
+                'message' => __('admin.messages.escrow_extend_failed', ['error' => $e->getMessage()]),
             ]);
         }
     }

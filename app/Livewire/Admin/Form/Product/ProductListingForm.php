@@ -47,7 +47,7 @@ class ProductListingForm extends Form
 
         if ($this->status === ProductListingStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'listingForm.status' => 'Cannot create listing with deleted status.',
+                'listingForm.status' => __('admin.validation.status_deleted_create'),
             ]);
         }
 
@@ -76,7 +76,7 @@ class ProductListingForm extends Form
     {
         if (! in_array($status, array_column(ProductListingStatus::cases(), 'value'))) {
             throw ValidationException::withMessages([
-                'status' => 'Invalid status value.',
+                'status' => __('admin.validation.invalid_status'),
             ]);
         }
 
@@ -88,7 +88,7 @@ class ProductListingForm extends Form
 
         if ($hasSoldKeys && in_array($status, [ProductListingStatus::Closed->value, ProductListingStatus::Deleted->value])) {
             throw ValidationException::withMessages([
-                'status' => 'Cannot close or delete listings with sold keys.',
+                'status' => __('admin.validation.listing_cannot_close_sold_keys'),
             ]);
         }
 
@@ -103,7 +103,7 @@ class ProductListingForm extends Form
 
         if ($hasSoldKeys) {
             throw ValidationException::withMessages([
-                'general' => 'Cannot delete listing with sold keys.',
+                'general' => __('admin.validation.listing_delete_sold_keys'),
             ]);
         }
 

@@ -26,7 +26,7 @@ class ProductBulkChangeStatusForm extends Form
 
         if ($this->status === GeneralStatus::Deleted->value) {
             throw ValidationException::withMessages([
-                'bulkChangeStatusForm.status' => 'Cannot set status to Deleted via bulk action.',
+                'bulkChangeStatusForm.status' => __('admin.validation.status_deleted_bulk_action'),
             ]);
         }
 

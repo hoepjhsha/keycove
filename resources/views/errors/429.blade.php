@@ -9,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-        <title>429 - Too Many Requests</title>
+        <title>429 - Quá nhiều yêu cầu</title>
 
         @vite(['resources/css/app.css'])
         <style>
@@ -40,26 +40,26 @@
                 </div>
 
                 <!-- Title -->
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">Too Many Requests</h1>
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Quá nhiều yêu cầu</h1>
 
                 <!-- Description -->
                 <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg mb-8">
-                    You've made too many requests in a short period. Please slow down and try again in a few moments.
+                    Bạn đã gửi quá nhiều yêu cầu trong thời gian ngắn. Vui lòng chờ một chút rồi thử lại.
                 </p>
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <button onclick="window.history.back()" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 transition-colors duration-200">
-                        Go Back
+                        Quay lại
                     </button>
                     <a href="{{ route('app.shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-                        Go Home
+                        Về trang chủ
                     </a>
                 </div>
 
                 <!-- Footer Message -->
                 <p class="text-sm text-gray-500 dark:text-gray-500 mt-12">
-                    Error Code: 429
+                    Mã lỗi: 429
                 </p>
             </div>
         </div>

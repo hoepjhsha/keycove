@@ -68,10 +68,10 @@ final class SellerListingsTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('listing_name', function (ProductListing $listing): string {
-                return $listing->display_name ?: ($listing->variant?->product?->name ?? 'Untitled listing');
+                return $listing->display_name ?: ($listing->variant?->product?->name ?? 'Listing chưa có tên');
             })
             ->add('product_name', function (ProductListing $listing): string {
-                return $listing->variant?->product?->name ?? 'Unknown product';
+                return $listing->variant?->product?->name ?? 'Sản phẩm chưa xác định';
             })
             ->add('variant_name', function (ProductListing $listing): string {
                 return collect([
@@ -83,8 +83,8 @@ final class SellerListingsTable extends PowerGridComponent
             })
             ->add('source_label', function (ProductListing $listing): string {
                 return $listing->variant?->product?->submitted_by_seller_id === $this->sellerId()
-                    ? 'My Product'
-                    : 'Admin Catalog';
+                    ? 'Sản phẩm của tôi'
+                    : 'Danh mục quản trị';
             })
             ->add('price_formatted', fn (ProductListing $listing): string => number_format((float) $listing->price, 0, ',', '.').' VND')
             ->add('status_label', fn (ProductListing $listing): string => $this->statusLabel($listing->status))
@@ -100,31 +100,31 @@ final class SellerListingsTable extends PowerGridComponent
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Product', 'product_name')
+            Column::make('Sản phẩm', 'product_name')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Variant', 'variant_name')
+            Column::make('Biến thể', 'variant_name')
                 ->searchable(),
 
-            Column::make('Source', 'source_label')
+            Column::make('Nguồn', 'source_label')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Price', 'price_formatted', 'price')
+            Column::make('Giá', 'price_formatted', 'price')
                 ->sortable(),
 
-            Column::make('Status', 'status_label', 'status')
+            Column::make('Trạng thái', 'status_label', 'status')
                 ->sortable()
                 ->searchable(),
 
-            Column::make('Available Keys', 'available_keys_count')
+            Column::make('Key khả dụng', 'available_keys_count')
                 ->sortable(),
 
-            Column::make('Updated', 'updated_at_formatted', 'updated_at')
+            Column::make('Cập nhật', 'updated_at_formatted', 'updated_at')
                 ->sortable(),
 
-            Column::action('Action'),
+            Column::action('Thao tác'),
         ];
     }
 
@@ -147,7 +147,7 @@ final class SellerListingsTable extends PowerGridComponent
     {
         return [
             Button::add('create')
-                ->slot('Create Listing')
+                ->slot('Tạo listing')
                 ->class('inline-flex items-center rounded-2xl bg-black px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white')
                 ->dispatch('openCreateListingModal', []),
         ];
@@ -163,7 +163,7 @@ final class SellerListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 text-indigo-600 transition-all hover:scale-110 hover:text-indigo-900')
                 ->attributes([
-                    'x-tooltip' => 'Manage Keys',
+                    'x-tooltip' => 'Quản lý key',
                 ])
                 ->dispatch('openKeysModal', ['listingId' => $row->id]),
 
@@ -174,7 +174,7 @@ final class SellerListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 text-lg transition-all hover:scale-110 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => $row->status === ProductListingStatus::Active ? 'Deactivate' : 'Activate',
+                    'x-tooltip' => $row->status === ProductListingStatus::Active ? 'Tắt bán' : 'Kích hoạt',
                 ])
                 ->dispatch('toggleListingStatus', ['rowId' => $row->id]),
 
@@ -183,7 +183,7 @@ final class SellerListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 text-blue-600 transition-all hover:scale-110 hover:text-blue-800 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Edit Listing',
+                    'x-tooltip' => 'Sửa listing',
                 ])
                 ->dispatch('editListing', ['listingId' => $row->id]),
 
@@ -192,7 +192,7 @@ final class SellerListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 text-red-500 transition-all hover:scale-110 hover:text-red-700 '.$deleteClass)
                 ->attributes([
-                    'x-tooltip' => 'Delete',
+                    'x-tooltip' => 'Xóa',
                 ])
                 ->dispatch('deleteListing', ['rowId' => $row->id]),
 
@@ -201,7 +201,7 @@ final class SellerListingsTable extends PowerGridComponent
                 ->id()
                 ->class('px-1 py-1 text-yellow-500 transition-all hover:scale-110 hover:text-yellow-700 '.($row->status === ProductListingStatus::Deleted ? '' : 'hidden'))
                 ->attributes([
-                    'x-tooltip' => 'Restore',
+                    'x-tooltip' => 'Khôi phục',
                 ])
                 ->dispatch('restoreListing', ['rowId' => $row->id]),
         ];
@@ -211,8 +211,8 @@ final class SellerListingsTable extends PowerGridComponent
     public function toggleListingStatus(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Change Status?',
-            'text'   => 'Are you sure you want to change this listing status?',
+            'title'  => 'Đổi trạng thái?',
+            'text'   => 'Bạn có chắc muốn đổi trạng thái listing này?',
             'method' => 'performToggleListingStatus',
             'id'     => $rowId,
         ]);
@@ -233,15 +233,15 @@ final class SellerListingsTable extends PowerGridComponent
 
         $listing->save();
 
-        $this->dispatch('swal:success', ['message' => 'Listing status updated.']);
+        $this->dispatch('swal:success', ['message' => 'Trạng thái listing đã được cập nhật.']);
     }
 
     #[On('deleteListing')]
     public function deleteListing(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Delete Listing?',
-            'text'   => 'Are you sure you want to delete this listing?',
+            'title'  => 'Xóa listing?',
+            'text'   => 'Bạn có chắc muốn xóa listing này?',
             'method' => 'performDeleteListing',
             'id'     => $rowId,
         ]);
@@ -254,14 +254,14 @@ final class SellerListingsTable extends PowerGridComponent
             $listing = $this->resolveOwnedListing($id);
 
             if ($listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists()) {
-                throw new \RuntimeException('Cannot delete listing with sold keys.');
+                throw new \RuntimeException('Không thể xóa listing có key đã bán.');
             }
 
             $listing->status = ProductListingStatus::Deleted;
             $listing->save();
             $listing->delete();
 
-            $this->dispatch('swal:success', ['message' => 'Listing deleted successfully.']);
+            $this->dispatch('swal:success', ['message' => 'Listing đã được xóa thành công.']);
         } catch (\Throwable $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -271,8 +271,8 @@ final class SellerListingsTable extends PowerGridComponent
     public function restoreListing(int $rowId): void
     {
         $this->dispatch('swal:confirm', [
-            'title'  => 'Restore Listing?',
-            'text'   => 'Are you sure you want to restore this listing?',
+            'title'  => 'Khôi phục listing?',
+            'text'   => 'Bạn có chắc muốn khôi phục listing này?',
             'method' => 'performRestoreListing',
             'id'     => $rowId,
         ]);
@@ -286,7 +286,7 @@ final class SellerListingsTable extends PowerGridComponent
         $listing->status = ProductListingStatus::Draft;
         $listing->save();
 
-        $this->dispatch('swal:success', ['message' => 'Listing restored successfully.']);
+        $this->dispatch('swal:success', ['message' => 'Listing đã được khôi phục thành công.']);
     }
 
     protected function statusLabel(ProductListingStatus $status): string

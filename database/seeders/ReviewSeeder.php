@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Enums\OrderStatus;
 use App\Models\OrderItem;
 use App\Models\Review;
 use App\Models\ReviewResponse;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class ReviewSeeder extends Seeder
 {
@@ -16,113 +19,92 @@ class ReviewSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->seedReviews();
-    }
-
-    protected function seedReviews(): void
-    {
-        $completedOrderItems = OrderItem::with(['order', 'seller.user'])
-            ->where('status', OrderStatus::Completed)
-            ->whereHas('order')
+        $reviewableItems = OrderItem::query()
+            ->with(['order.buyer', 'seller.user'])
+            ->whereIn('status', [OrderStatus::Delivered, OrderStatus::Completed])
+            ->doesntHave('review')
             ->get()
-            ->shuffle();
+            ->shuffle()
+            ->take((int) floor(OrderItem::query()->whereIn('status', [OrderStatus::Delivered, OrderStatus::Completed])->count() * 0.32));
 
-        if ($completedOrderItems->isEmpty()) {
-            return;
-        }
+        foreach ($reviewableItems as $orderItem) {
+            $rating = fake()->randomElement([5, 5, 5, 4, 4, 4, 4, 3, 2, 1]);
+            $createdAt = Carbon::parse($orderItem->updated_at)->copy()->addDays(random_int(1, 14))->addHours(random_int(1, 12));
 
-        $ratingDistribution = [
-            5 => 8,
-            4 => 5,
-            3 => 3,
-            2 => 2,
-            1 => 1,
-        ];
+            $review = Review::create([
+                'user_id'       => $orderItem->order->buyer_id,
+                'order_item_id' => $orderItem->id,
+                'rating'        => $rating,
+                'comment'       => $this->commentForRating($rating, $orderItem->product_name_snapshot),
+                'media'         => fake()->boolean(12)
+                    ? ['https://placehold.co/1280x720/png?text='.urlencode(Str::limit($orderItem->product_name_snapshot, 36, ''))]
+                    : null,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
 
-        $comments = [
-            1 => [
-                'Key không hoạt động và shop phản hồi khá chậm.',
-                'Mã đã bị dùng trước đó, phải mở tranh chấp.',
-                'Trải nghiệm tệ, sản phẩm không đúng mô tả.',
-            ],
-            2 => [
-                'Key dùng được nhưng giao hơi chậm.',
-                'Bán đúng hàng nhưng support chưa tốt.',
-                'Ổn nhưng không đúng kỳ vọng ban đầu.',
-            ],
-            3 => [
-                'Giao dịch ở mức ổn, key kích hoạt được.',
-                'Sản phẩm đúng mô tả, cần cải thiện tốc độ giao.',
-                'Mua xong dùng bình thường, không có gì nổi bật.',
-            ],
-            4 => [
-                'Key hoạt động tốt, giao hàng khá nhanh.',
-                'Mọi thứ ổn, shop phản hồi rõ ràng.',
-                'Đúng mô tả, đáng tiền.',
-            ],
-            5 => [
-                'Key giao rất nhanh, kích hoạt ngay.',
-                'Shop uy tín, hàng chuẩn, sẽ mua lại.',
-                'Trải nghiệm tốt, giao dịch rất mượt.',
-                'Đúng key cần mua, support nhanh.',
-            ],
-        ];
+            if ($orderItem->seller?->user_id === null) {
+                continue;
+            }
 
-        foreach ($ratingDistribution as $rating => $count) {
-            for ($i = 0; $i < $count; $i++) {
-                $orderItem = $completedOrderItems->shift();
+            if ($rating <= 3 || fake()->boolean(35)) {
+                $responseCreatedAt = $createdAt->copy()->addHours(random_int(4, 72));
 
-                if (! $orderItem) {
-                    return;
-                }
-
-                if (Review::where('order_item_id', $orderItem->id)->exists()) {
-                    continue;
-                }
-
-                $order = $orderItem->order;
-                if (! $order) {
-                    continue;
-                }
-
-                $reviewDate = Carbon::parse($order->created_at)->addDays(random_int(1, 10));
-
-                $review = Review::create([
-                    'user_id'       => $order->buyer_id,
-                    'order_item_id' => $orderItem->id,
-                    'rating'        => $rating,
-                    'comment'       => fake()->randomElement($comments[$rating]),
-                    'media'         => fake()->optional(0.2)->passthrough([
-                        fake()->imageUrl(1200, 900, 'screenshot'),
-                    ]),
+                ReviewResponse::create([
+                    'review_id'  => $review->id,
+                    'replier_id' => $orderItem->seller->user_id,
+                    'content'    => $this->responseForRating($rating),
+                    'created_at' => $responseCreatedAt,
                 ]);
-
-                $review->forceFill([
-                    'created_at' => $reviewDate,
-                    'updated_at' => $reviewDate,
-                ])->saveQuietly();
-
-                $sellerUser = $orderItem->seller?->user;
-
-                if ($sellerUser && fake()->boolean(35)) {
-                    $responseDate = $reviewDate->copy()->addHours(random_int(2, 48));
-
-                    $response = ReviewResponse::create([
-                        'review_id'  => $review->id,
-                        'replier_id' => $sellerUser->id,
-                        'content'    => fake()->randomElement([
-                            'Cảm ơn bạn đã đánh giá, shop sẽ tiếp tục cải thiện chất lượng phục vụ.',
-                            'Rất vui vì bạn hài lòng, cảm ơn bạn đã ủng hộ shop.',
-                            'Cảm ơn phản hồi của bạn, nếu cần hỗ trợ thêm hãy nhắn shop nhé.',
-                            'Chúng tôi ghi nhận góp ý và sẽ xử lý tốt hơn ở các đơn sau.',
-                        ]),
-                    ]);
-
-                    $response->forceFill([
-                        'created_at' => $responseDate,
-                    ])->saveQuietly();
-                }
             }
         }
+    }
+
+    protected function commentForRating(int $rating, string $productName): string
+    {
+        $comments = match ($rating) {
+            5 => [
+                'Key giao nhanh, kich hoat '.$productName.' on ngay, se quay lai mua tiep.',
+                'Gia hop ly, seller tra loi nhanh, don '.$productName.' rat muot.',
+                'San pham dung mo ta, nhan key gan nhu ngay lap tuc.',
+            ],
+            4 => [
+                'Don '.$productName.' on, kich hoat duoc, chi hoi cham mot chut.',
+                'Mua lan dau thay kha hai long, key dung va ho tro on.',
+                'Gia tot, giao key nhanh, mo ta san pham kha chuan.',
+            ],
+            3 => [
+                'Key van dung nhung thoi gian cho hoi lau hon du kien.',
+                'San pham '.$productName.' dung duoc, nhung can mo ta ro hon ve region.',
+                'Tam on, khong co van de lon nhung trai nghiem chua that su mem.',
+            ],
+            2 => [
+                'Nhan key hoi cham va phai nhan ho tro moi kich hoat duoc.',
+                'Seller co phan cham phan hoi, trai nghiem voi '.$productName.' chua tot.',
+                'Key dung nhung xu ly phat sinh kha met.',
+            ],
+            default => [
+                'Gap loi kich hoat, phai lien he nhieu lan moi xu ly duoc.',
+                'Trai nghiem khong tot, key/phien ban nhan duoc khong nhu ky vong.',
+                'Ho tro cham, phat sinh nhieu van de voi don nay.',
+            ],
+        };
+
+        return fake()->randomElement($comments);
+    }
+
+    protected function responseForRating(int $rating): string
+    {
+        if ($rating >= 4) {
+            return fake()->randomElement([
+                'Cam on ban da ung ho shop. Neu can them key hoac gia han, ben minh ho tro nhanh.',
+                'Cam on phan hoi tich cuc cua ban. Shop se co gang giu toc do giao key on dinh hon nua.',
+            ]);
+        }
+
+        return fake()->randomElement([
+            'Shop xin loi ve trai nghiem chua tot. Neu ban can doi key hoac ho tro them, shop se xu ly tiep.',
+            'Cam on ban da de lai phan hoi. Ben minh da ghi nhan van de va se uu tien ho tro nhanh hon.',
+        ]);
     }
 }
