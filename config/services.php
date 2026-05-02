@@ -23,7 +23,7 @@ return [
     ],
 
     'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
+        'key'    => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
@@ -31,7 +31,22 @@ return [
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+            'channel'              => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+        ],
+    ],
+
+    'payment' => [
+        'default' => 'vnpay',
+
+        'vnpay' => [
+            'tmn_code'      => env('VNPAY_TMN_CODE', 'YOUR_TMN_CODE'),
+            'hash_secret'   => env('VNPAY_HASH_SECRET', 'YOUR_HASH_SECRET'),
+            'url'           => env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+            'api_url'       => env('VNPAY_API_URL', 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'),
+            'return_url'    => env('VNPAY_RETURN_URL', 'http://localhost/payment/vnpay/return'),
+            'refund_mock'   => env('VNPAY_REFUND_MOCK', false),
+            'withdraw_mock' => env('VNPAY_WITHDRAW_MOCK', false),
+            'version'       => env('VNPAY_API_VERSION', ''),
         ],
     ],
 

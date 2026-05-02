@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('order_items', function (Blueprint $table) {
+            $table->id();
+            $table->string('order_item_code', 255)->nullable()->unique();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('listing_id')->constrained('product_listings')->restrictOnDelete();
+            $table->foreignId('seller_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('product_name_snapshot', 255);
+            $table->json('variant_snapshot')->nullable();
+            $table->unsignedInteger('quantity');
+            $table->decimal('unit_price', 15, 2);
+            $table->decimal('subtotal', 15, 2);
+            $table->decimal('platform_fee', 15, 2)->default(0);
+            $table->decimal('seller_amount', 15, 2)->default(0);
+            $table->tinyInteger('status')->default(0);
+            $table->timestamp('buyer_key_viewed_at')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('order_items');
+    }
+};

@@ -1,0 +1,248 @@
+<?php
+
+use App\Enums\GeneralStatus;
+use App\Enums\ProductKeyStatus;
+use App\Enums\ProductListingStatus;
+use App\Enums\ProductVariantStatus;
+use App\Enums\UserRole;
+use App\Livewire\Admin\Action\Product\ProductDetail;
+use App\Models\Category;
+use App\Models\OperatingSystem;
+use App\Models\Platform;
+use App\Models\Product;
+use App\Models\ProductKey;
+use App\Models\ProductListing;
+use App\Models\ProductVariant;
+use App\Models\Region;
+use App\Models\Seller;
+use App\Models\User;
+use Livewire\Livewire;
+
+beforeEach(function () {
+    $this->admin = User::factory()->create(['role' => UserRole::Admin]);
+    $this->product = Product::factory()->create(['status' => GeneralStatus::Active]);
+    $this->region = Region::factory()->create(['status' => GeneralStatus::Active]);
+    $this->platform = Platform::factory()->create(['status' => GeneralStatus::Active]);
+    $this->operatingSystem = OperatingSystem::factory()->create(['status' => GeneralStatus::Active]);
+    $this->seller = Seller::factory()->create(['status' => GeneralStatus::Active]);
+});
+
+describe('ProductDetail Route Tests', function () {
+    test('admin can access product detail page with valid product id', function () {
+        $response = $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.products.detail', $this->product));
+
+        $response->assertOk();
+        $response->assertSeeLivewire(ProductDetail::class);
+    });
+
+    test('product detail page returns 404 for invalid product id', function () {
+        $response = $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.products.detail', 99999));
+
+        $response->assertNotFound();
+    });
+
+    test('product detail page returns 404 for soft deleted product', function () {
+        $product = Product::factory()->create();
+        $product->delete();
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.products.detail', $product->id));
+
+        $response->assertNotFound();
+    });
+
+    test('guest cannot access product detail page', function () {
+        $response = $this->get(route('admin.products.detail', $this->product));
+
+        $response->assertRedirect(route('admin.auth.login'));
+    });
+});
+
+describe('ProductDetail Component Tests', function () {
+    test('component renders product information', function () {
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->assertSee($this->product->name)
+            ->assertSee($this->product->slug);
+    });
+
+    test('component displays product categories', function () {
+        $category = Category::factory()->create();
+        $this->product->categories()->attach($category);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->assertSee($category->name);
+    });
+
+    test('component shows variants section', function () {
+        ProductVariant::factory()->count(2)->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->assertSee('Product Variants');
+    });
+
+    test('component can open variant create modal', function () {
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openVariantModal')
+            ->assertSet('showVariantModal', true)
+            ->assertSet('editingVariantId', null);
+    });
+
+    test('component can open variant edit modal', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'edition' => 'Standard Edition',
+            'status' => ProductVariantStatus::Draft,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openVariantModal', $variant->id)
+            ->assertSet('showVariantModal', true)
+            ->assertSet('editingVariantId', $variant->id);
+    });
+
+    test('component can create a new variant', function () {
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openVariantModal')
+            ->set('variantForm.region_id', $this->region->id)
+            ->set('variantForm.platform_id', $this->platform->id)
+            ->set('variantForm.os_id', $this->operatingSystem->id)
+            ->set('variantForm.edition', 'Deluxe Edition')
+            ->set('variantForm.status', ProductVariantStatus::Draft->value)
+            ->call('saveVariant')
+            ->assertSet('showVariantModal', false);
+
+        expect(ProductVariant::where('product_id', $this->product->id)->count())->toBe(1);
+    });
+
+    test('component can open listing modal for variant', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openListingModal', $variant->id)
+            ->assertSet('showListingModal', true)
+            ->assertSet('selectedVariantIdForListing', $variant->id);
+    });
+
+    test('component can create a new listing', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openListingModal', $variant->id)
+            ->set('listingForm.seller_id', $this->seller->id)
+            ->set('listingForm.price', 29.99)
+            ->set('listingForm.status', ProductListingStatus::Draft->value)
+            ->call('saveListing')
+            ->assertSet('showListingModal', false);
+
+        expect(ProductListing::where('variant_id', $variant->id)->count())->toBe(1);
+    });
+
+    test('component can open keys modal for listing', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        $listing = ProductListing::factory()->create([
+            'variant_id' => $variant->id,
+            'seller_id' => $this->seller->id,
+            'price' => 29.99,
+            'status' => ProductListingStatus::Active,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openKeysModal', $listing->id)
+            ->assertSet('showKeysModal', true)
+            ->assertSet('viewingKeysListingId', $listing->id);
+    });
+
+    test('component can create a new key', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        $listing = ProductListing::factory()->create([
+            'variant_id' => $variant->id,
+            'seller_id' => $this->seller->id,
+            'price' => 29.99,
+            'status' => ProductListingStatus::Active,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openKeysModal', $listing->id)
+            ->set('keyForm.key_code', 'TEST1-TEST2-TEST3-TEST4-TEST5')
+            ->call('saveKey')
+            ->assertSet('keyForm.key_code', '');
+
+        expect(ProductKey::where('listing_id', $listing->id)->count())->toBe(1);
+    });
+
+    test('keys modal displays existing keys', function () {
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $this->product->id,
+            'region_id' => $this->region->id,
+            'platform_id' => $this->platform->id,
+            'os_id' => $this->operatingSystem->id,
+            'status' => ProductVariantStatus::Active,
+        ]);
+
+        $listing = ProductListing::factory()->create([
+            'variant_id' => $variant->id,
+            'seller_id' => $this->seller->id,
+            'price' => 29.99,
+            'status' => ProductListingStatus::Active,
+        ]);
+
+        ProductKey::factory()->count(3)->create([
+            'listing_id' => $listing->id,
+            'status' => ProductKeyStatus::Available,
+        ]);
+
+        Livewire::actingAs($this->admin, 'admin')
+            ->test(ProductDetail::class, ['product' => $this->product])
+            ->call('openKeysModal', $listing->id)
+            ->assertViewHas('viewingListingKeys', function ($keys) {
+                return $keys->count() === 3;
+            });
+    });
+});

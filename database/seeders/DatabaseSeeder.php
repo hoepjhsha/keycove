@@ -2,9 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +19,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create SuperAdmin
+        User::firstOrCreate(
+            ['email' => 'hoep@hoep'],
+            [
+                'username' => 'hoepjhsha',
+                'password' => Hash::make('hoep'),
+                'role'     => UserRole::SuperAdmin,
+                'status'   => UserStatus::Active,
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Seed game genres first
+        Category::factory()->seedGameGenres();
+
+        // Seed in order of dependencies
+        $this->call([
+            UserSeeder::class,
+            AttributeSeeder::class,
+            SystemConfigSeeder::class,
+            ProductSeeder::class,
+            OrderSeeder::class,
+            ReviewSeeder::class,
+            DisputeSeeder::class,
         ]);
     }
 }
