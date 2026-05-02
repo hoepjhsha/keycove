@@ -349,10 +349,12 @@ it('refunds seller-owned complaints through vnpay before recording refund transa
         ->first();
 
     expect($complaint->fresh()?->status)->toBe(ComplaintStatus::ApprovedRefund)
+        ->and($order->fresh()?->payment_status)->toBe(PaymentStatus::Refunded)
         ->and($escrow->fresh()?->status)->toBe(EscrowStatus::Refunded)
         ->and($sellerWallet?->holding)->toBe('0.00')
         ->and($refundTransaction)->not->toBeNull()
         ->and(data_get($refundTransaction?->payment_info, 'gateway_refund.success'))->toBeTrue()
+        ->and($order->paymentTransactions()->latest('id')->first()?->status)->toBe(PaymentStatus::Refunded)
         ->and(data_get($order->paymentTransactions()->latest('id')->first()?->response_payload, 'refund.success'))->toBeTrue();
 });
 
@@ -426,9 +428,11 @@ it('refunds platform-owned complaints through vnpay and records an internal refu
         ->first();
 
     expect($complaint->fresh()?->status)->toBe(ComplaintStatus::ApprovedRefund)
+        ->and($order->fresh()?->payment_status)->toBe(PaymentStatus::Refunded)
         ->and($internalWallet->fresh()?->balance)->toBe('0.00')
         ->and($refundTransaction)->not->toBeNull()
         ->and($refundTransaction?->amount)->toBe('-199000.00')
+        ->and($order->paymentTransactions()->latest('id')->first()?->status)->toBe(PaymentStatus::Refunded)
         ->and(data_get($refundTransaction?->payment_info, 'gateway_refund.success'))->toBeTrue();
 });
 

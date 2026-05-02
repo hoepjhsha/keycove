@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\Logout;
 use App\Http\Controllers\Admin\SellerKycImageController;
 use App\Livewire\Admin\Action\Category\CategoryIndex;
 use App\Livewire\Admin\Action\Complaint\ComplaintIndex;
+use App\Livewire\Admin\Action\Dashboard\DashboardIndex;
 use App\Livewire\Admin\Action\Escrow\EscrowIndex;
 use App\Livewire\Admin\Action\InternalWallet\InternalWalletIndex;
 use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
@@ -41,9 +42,7 @@ Route::middleware('auth:admin')
     ->prefix('/admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('pages.landing.admin-dashboard');
-        })->name('dashboard.index');
+        Route::livewire('/dashboard', DashboardIndex::class)->name('dashboard.index');
 
         Route::prefix('/system-settings')
             ->name('system_settings.')

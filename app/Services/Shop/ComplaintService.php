@@ -19,6 +19,7 @@ use App\Managers\PaymentManager;
 use App\Models\Complaint;
 use App\Models\ComplaintMessage;
 use App\Models\Escrow;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\User;
@@ -192,8 +193,9 @@ class ComplaintService
             ])->save();
 
             $orderItem = $complaint->orderItem;
+            $order = $orderItem?->order;
             $escrow = $orderItem?->escrow;
-            $paymentTransaction = $orderItem?->order?->paymentTransactions?->sortByDesc('id')->first();
+            $paymentTransaction = $order?->paymentTransactions?->sortByDesc('id')->first();
 
             $orderItem?->forceFill([
                 'status' => $orderStatus,
@@ -306,6 +308,10 @@ class ComplaintService
                 $this->internalWalletService->refundPaid($complaint, $complaint->resolved_at ?? now());
             }
 
+            if ($status === ComplaintStatus::ApprovedRefund && $order instanceof Order) {
+                $this->syncRefundedPaymentStatus($order);
+            }
+
             return $complaint;
         }, 5);
 
@@ -332,6 +338,36 @@ class ComplaintService
         return data_get($paymentTransaction->response_payload, 'vnp_PayDate')
             ?? data_get($paymentTransaction->response_payload, 'pay_date')
             ?? ($paymentTransaction->paid_at?->format('YmdHis') ?? now()->format('YmdHis'));
+    }
+
+    protected function syncRefundedPaymentStatus(Order $order): void
+    {
+        $lockedOrder = Order::query()
+            ->whereKey($order->id)
+            ->lockForUpdate()
+            ->with(['items', 'paymentTransactions'])
+            ->first();
+
+        if (! $lockedOrder instanceof Order) {
+            return;
+        }
+
+        $allItemsRefunded = $lockedOrder->items->isNotEmpty()
+            && $lockedOrder->items->every(fn (OrderItem $item): bool => $item->status === OrderStatus::Refunded);
+
+        if (! $allItemsRefunded) {
+            return;
+        }
+
+        $lockedOrder->forceFill([
+            'payment_status' => PaymentStatus::Refunded,
+        ])->save();
+
+        $lockedOrder->paymentTransactions
+            ->sortByDesc('id')
+            ->first()?->forceFill([
+                'status' => PaymentStatus::Refunded,
+            ])->save();
     }
 
     protected function broadcastThreadUpdate(Complaint $complaint, User $actor, string $action, ?int $messageId = null): void
