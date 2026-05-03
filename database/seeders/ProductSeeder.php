@@ -212,21 +212,12 @@ class ProductSeeder extends Seeder
 
     protected function createListings(ProductVariant $variant, array $priceRange, ?int $submittedBySellerId): void
     {
-        $numListings = $submittedBySellerId === null ? random_int(1, 3) : 1;
-        $sellerIds = $this->resolveSellerIds($submittedBySellerId, $numListings);
+        $listingSellerIds = $this->resolveListingSellerIds($submittedBySellerId);
 
-        for ($i = 0; $i < $numListings; $i++) {
+        foreach ($listingSellerIds as $sellerId) {
             $price = $this->randomVndPrice($priceRange);
-            $status = fake()->randomElement([
-                ProductListingStatus::Active, ProductListingStatus::Active, ProductListingStatus::Active,
-                ProductListingStatus::Pending, ProductListingStatus::Hidden,
-            ]);
+            $status = $this->listingStatusForOwner($sellerId);
             $displayName = $this->makeListingDisplayName($variant);
-            $sellerId = $sellerIds[$i] ?? $sellerIds[0] ?? null;
-
-            if ($sellerId === null) {
-                continue;
-            }
 
             $listing = ProductListing::firstOrNew([
                 'variant_id' => $variant->id,
@@ -262,25 +253,41 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * @return list<int>
+     * @return list<int|null>
      */
-    protected function resolveSellerIds(?int $submittedBySellerId, int $numListings): array
+    protected function resolveListingSellerIds(?int $submittedBySellerId): array
     {
         if ($submittedBySellerId !== null) {
             return [$submittedBySellerId];
         }
 
-        if ($this->activeSellerIds === []) {
-            return [];
-        }
+        $sellerListingCount = fake()->randomElement([0, 1, 1, 2]);
+        $sellerIds = $this->activeSellerIds === []
+            ? []
+            : collect($this->activeSellerIds)
+                ->shuffle()
+                ->take($sellerListingCount)
+                ->values()
+                ->all();
 
-        $sellerIds = collect($this->activeSellerIds)
-            ->shuffle()
-            ->take($numListings)
-            ->values()
-            ->all();
+        array_unshift($sellerIds, null);
 
         return $sellerIds;
+    }
+
+    protected function listingStatusForOwner(?int $sellerId): ProductListingStatus
+    {
+        if ($sellerId === null) {
+            return ProductListingStatus::Active;
+        }
+
+        return fake()->randomElement([
+            ProductListingStatus::Active,
+            ProductListingStatus::Active,
+            ProductListingStatus::Active,
+            ProductListingStatus::Pending,
+            ProductListingStatus::Hidden,
+        ]);
     }
 
     protected function makeListingDisplayName(ProductVariant $variant): ?string
@@ -297,7 +304,11 @@ class ProductSeeder extends Seeder
 
     protected function createKeys(ProductListing $listing, ProductListingStatus $status, DateTimeInterface $createdAt): void
     {
-        $numKeys = $status === ProductListingStatus::Active ? random_int(10, 50) : random_int(2, 10);
+        $numKeys = match (true) {
+            $listing->seller_id === null && $status === ProductListingStatus::Active => random_int(35, 90),
+            $status === ProductListingStatus::Active                                 => random_int(10, 50),
+            default                                                                  => random_int(2, 10),
+        };
 
         for ($i = 0; $i < $numKeys; $i++) {
             $keyCode = $this->generateKeyCode();

@@ -84,9 +84,8 @@ class OrderSeeder extends Seeder
             ->get();
 
         $this->listings = ProductListing::query()
-            ->with(['variant.product', 'variant.region', 'variant.platform', 'variant.operatingSystem', 'seller.user'])
+            ->with(['variant.product', 'variant.region', 'variant.platform', 'variant.operatingSystem', 'seller.user', 'seller.wallet'])
             ->where('status', ProductListingStatus::Active)
-            ->whereNotNull('seller_id')
             ->where('stock_count', '>', 0)
             ->get();
 
@@ -211,7 +210,7 @@ class OrderSeeder extends Seeder
         $quantity = $this->resolveQuantity($listing);
         $unitPrice = (float) $listing->price;
         $subtotal = $unitPrice * $quantity;
-        $platformFee = round($subtotal * self::PLATFORM_FEE_RATE, 2);
+        $platformFee = $listing->seller_id === null ? 0.0 : round($subtotal * self::PLATFORM_FEE_RATE, 2);
         $sellerAmount = round($subtotal - $platformFee, 2);
 
         $orderItem = OrderItem::create([
@@ -269,6 +268,12 @@ class OrderSeeder extends Seeder
 
     protected function createEscrowAndWalletFlows(Order $order, OrderItem $orderItem, ProductListing $listing, OrderStatus $status, Carbon $createdAt): void
     {
+        if ($listing->seller_id === null) {
+            $this->createPlatformOwnedWalletFlows($order, $orderItem, $status, $createdAt);
+
+            return;
+        }
+
         if ($listing->seller === null || $listing->seller->wallet === null) {
             return;
         }
@@ -389,6 +394,70 @@ class OrderSeeder extends Seeder
             'occurred_at'     => $this->resolveOrderUpdatedAt($createdAt, $status),
             'created_at'      => $this->resolveOrderUpdatedAt($createdAt, $status),
             'updated_at'      => $this->resolveOrderUpdatedAt($createdAt, $status),
+        ]);
+
+        $this->internalWalletBalance -= (float) $orderItem->subtotal;
+    }
+
+    protected function createPlatformOwnedWalletFlows(Order $order, OrderItem $orderItem, OrderStatus $status, Carbon $createdAt): void
+    {
+        if (! in_array($status, [OrderStatus::Processing, OrderStatus::Delivered, OrderStatus::Completed, OrderStatus::Disputing, OrderStatus::Refunded], true)) {
+            return;
+        }
+
+        $occurredAt = $this->resolveOrderUpdatedAt($createdAt, $status);
+
+        Transaction::create([
+            'wallet_id'       => $this->internalWallet->id,
+            'order_id'        => $order->id,
+            'source_type'     => OrderItem::class,
+            'source_id'       => $orderItem->id,
+            'type'            => TransactionType::PaymentReceived,
+            'balance_type'    => TransactionBalanceType::Available,
+            'payment_info'    => ['gateway' => 'vnpay', 'owner' => 'platform'],
+            'amount'          => $orderItem->seller_amount,
+            'status'          => TransactionStatus::Completed,
+            'idempotency_key' => 'internal-shop-sale-'.$orderItem->id,
+            'metadata'        => ['order_item_id' => $orderItem->id],
+            'created_at'      => $occurredAt,
+            'updated_at'      => $occurredAt,
+        ]);
+
+        if ($status !== OrderStatus::Refunded) {
+            return;
+        }
+
+        Transaction::create([
+            'wallet_id'       => $this->internalWallet->id,
+            'order_id'        => $order->id,
+            'source_type'     => OrderItem::class,
+            'source_id'       => $orderItem->id,
+            'type'            => TransactionType::Refund,
+            'balance_type'    => TransactionBalanceType::Available,
+            'payment_info'    => ['gateway' => 'vnpay', 'owner' => 'platform'],
+            'amount'          => -((float) $orderItem->subtotal),
+            'status'          => TransactionStatus::Completed,
+            'idempotency_key' => 'internal-shop-refund-'.$orderItem->id,
+            'metadata'        => ['order_item_id' => $orderItem->id],
+            'created_at'      => $occurredAt,
+            'updated_at'      => $occurredAt,
+        ]);
+
+        InternalWalletEntry::create([
+            'wallet_id'       => $this->internalWallet->id,
+            'order_id'        => $order->id,
+            'source_type'     => OrderItem::class,
+            'source_id'       => $orderItem->id,
+            'type'            => InternalWalletEntryType::RefundPaid,
+            'direction'       => InternalWalletDirection::Outflow,
+            'amount'          => $orderItem->subtotal,
+            'status'          => TransactionStatus::Completed,
+            'affects_balance' => true,
+            'idempotency_key' => 'internal-shop-refund-entry-'.$orderItem->id,
+            'metadata'        => ['owner' => 'platform'],
+            'occurred_at'     => $occurredAt,
+            'created_at'      => $occurredAt,
+            'updated_at'      => $occurredAt,
         ]);
 
         $this->internalWalletBalance -= (float) $orderItem->subtotal;

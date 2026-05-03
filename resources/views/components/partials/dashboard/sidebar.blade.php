@@ -131,7 +131,7 @@
                         <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
                             <li><a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.users_list') }}</a></li>
                             <li><a href="{{ route('admin.seller_verifications.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.seller_verifications.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.seller_approvals') }}</a></li>
-                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">{{ __('admin.nav.roles_permissions') }}</a></li>
+{{--                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">{{ __('admin.nav.roles_permissions') }}</a></li>--}}
                         </ul>
                     </div>
                 </details>
