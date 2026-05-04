@@ -13,7 +13,7 @@
                 </p>
                 <div>
                     <h2 class="text-3xl font-semibold tracking-tight text-gray-950 dark:text-white">Quản lý listing và key</h2>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">Tạo listing từ biến thể có sẵn, dùng lại sản phẩm của bạn hoặc tạo sản phẩm mới.</p>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">Tạo listing từ biến thể có sẵn.</p>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
@@ -62,8 +62,10 @@
                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Cách tạo <span class="text-red-400">*</span></label>
                     <select wire:model.live="createMode" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
                         <option value="existing_variant">Dùng biến thể có sẵn</option>
+                        {{--
                         <option value="existing_product_variant">Tạo biến thể từ sản phẩm có sẵn</option>
                         <option value="new_product">Tạo sản phẩm mới</option>
+                        --}}
                     </select>
                     @error('createMode')
                         <small class="error text-red-500 text-xs">{{ $message }}</small>
@@ -83,7 +85,7 @@
                             <small class="error text-red-500 text-xs">{{ $message }}</small>
                         @enderror
                     </div>
-                @elseif($createMode === 'existing_product_variant')
+                {{-- @elseif($createMode === 'existing_product_variant')
                     <div>
                         <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Sản phẩm <span class="text-red-400">*</span></label>
                         <select wire:model="selectedProductId" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
@@ -233,6 +235,7 @@
                             <input wire:model="variantForm.edition" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="Ví dụ: Bản Standard">
                         </div>
                     </div>
+                --}}
                 @endif
             @endif
 

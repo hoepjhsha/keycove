@@ -77,43 +77,43 @@ test('seller can create a listing from an existing variant and reuse a seller pr
 
     expect(ProductListing::query()->where('seller_id', $seller->id)->where('display_name', 'Admin Variant Listing')->exists())->toBeTrue();
 
-    Livewire::actingAs($sellerUser)
-        ->test(SellerListings::class)
-        ->set('createMode', 'new_product')
-        ->set('productForm.name', 'My Seller Product')
-        ->set('productForm.slug', 'my-seller-product')
-        ->set('productForm.publisher', 'KeyCove')
-        ->set('productForm.developer', 'KeyCove Studio')
-        ->set('productForm.status', GeneralStatus::Inactive->value)
-        ->set('variantForm.region_id', $region->id)
-        ->set('variantForm.platform_id', $platform->id)
-        ->set('variantForm.os_id', $os->id)
-        ->set('variantForm.edition', 'Deluxe Edition')
-        ->set('listingForm.display_name', 'My First Seller Listing')
-        ->set('listingForm.price', 299000)
-        ->set('listingForm.status', ProductListingStatus::Pending->value)
-        ->call('saveListing')
-        ->assertHasNoErrors();
-
-    $sellerProduct = Product::query()->where('submitted_by_seller_id', $seller->id)->where('slug', 'my-seller-product')->first();
-
-    expect($sellerProduct)->not->toBeNull();
-    expect(ProductListing::query()->where('seller_id', $seller->id)->where('display_name', 'My First Seller Listing')->exists())->toBeTrue();
-
-    Livewire::actingAs($sellerUser)
-        ->test(SellerListings::class)
-        ->set('createMode', 'existing_product_variant')
-        ->set('selectedProductId', $sellerProduct->id)
-        ->set('variantForm.region_id', $region->id)
-        ->set('variantForm.platform_id', $platform->id)
-        ->set('variantForm.os_id', $os->id)
-        ->set('variantForm.edition', 'Ultimate Edition')
-        ->set('listingForm.display_name', 'Reused Seller Product Listing')
-        ->set('listingForm.price', 399000)
-        ->set('listingForm.status', ProductListingStatus::Pending->value)
-        ->call('saveListing')
-        ->assertHasNoErrors();
-
-    expect(ProductVariant::query()->where('product_id', $sellerProduct->id)->count())->toBe(2);
-    expect(ProductListing::query()->where('seller_id', $seller->id)->count())->toBe(3);
+    // Livewire::actingAs($sellerUser)
+    //     ->test(SellerListings::class)
+    //     ->set('createMode', 'new_product')
+    //     ->set('productForm.name', 'My Seller Product')
+    //     ->set('productForm.slug', 'my-seller-product')
+    //     ->set('productForm.publisher', 'KeyCove')
+    //     ->set('productForm.developer', 'KeyCove Studio')
+    //     ->set('productForm.status', GeneralStatus::Inactive->value)
+    //     ->set('variantForm.region_id', $region->id)
+    //     ->set('variantForm.platform_id', $platform->id)
+    //     ->set('variantForm.os_id', $os->id)
+    //     ->set('variantForm.edition', 'Deluxe Edition')
+    //     ->set('listingForm.display_name', 'My First Seller Listing')
+    //     ->set('listingForm.price', 299000)
+    //     ->set('listingForm.status', ProductListingStatus::Pending->value)
+    //     ->call('saveListing')
+    //     ->assertHasNoErrors();
+    //
+    // $sellerProduct = Product::query()->where('submitted_by_seller_id', $seller->id)->where('slug', 'my-seller-product')->first();
+    //
+    // expect($sellerProduct)->not->toBeNull();
+    // expect(ProductListing::query()->where('seller_id', $seller->id)->where('display_name', 'My First Seller Listing')->exists())->toBeTrue();
+    //
+    // Livewire::actingAs($sellerUser)
+    //     ->test(SellerListings::class)
+    //     ->set('createMode', 'existing_product_variant')
+    //     ->set('selectedProductId', $sellerProduct->id)
+    //     ->set('variantForm.region_id', $region->id)
+    //     ->set('variantForm.platform_id', $platform->id)
+    //     ->set('variantForm.os_id', $os->id)
+    //     ->set('variantForm.edition', 'Ultimate Edition')
+    //     ->set('listingForm.display_name', 'Reused Seller Product Listing')
+    //     ->set('listingForm.price', 399000)
+    //     ->set('listingForm.status', ProductListingStatus::Pending->value)
+    //     ->call('saveListing')
+    //     ->assertHasNoErrors();
+    //
+    // expect(ProductVariant::query()->where('product_id', $sellerProduct->id)->count())->toBe(2);
+    // expect(ProductListing::query()->where('seller_id', $seller->id)->count())->toBe(3);
 });

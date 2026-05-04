@@ -282,10 +282,10 @@ class SellerListings extends Component
                 $this->listingForm->seller_id = $this->seller->id;
 
                 $message = match ($this->createMode) {
-                    'existing_variant'         => $this->createListingFromExistingVariant(),
-                    'existing_product_variant' => $this->createListingFromExistingProduct(),
-                    'new_product'              => $this->createListingWithNewProduct(),
-                    default                    => throw ValidationException::withMessages([
+                    'existing_variant' => $this->createListingFromExistingVariant(),
+                    // 'existing_product_variant' => $this->createListingFromExistingProduct(),
+                    // 'new_product'              => $this->createListingWithNewProduct(),
+                    default => throw ValidationException::withMessages([
                         'createMode' => 'Cách tạo không hợp lệ.',
                     ]),
                 };
@@ -432,6 +432,7 @@ class SellerListings extends Component
         return 'Listing đã được tạo thành công.';
     }
 
+    /*
     protected function createListingFromExistingProduct(): string
     {
         $this->validate([
@@ -457,7 +458,9 @@ class SellerListings extends Component
 
         return 'Listing đã được tạo thành công.';
     }
+    */
 
+    /*
     protected function createListingWithNewProduct(): string
     {
         $this->validate([
@@ -491,6 +494,7 @@ class SellerListings extends Component
 
         return 'Listing đã được tạo thành công.';
     }
+    */
 
     protected function resolveOwnedListing(int $listingId, bool $withTrashed = false): ProductListing
     {
