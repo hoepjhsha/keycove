@@ -1,0 +1,332 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Ai;
+
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
+use RuntimeException;
+
+class AiClient
+{
+    public function chat(array $messages): AiResponse
+    {
+        $apiKey = (string) config('services.ai.api_key');
+        $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
+        $model = (string) config('services.ai.model', '');
+        $timeout = max(1, (int) config('services.ai.timeout', 30));
+
+        if ($apiKey === '' || $baseUrl === '' || $model === '') {
+            throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_BASE_URL, AI_API_KEY và AI_MODEL.');
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withToken($apiKey)
+                ->withHeaders($this->providerHeaders())
+                ->connectTimeout(10)
+                ->timeout($timeout)
+                ->post("$baseUrl/chat/completions", $this->payload($model, $messages));
+
+            $response->throw();
+        } catch (ConnectionException|RequestException $exception) {
+            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+        }
+
+        return $this->responseFromPayload($response->json());
+    }
+
+    public function streamChat(array $messages, callable $onChunk): AiResponse
+    {
+        $apiKey = (string) config('services.ai.api_key');
+        $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
+        $model = (string) config('services.ai.model', '');
+        $timeout = max(1, (int) config('services.ai.timeout', 30));
+
+        if ($apiKey === '' || $baseUrl === '' || $model === '') {
+            throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_BASE_URL, AI_API_KEY và AI_MODEL.');
+        }
+
+        try {
+            $response = Http::accept('text/event-stream')
+                ->withToken($apiKey)
+                ->withHeaders($this->providerHeaders())
+                ->connectTimeout(10)
+                ->timeout($timeout)
+                ->withOptions(['stream' => true])
+                ->post("$baseUrl/chat/completions", $this->payload($model, $messages, stream: true));
+
+            $response->throw();
+        } catch (ConnectionException|RequestException $exception) {
+            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+        }
+
+        return $this->streamedResponse($response, $onChunk);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function responseFromPayload(array $payload): AiResponse
+    {
+        $content = $this->extractContent($payload);
+
+        if ($content === '') {
+            throw new RuntimeException('Dịch vụ AI không trả về nội dung hợp lệ.');
+        }
+
+        /** @var array<string, mixed>|null $usage */
+        $usage = data_get($payload, 'usage');
+        /** @var list<array<string, mixed>>|null $reasoningDetails */
+        $reasoningDetails = data_get($payload, 'choices.0.message.reasoning_details');
+
+        return new AiResponse(
+            content: $content,
+            raw: $payload,
+            usage: is_array($usage) ? $usage : null,
+            reasoningDetails: is_array($reasoningDetails) ? $reasoningDetails : null,
+        );
+    }
+
+    protected function payload(string $model, array $messages, bool $stream = false): array
+    {
+        $payload = [
+            'model'     => $model,
+            'messages'  => $this->normalizeMessages($messages),
+            'reasoning' => [
+                'enabled' => (bool) config('services.ai.reasoning_enabled', true),
+            ],
+        ];
+
+        if ($stream) {
+            $payload['stream'] = true;
+        }
+
+        return $payload;
+    }
+
+    protected function normalizeMessages(array $messages): array
+    {
+        return collect($messages)
+            ->map(function (array $message): array {
+                $normalized = [
+                    'role'    => (string) ($message['role'] ?? 'user'),
+                    'content' => $message['content'] ?? '',
+                ];
+
+                if (array_key_exists('reasoning_details', $message) && is_array($message['reasoning_details'])) {
+                    $normalized['reasoning_details'] = $message['reasoning_details'];
+                }
+
+                return $normalized;
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function providerHeaders(): array
+    {
+        $headers = [];
+        $httpReferer = (string) config('services.ai.http_referer', '');
+        $appName = (string) config('services.ai.app_name', '');
+
+        if ($httpReferer !== '') {
+            $headers['HTTP-Referer'] = $httpReferer;
+        }
+
+        if ($appName !== '') {
+            $headers['X-Title'] = $appName;
+            $headers['X-OpenRouter-Title'] = $appName;
+        }
+
+        return $headers;
+    }
+
+    protected function streamedResponse(Response $response, callable $onChunk): AiResponse
+    {
+        $content = '';
+        $rawBody = '';
+        $events = [];
+        $usage = null;
+        $reasoningDetails = null;
+        $eventDataLines = [];
+        $resource = $response->resource();
+
+        try {
+            while (! feof($resource)) {
+                $line = fgets($resource);
+
+                if ($line === false) {
+                    continue;
+                }
+
+                $rawBody .= $line;
+                $line = rtrim($line, "\r\n");
+
+                if ($line === '') {
+                    if ($this->consumeStreamEvent($eventDataLines, $onChunk, $content, $events, $usage, $reasoningDetails)) {
+                        break;
+                    }
+
+                    $eventDataLines = [];
+
+                    continue;
+                }
+
+                if (str_starts_with($line, 'data:')) {
+                    $eventDataLines[] = ltrim(substr($line, 5));
+                }
+            }
+
+            $this->consumeStreamEvent($eventDataLines, $onChunk, $content, $events, $usage, $reasoningDetails);
+        } finally {
+            $response->close();
+        }
+
+        if ($content === '') {
+            /** @var array<string, mixed>|null $payload */
+            $payload = json_decode($rawBody, true);
+
+            if (is_array($payload)) {
+                return $this->responseFromPayload($payload);
+            }
+
+            throw new RuntimeException('Dịch vụ AI không trả về nội dung hợp lệ.');
+        }
+
+        return new AiResponse(
+            content: trim($content),
+            raw: [
+                'events' => $events,
+            ],
+            usage: $usage,
+            reasoningDetails: $reasoningDetails,
+        );
+    }
+
+    /**
+     * @param  list<string>  $eventDataLines
+     * @param  list<array<string, mixed>>|null  $reasoningDetails
+     * @param  array<int, array<string, mixed>>  $events
+     */
+    protected function consumeStreamEvent(array $eventDataLines, callable $onChunk, string &$content, array &$events, ?array &$usage, ?array &$reasoningDetails): bool
+    {
+        if ($eventDataLines === []) {
+            return false;
+        }
+
+        $payload = trim(implode("\n", $eventDataLines));
+
+        if ($payload === '[DONE]') {
+            return true;
+        }
+
+        /** @var array<string, mixed>|null $decoded */
+        $decoded = json_decode($payload, true);
+
+        if (! is_array($decoded)) {
+            return false;
+        }
+
+        $events[] = $decoded;
+
+        $chunk = $this->extractStreamContent($decoded);
+
+        if ($chunk !== '') {
+            $content .= $chunk;
+            $onChunk($chunk);
+        }
+
+        $streamUsage = data_get($decoded, 'usage');
+
+        if (is_array($streamUsage)) {
+            $usage = $streamUsage;
+        }
+
+        $streamReasoningDetails = data_get($decoded, 'choices.0.delta.reasoning_details');
+
+        if (! is_array($streamReasoningDetails)) {
+            $streamReasoningDetails = data_get($decoded, 'choices.0.message.reasoning_details');
+        }
+
+        if (is_array($streamReasoningDetails)) {
+            $reasoningDetails = $reasoningDetails === null
+                ? array_values($streamReasoningDetails)
+                : array_values(array_merge($reasoningDetails, $streamReasoningDetails));
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function extractStreamContent(array $payload): string
+    {
+        $content = data_get($payload, 'choices.0.delta.content');
+
+        if (is_string($content)) {
+            return $content;
+        }
+
+        if (is_array($content)) {
+            return $this->implodeContentParts($content);
+        }
+
+        $messageContent = data_get($payload, 'choices.0.message.content');
+
+        if (is_string($messageContent)) {
+            return $messageContent;
+        }
+
+        if (is_array($messageContent)) {
+            return $this->implodeContentParts($messageContent);
+        }
+
+        return '';
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function extractContent(array $payload): string
+    {
+        $content = data_get($payload, 'choices.0.message.content');
+
+        if (is_string($content)) {
+            return trim($content);
+        }
+
+        if (! is_array($content)) {
+            return '';
+        }
+
+        return trim($this->implodeContentParts($content));
+    }
+
+    /**
+     * @param  list<mixed>  $content
+     */
+    protected function implodeContentParts(array $content): string
+    {
+        return collect($content)
+            ->map(function (mixed $part): string {
+                if (! is_array($part)) {
+                    return '';
+                }
+
+                $text = data_get($part, 'text');
+
+                return is_string($text) ? $text : '';
+            })
+            ->filter(fn (string $part): bool => $part !== '')
+            ->implode("\n")
+            ?: '';
+    }
+}

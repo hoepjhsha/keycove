@@ -23,6 +23,8 @@
     <body class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 antialiased font-sans">
         {{ $slot }}
 
+{{--        <livewire:ai.chatbot />--}}
+
         @livewireScripts
 
         <script src="https://unpkg.com/@popperjs/core@2"></script>

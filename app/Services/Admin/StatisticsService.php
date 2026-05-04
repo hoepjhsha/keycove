@@ -65,6 +65,69 @@ class StatisticsService
     }
 
     /**
+     * @param  array{
+     *     quick_stats: array<string, int|float>,
+     *     finance: array<string, int|float>,
+     *     operations: array<string, int|float>,
+     *     market: array<string, int|float|array<int, array{name: string, revenue: float}>>,
+     *     growth: array<string, int|float>,
+     *     charts: array<string, array{labels: list<string>, values?: list<float|int>, revenue?: list<float>, orders?: list<int>, users?: list<int>, sellers?: list<int>}>,
+     *     tables: array<string, Collection<int, mixed>>
+     * }  $snapshot
+     * @return array<string, mixed>
+     */
+    public function summarizeForAi(array $snapshot): array
+    {
+        /** @var Collection<int, Order> $topOrders */
+        $topOrders = $snapshot['tables']['top_orders'];
+        /** @var Collection<int, Complaint> $urgentComplaints */
+        $urgentComplaints = $snapshot['tables']['urgent_complaints'];
+        /** @var Collection<int, object> $topSellers */
+        $topSellers = $snapshot['tables']['top_sellers'];
+        /** @var Collection<int, AuditLog> $auditLogs */
+        $auditLogs = $snapshot['tables']['audit_logs'];
+
+        return [
+            'quick_stats' => $snapshot['quick_stats'],
+            'finance'     => $snapshot['finance'],
+            'operations'  => $snapshot['operations'],
+            'market'      => $snapshot['market'],
+            'growth'      => $snapshot['growth'],
+            'charts'      => $snapshot['charts'],
+            'top_orders'  => $topOrders->map(fn (Order $order): array => [
+                'order_code'     => $order->order_code,
+                'buyer'          => $order->buyer?->username,
+                'items_count'    => $order->items_count,
+                'total_price'    => (float) $order->total_price,
+                'payment_status' => $order->payment_status?->label(),
+                'created_at'     => $order->created_at?->toDateTimeString(),
+            ])->values()->all(),
+            'urgent_complaints' => $urgentComplaints->map(fn (Complaint $complaint): array => [
+                'complaint_code' => $complaint->complaint_code,
+                'buyer'          => $complaint->orderItem?->order?->buyer?->username,
+                'seller'         => $complaint->orderItem?->seller?->shop_name,
+                'status'         => $complaint->status?->label(),
+                'reason'         => $complaint->reason,
+                'created_at'     => $complaint->created_at?->toDateTimeString(),
+            ])->values()->all(),
+            'top_sellers' => $topSellers->map(fn (object $seller): array => [
+                'shop_name'         => (string) $seller->shop_name,
+                'successful_orders' => (int) $seller->successful_orders,
+                'gross_revenue'     => (float) $seller->gross_revenue,
+                'platform_revenue'  => (float) $seller->platform_revenue,
+            ])->values()->all(),
+            'audit_logs' => $auditLogs->map(fn (AuditLog $log): array => [
+                'user'       => $log->user?->username,
+                'event'      => $log->event->label(),
+                'auditable'  => class_basename($log->auditable_type).' #'.$log->auditable_id,
+                'created_at' => is_int($log->created_at)
+                    ? CarbonImmutable::createFromTimestamp($log->created_at)->toDateTimeString()
+                    : $log->created_at?->toDateTimeString(),
+            ])->values()->all(),
+        ];
+    }
+
+    /**
      * @return array<string, int|float>
      */
     protected function quickStats(CarbonImmutable $startDate, CarbonImmutable $endDate): array

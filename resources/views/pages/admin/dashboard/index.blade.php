@@ -76,6 +76,12 @@
         </article>
     </section>
 
+    <livewire:admin.action.dashboard.dashboard-ai-assistant
+        :context="$dashboardAiContext"
+        :range-label="$rangeLabel"
+        :key="'dashboard-ai-'.$timeFilter.'-'.$startDate.'-'.$endDate"
+    />
+
     <section class="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_22rem]">
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-start justify-between gap-4">

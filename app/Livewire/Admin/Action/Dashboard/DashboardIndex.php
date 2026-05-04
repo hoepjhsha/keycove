@@ -52,6 +52,7 @@ class DashboardIndex extends Component
         [$startDate, $endDate] = $this->dateRange();
 
         $snapshot = $this->statisticsService->buildSnapshot($startDate, $endDate);
+        $dashboardAiContext = $this->statisticsService->summarizeForAi($snapshot);
 
         $this->revenueOrdersChart = $snapshot['charts']['revenue_orders'];
         $this->platformRevenueChart = $snapshot['charts']['platforms'];
@@ -71,6 +72,7 @@ class DashboardIndex extends Component
             'revenueOrdersChart'   => $this->revenueOrdersChart,
             'platformRevenueChart' => $this->platformRevenueChart,
             'userGrowthChart'      => $this->userGrowthChart,
+            'dashboardAiContext'   => $dashboardAiContext,
         ])->layout('components.layouts.dashboard', [
             'title' => 'Bảng điều khiển',
         ]);
