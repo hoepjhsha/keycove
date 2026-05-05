@@ -225,7 +225,8 @@ class MyLibrary extends Component
         }
 
         $item->forceFill([
-            'status' => OrderStatus::Completed,
+            'status'       => OrderStatus::Completed,
+            'completed_at' => now(),
         ])->save();
 
         $this->confirmReceivedOrderItemId = null;

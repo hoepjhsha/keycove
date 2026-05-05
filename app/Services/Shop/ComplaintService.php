@@ -198,7 +198,8 @@ class ComplaintService
             $paymentTransaction = $order?->paymentTransactions?->sortByDesc('id')->first();
 
             $orderItem?->forceFill([
-                'status' => $orderStatus,
+                'status'       => $orderStatus,
+                'completed_at' => $orderStatus === OrderStatus::Completed ? $resolvedAt : $orderItem?->completed_at,
             ])->save();
 
             if ($status === ComplaintStatus::ApprovedRefund && $paymentTransaction !== null && $refundData !== null) {

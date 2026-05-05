@@ -122,14 +122,25 @@ return [
     ],
 
     'internal_wallet_entry_type' => [
-        'PaymentReceived'       => 'Nhận thanh toán',
-        'EscrowHeld'            => 'Ghi nhận ký quỹ',
-        'EscrowReleased'        => 'Giải ngân ký quỹ',
-        'RefundPaid'            => 'Hoàn tiền',
-        'SellerPayoutRequested' => 'Yêu cầu trả seller',
-        'SellerPayoutCompleted' => 'Đã trả seller',
-        'SellerPayoutFailed'    => 'Trả seller thất bại',
-        'Adjustment'            => 'Điều chỉnh',
+        'PaymentReceived'               => 'Nhận thanh toán',
+        'EscrowHeld'                    => 'Ghi nhận ký quỹ',
+        'EscrowReleased'                => 'Giải ngân ký quỹ',
+        'RefundPaid'                    => 'Hoàn tiền',
+        'SellerPayoutRequested'         => 'Yêu cầu trả seller',
+        'SellerPayoutCompleted'         => 'Đã trả seller',
+        'SellerPayoutFailed'            => 'Trả seller thất bại',
+        'Adjustment'                    => 'Điều chỉnh',
+        'PlatformProfitPayoutRequested' => 'Yêu cầu payout lợi nhuận',
+        'PlatformProfitPayoutCompleted' => 'Đã payout lợi nhuận',
+        'PlatformProfitPayoutFailed'    => 'Payout lợi nhuận thất bại',
+    ],
+
+    'platform_payout_status' => [
+        'Pending'    => 'Đang chờ',
+        'Processing' => 'Đang xử lý',
+        'Completed'  => 'Hoàn tất',
+        'Failed'     => 'Thất bại',
+        'Cancelled'  => 'Đã hủy',
     ],
 
     'withdraw_status' => [

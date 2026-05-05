@@ -10,6 +10,7 @@ use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\PlatformPayoutStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
 use App\Enums\TransactionBalanceType;
@@ -29,6 +30,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
 use App\Models\Platform;
+use App\Models\PlatformPayout;
+use App\Models\PlatformPayoutItem;
 use App\Models\Product;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
@@ -723,6 +726,209 @@ it('backfills internal wallet entries idempotently', function (): void {
         ->and($firstBalance)->toBe('-1000.00');
 });
 
+it('auto completes delivered seller items after the response window and releases escrow', function (): void {
+    Carbon::setTestNow('2026-05-12 10:00:00');
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INT-AUTOCOMP-001',
+        'balance'   => 50000,
+        'holding'   => 0,
+    ]);
+
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $listing = activeListing($seller);
+
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $orderItem = $order->items()->create([
+        'listing_id'            => $listing->id,
+        'seller_id'             => $seller->id,
+        'order_item_code'       => 'OI-20260512-AUTOCOMP',
+        'product_name_snapshot' => 'Auto Complete Listing',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 19900,
+        'seller_amount'         => 179100,
+        'status'                => OrderStatus::Delivered,
+        'delivered_at'          => now()->subDays(8),
+        'buyer_key_viewed_at'   => now()->subDays(8),
+    ]);
+
+    $escrow = Escrow::query()->create([
+        'order_item_id' => $orderItem->id,
+        'seller_id'     => $seller->id,
+        'amount'        => 179100,
+        'release_date'  => now()->subDay(),
+        'status'        => EscrowStatus::Holding,
+    ]);
+
+    $sellerWallet = Wallet::query()->create([
+        'seller_id' => $seller->id,
+        'type'      => WalletType::Seller,
+        'code'      => 'SELLER-AUTOCOMP-001',
+        'balance'   => 0,
+        'holding'   => 179100,
+    ]);
+
+    $this->artisan('app:complete-settled-order-items', ['--days' => 7])->assertSuccessful();
+
+    expect($orderItem->fresh()->status)->toBe(OrderStatus::Completed)
+        ->and($orderItem->fresh()->completed_at)->not->toBeNull()
+        ->and($escrow->fresh()->status)->toBe(EscrowStatus::Released)
+        ->and($sellerWallet->fresh()->balance)->toBe('179100.00')
+        ->and($sellerWallet->fresh()->holding)->toBe('0.00')
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::EscrowReleased)->count())->toBe(1);
+});
+
+it('processes weekly platform profit payouts for eligible completed items', function (): void {
+    Carbon::setTestNow('2026-05-12 10:00:00');
+
+    config()->set('services.payment.default', 'vnpay');
+    config()->set('services.payment.vnpay.withdraw_mock', true);
+
+    configurePlatformPayoutSettings();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INT-PAYOUT-001',
+        'balance'   => 50000,
+        'holding'   => 0,
+    ]);
+
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $sellerListing = activeListing($seller);
+    $platformListing = activeListing($seller);
+    $platformListing->forceFill(['seller_id' => null])->save();
+
+    createCompletedOrderItem($buyer, $sellerListing, [
+        'seller_id'     => $seller->id,
+        'platform_fee'  => 1900,
+        'seller_amount' => 17100,
+        'completed_at'  => now()->subDays(8),
+        'delivered_at'  => now()->subDays(10),
+    ]);
+
+    createCompletedOrderItem($buyer, $platformListing, [
+        'seller_id'     => null,
+        'platform_fee'  => 0,
+        'seller_amount' => 5000,
+        'completed_at'  => now()->subDays(9),
+        'delivered_at'  => now()->subDays(11),
+    ]);
+
+    createCompletedOrderItem($buyer, $platformListing, [
+        'seller_id'     => null,
+        'platform_fee'  => 0,
+        'seller_amount' => 7000,
+        'completed_at'  => now()->subDays(3),
+        'delivered_at'  => now()->subDays(4),
+    ]);
+
+    $this->artisan('app:process-platform-profit-payouts')->assertSuccessful();
+
+    $platformPayout = PlatformPayout::query()->with('items')->first();
+
+    expect($platformPayout)->not->toBeNull()
+        ->and($platformPayout?->status)->toBe(PlatformPayoutStatus::Completed)
+        ->and($platformPayout?->amount)->toBe('6900.00')
+        ->and($platformPayout?->items)->toHaveCount(2)
+        ->and(Wallet::query()->where('type', WalletType::Internal)->value('balance'))->toBe('43100.00')
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutRequested)->count())->toBe(1)
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutCompleted)->count())->toBe(1);
+});
+
+it('marks weekly platform profit payouts as failed without reducing the internal wallet balance', function (): void {
+    Carbon::setTestNow('2026-05-12 10:00:00');
+
+    config()->set('services.payment.default', 'vnpay');
+    config()->set('services.payment.vnpay.withdraw_mock', true);
+
+    configurePlatformPayoutSettings();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INT-PAYOUT-FAIL-001',
+        'balance'   => 20000,
+        'holding'   => 0,
+    ]);
+
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $listing = activeListing($seller);
+    $listing->forceFill(['seller_id' => null])->save();
+
+    createCompletedOrderItem($buyer, $listing, [
+        'seller_id'     => null,
+        'platform_fee'  => 0,
+        'seller_amount' => 9999,
+        'completed_at'  => now()->subDays(8),
+        'delivered_at'  => now()->subDays(9),
+    ]);
+
+    $this->artisan('app:process-platform-profit-payouts')->assertSuccessful();
+
+    $platformPayout = PlatformPayout::query()->first();
+
+    expect($platformPayout)->not->toBeNull()
+        ->and($platformPayout?->status)->toBe(PlatformPayoutStatus::Failed)
+        ->and(Wallet::query()->where('type', WalletType::Internal)->value('balance'))->toBe('20000.00')
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutRequested)->count())->toBe(1)
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutFailed)->count())->toBe(1)
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutCompleted)->count())->toBe(0);
+});
+
+it('keeps weekly platform profit payouts idempotent across repeated runs', function (): void {
+    Carbon::setTestNow('2026-05-12 10:00:00');
+
+    config()->set('services.payment.default', 'vnpay');
+    config()->set('services.payment.vnpay.withdraw_mock', true);
+
+    configurePlatformPayoutSettings();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INT-PAYOUT-IDEMP-001',
+        'balance'   => 30000,
+        'holding'   => 0,
+    ]);
+
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+    $listing = activeListing($seller);
+
+    createCompletedOrderItem($buyer, $listing, [
+        'seller_id'     => $seller->id,
+        'platform_fee'  => 1000,
+        'seller_amount' => 9000,
+        'completed_at'  => now()->subDays(8),
+        'delivered_at'  => now()->subDays(9),
+    ]);
+
+    $this->artisan('app:process-platform-profit-payouts')->assertSuccessful();
+    $this->artisan('app:process-platform-profit-payouts')->assertSuccessful();
+
+    expect(PlatformPayout::query()->count())->toBe(1)
+        ->and(PlatformPayoutItem::query()->count())->toBe(1)
+        ->and(Wallet::query()->where('type', WalletType::Internal)->value('balance'))->toBe('29000.00')
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::PlatformProfitPayoutCompleted)->count())->toBe(1);
+});
+
 function approvedSeller(User $user): Seller
 {
     return Seller::query()->create([
@@ -773,4 +979,43 @@ function activeListing(Seller $seller): ProductListing
         'stock_count' => 5,
         'status'      => ProductListingStatus::Active,
     ]);
+}
+
+function configurePlatformPayoutSettings(): void
+{
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_enabled'], ['value' => 'true', 'description' => 'Enable platform profit payouts']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_auto_process'], ['value' => 'true', 'description' => 'Auto process platform profit payouts']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_settlement_days'], ['value' => '7', 'description' => 'Settlement days before platform payout']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_bank_name'], ['value' => 'Vietcombank', 'description' => 'Platform payout bank name']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_bank_code'], ['value' => 'VCB', 'description' => 'Platform payout bank code']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_bank_account_number'], ['value' => '0123456789', 'description' => 'Platform payout bank account number']);
+    SystemConfig::query()->updateOrCreate(['key' => 'platform_payout_bank_account_name'], ['value' => 'KeyCove Owner', 'description' => 'Platform payout bank account holder']);
+}
+
+/**
+ * @param  array<string, mixed>  $overrides
+ */
+function createCompletedOrderItem(User $buyer, ProductListing $listing, array $overrides = []): OrderItem
+{
+    $order = Order::factory()->forBuyer($buyer)->create([
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => (float) ($overrides['subtotal'] ?? 19900),
+    ]);
+
+    return $order->items()->create(array_merge([
+        'listing_id'            => $listing->id,
+        'seller_id'             => $overrides['seller_id'] ?? $listing->seller_id,
+        'order_item_code'       => 'OI-'.Str::upper(Str::random(10)),
+        'product_name_snapshot' => 'Completed payout item',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 19900,
+        'subtotal'              => 19900,
+        'platform_fee'          => 1900,
+        'seller_amount'         => 18000,
+        'status'                => OrderStatus::Completed,
+        'delivered_at'          => now()->subDays(10),
+        'completed_at'          => now()->subDays(8),
+        'buyer_key_viewed_at'   => now()->subDays(10),
+    ], $overrides));
 }

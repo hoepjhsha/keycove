@@ -11,6 +11,7 @@ use App\Livewire\Admin\Action\OperatingSystem\OperatingSystemIndex;
 use App\Livewire\Admin\Action\Order\OrderDetail;
 use App\Livewire\Admin\Action\Order\OrderIndex;
 use App\Livewire\Admin\Action\Platform\PlatformIndex;
+use App\Livewire\Admin\Action\PlatformPayout\PlatformPayoutIndex;
 use App\Livewire\Admin\Action\Product\ProductDetail;
 use App\Livewire\Admin\Action\Product\ProductIndex;
 use App\Livewire\Admin\Action\ProductKey\BulkImportIndex;
@@ -116,6 +117,12 @@ Route::middleware('auth:admin')
             ->name('withdrawals.')
             ->group(function () {
                 Route::get('/', WithdrawalRequestIndex::class)->name('index');
+            });
+
+        Route::prefix('/platform-payouts')
+            ->name('platform_payouts.')
+            ->group(function () {
+                Route::get('/', PlatformPayoutIndex::class)->name('index');
             });
 
         Route::prefix('/orders')
