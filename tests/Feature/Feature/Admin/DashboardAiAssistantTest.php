@@ -81,6 +81,74 @@ it('generates and stores admin dashboard insights as markdown', function (): voi
     });
 });
 
+it('generates dashboard insights with gemini', function (): void {
+    $diskRoot = storage_path('framework/testing/disks/ai-test-'.uniqid());
+
+    config()->set('filesystems.disks.ai_test', [
+        'driver' => 'local',
+        'root'   => $diskRoot,
+        'throw'  => false,
+    ]);
+
+    Http::fake([
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent' => Http::response([
+            'candidates' => [
+                [
+                    'content' => [
+                        'parts' => [
+                            [
+                                'text' => "## Điểm nổi bật\n- Doanh thu nền tảng tăng.\n\n## Rủi ro\n- Complaint seller tăng.\n\n## Hành động đề xuất\n- Ưu tiên seller có complaint rate cao.",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'usageMetadata' => [
+                'promptTokenCount'     => 120,
+                'candidatesTokenCount' => 40,
+                'totalTokenCount'      => 160,
+            ],
+        ]),
+    ]);
+
+    config()->set('filesystems.default', 'ai_test');
+    config()->set('services.ai.provider', 'gemini');
+    config()->set('services.ai.api_key', 'test-gemini-key');
+    config()->set('services.ai.base_url', 'https://generativelanguage.googleapis.com/v1beta');
+    config()->set('services.ai.model', 'gemini-flash-latest');
+
+    $admin = User::factory()->admin()->create();
+    $rangeLabel = '01/05/2026 - 02/05/2026';
+    $context = [
+        'revenue' => [
+            'platformRevenue' => 219000,
+        ],
+    ];
+
+    $path = 'ai/dashboard-insights/'.md5($rangeLabel.json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)).'.md';
+
+    Livewire::actingAs($admin, 'admin')
+        ->test(DashboardAiAssistant::class, [
+            'rangeLabel' => $rangeLabel,
+            'context'    => $context,
+        ])
+        ->call('generateInsight')
+        ->assertSee('Điểm nổi bật')
+        ->assertSee('Doanh thu nền tảng tăng')
+        ->assertSeeHtml('<h2>Điểm nổi bật</h2>');
+
+    expect(Storage::disk('ai_test')->exists($path))->toBeTrue();
+
+    Http::assertSent(function ($request): bool {
+        $payload = $request->data();
+
+        return $request->url() === 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent'
+            && $request->header('X-goog-api-key')[0] === 'test-gemini-key'
+            && data_get($payload, 'contents.0.role') === 'user'
+            && data_get($payload, 'contents.0.parts.0.text') !== null;
+    });
+});
+
 it('loads the saved markdown insight and lets admins collapse long content', function (): void {
     $diskRoot = storage_path('framework/testing/disks/ai-test-'.uniqid());
 

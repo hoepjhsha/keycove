@@ -14,6 +14,10 @@ class AiClient
 {
     public function chat(array $messages): AiResponse
     {
+        if ($this->provider() === 'gemini') {
+            return $this->geminiChat($messages);
+        }
+
         $apiKey = (string) config('services.ai.api_key');
         $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
         $model = (string) config('services.ai.model', '');
@@ -41,6 +45,13 @@ class AiClient
 
     public function streamChat(array $messages, callable $onChunk): AiResponse
     {
+        if ($this->provider() === 'gemini') {
+            $response = $this->geminiChat($messages);
+            $onChunk($response->content);
+
+            return $response;
+        }
+
         $apiKey = (string) config('services.ai.api_key');
         $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
         $model = (string) config('services.ai.model', '');
@@ -91,6 +102,37 @@ class AiClient
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $messages
+     */
+    protected function geminiChat(array $messages): AiResponse
+    {
+        $apiKey = (string) config('services.ai.api_key');
+        $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
+        $model = (string) config('services.ai.model', '');
+        $timeout = max(1, (int) config('services.ai.timeout', 30));
+
+        if ($apiKey === '' || $baseUrl === '' || $model === '') {
+            throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_PROVIDER, AI_BASE_URL, AI_API_KEY và AI_MODEL.');
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withHeaders([
+                    'X-goog-api-key' => $apiKey,
+                ])
+                ->connectTimeout(10)
+                ->timeout($timeout)
+                ->post("$baseUrl/models/$model:generateContent", $this->geminiPayload($messages));
+
+            $response->throw();
+        } catch (ConnectionException|RequestException $exception) {
+            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+        }
+
+        return $this->responseFromGeminiPayload($response->json());
+    }
+
     protected function payload(string $model, array $messages, bool $stream = false): array
     {
         $payload = [
@@ -106,6 +148,48 @@ class AiClient
         }
 
         return $payload;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function geminiPayload(array $messages): array
+    {
+        $normalizedMessages = $this->normalizeGeminiMessages($messages);
+        $payload = [
+            'contents'         => $normalizedMessages['contents'],
+            'generationConfig' => [
+                'temperature' => (float) config('services.ai.temperature', 0.3),
+            ],
+        ];
+
+        if ($normalizedMessages['systemInstruction'] !== null) {
+            $payload['systemInstruction'] = $normalizedMessages['systemInstruction'];
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function responseFromGeminiPayload(array $payload): AiResponse
+    {
+        $content = $this->extractGeminiContent($payload);
+
+        if ($content === '') {
+            throw new RuntimeException('Dịch vụ AI không trả về nội dung hợp lệ.');
+        }
+
+        /** @var array<string, mixed>|null $usage */
+        $usage = data_get($payload, 'usageMetadata');
+
+        return new AiResponse(
+            content: $content,
+            raw: $payload,
+            usage: is_array($usage) ? $usage : null,
+            reasoningDetails: null,
+        );
     }
 
     protected function normalizeMessages(array $messages): array
@@ -128,6 +212,42 @@ class AiClient
     }
 
     /**
+     * @return array{systemInstruction: array{parts: list<array{text: string}>}|null, contents: list<array{role: string, parts: list<array{text: string}>}>}
+     */
+    protected function normalizeGeminiMessages(array $messages): array
+    {
+        $systemParts = [];
+        $contents = [];
+
+        foreach ($messages as $message) {
+            $role = (string) ($message['role'] ?? 'user');
+            $content = $this->messageContentToText($message['content'] ?? '');
+
+            if ($content === '') {
+                continue;
+            }
+
+            if ($role === 'system') {
+                $systemParts[] = ['text' => $content];
+
+                continue;
+            }
+
+            $contents[] = [
+                'role'  => $role === 'assistant' ? 'model' : 'user',
+                'parts' => [
+                    ['text' => $content],
+                ],
+            ];
+        }
+
+        return [
+            'systemInstruction' => $systemParts === [] ? null : ['parts' => $systemParts],
+            'contents'          => $contents,
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function providerHeaders(): array
@@ -146,6 +266,19 @@ class AiClient
         }
 
         return $headers;
+    }
+
+    protected function provider(): string
+    {
+        $provider = strtolower(trim((string) config('services.ai.provider', '')));
+
+        if ($provider !== '') {
+            return $provider;
+        }
+
+        $baseUrl = strtolower((string) config('services.ai.base_url', ''));
+
+        return str_contains($baseUrl, 'generativelanguage.googleapis.com') ? 'gemini' : 'openai';
     }
 
     protected function streamedResponse(Response $response, callable $onChunk): AiResponse
@@ -299,6 +432,33 @@ class AiClient
     {
         $content = data_get($payload, 'choices.0.message.content');
 
+        if (is_string($content)) {
+            return trim($content);
+        }
+
+        if (! is_array($content)) {
+            return '';
+        }
+
+        return trim($this->implodeContentParts($content));
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function extractGeminiContent(array $payload): string
+    {
+        $parts = data_get($payload, 'candidates.0.content.parts', []);
+
+        if (! is_array($parts)) {
+            return '';
+        }
+
+        return trim($this->implodeContentParts($parts));
+    }
+
+    protected function messageContentToText(mixed $content): string
+    {
         if (is_string($content)) {
             return trim($content);
         }
