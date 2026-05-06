@@ -355,6 +355,16 @@ return [
         'platform_payout_cancel_failed'  => 'Không thể hủy payout lợi nhuận: :error',
     ],
 
+    'internal_wallet' => [
+        'internal_balance'       => 'Số dư nội bộ',
+        'platform_revenue'       => 'Doanh thu nền tảng',
+        'platform_fee_revenue'   => 'Doanh thu platform fee',
+        'platform_owned_revenue' => 'Doanh thu sản phẩm platform-owned',
+        'escrow_exposure'        => 'Giá trị escrow',
+        'escrow_holding'         => 'Escrow đang giữ',
+        'escrow_released'        => 'Escrow đã giải ngân',
+    ],
+
     'platform_payouts' => [
         'empty'                           => 'Chưa có batch payout lợi nhuận.',
         'empty_items'                     => 'Batch này chưa có item payout.',

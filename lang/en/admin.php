@@ -355,6 +355,16 @@ return [
         'platform_payout_cancel_failed'  => 'Failed to cancel platform profit payout: :error',
     ],
 
+    'internal_wallet' => [
+        'internal_balance'       => 'Internal Balance',
+        'platform_revenue'       => 'Platform Revenue',
+        'platform_fee_revenue'   => 'Platform Fee Revenue',
+        'platform_owned_revenue' => 'Platform-owned Product Revenue',
+        'escrow_exposure'        => 'Escrow Exposure',
+        'escrow_holding'         => 'Escrow Holding',
+        'escrow_released'        => 'Escrow Released',
+    ],
+
     'platform_payouts' => [
         'empty'                           => 'No platform payout batches found.',
         'empty_items'                     => 'This payout batch has no payout items.',

@@ -27,104 +27,463 @@ use App\Models\Wallet;
 use App\Models\Withdraw;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class StatisticsService
 {
     /**
      * @return array{
-     *     quick_stats: array<string, int|float>,
-     *     finance: array<string, int|float>,
-     *     operations: array<string, int|float>,
-     *     market: array<string, int|float|array<int, array{name: string, revenue: float}>>,
-     *     growth: array<string, int|float>,
-     *     charts: array<string, array{labels: list<string>, values?: list<float|int>, revenue?: list<float>, orders?: list<int>, users?: list<int>, sellers?: list<int>}>,
-     *     tables: array<string, Collection<int, mixed>>
+     *     revenue: array{gmv: float, platformRevenue: float, platformFeeRevenue: float, platformOwnedRevenue: float, platformTakeRate: float},
+     *     orders: array{ordersCount: int, revenueItemsCount: int, averageOrderValue: float, revenuePerOrder: float},
+     *     complaints: array{shopAdminComplaintCount: int, sellerComplaintCount: int, shopAdminComplaintRate: float, sellerComplaintRate: float},
+     *     categories: array{favoriteCategories: list<array{category_id: int, category_name: string, units_sold: int, revenue: float}>},
+     *     products: array{topProducts: list<array{product_id: int, product_name: string, units_sold: int, revenue: float, platform_fee_revenue: float, seller_net_revenue: float}>, topSellerProducts: list<array{seller_name: string, product_name: string, units_sold: int, revenue: float, platform_fee_revenue: float}>},
+     *     sellers: array{topSellers: list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, platform_fee_revenue: float, seller_net_revenue: float, complaint_count: int, complaint_rate: float}>, worstComplaintRates: list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, complaint_count: int, complaint_rate: float}>},
+     *     charts: array<string, array{labels: list<string>, values?: list<float|int>, revenue?: list<float>, platformFeeRevenue?: list<float>, platformOwnedRevenue?: list<float>, orders?: list<int>, quantities?: list<int>, grossRevenue?: list<float>}>,
+     *     highlights: array{topCategory: ?array{category_id: int, category_name: string, units_sold: int, revenue: float}, topProduct: ?array{product_id: int, product_name: string, units_sold: int, revenue: float, platform_fee_revenue: float, seller_net_revenue: float}, topSeller: ?array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, platform_fee_revenue: float, seller_net_revenue: float, complaint_count: int, complaint_rate: float}},
+     *     ai_context: array<string, mixed>
      * }
      */
     public function buildSnapshot(CarbonImmutable $startDate, CarbonImmutable $endDate): array
     {
+        $revenue = $this->revenueSummary($startDate, $endDate);
+        $orders = $this->orderSummary($startDate, $endDate, $revenue);
+        $categories = $this->categoryPreferences($startDate, $endDate);
+        $products = $this->productPerformance($startDate, $endDate);
+        $sellers = $this->sellerPerformance($startDate, $endDate);
+        $complaints = $this->complaintSummary($startDate, $endDate);
+        $charts = [
+            'revenue_orders'       => $this->dashboardRevenueOrdersChart($startDate, $endDate),
+            'category_preferences' => $this->categoryPreferencesChart($categories['favoriteCategories']),
+            'seller_revenue'       => $this->sellerRevenueChart($sellers['topSellers']),
+        ];
+
         return [
-            'quick_stats' => $this->quickStats($startDate, $endDate),
-            'finance'     => $this->finance($startDate, $endDate),
-            'operations'  => $this->operations($startDate, $endDate),
-            'market'      => $this->market($startDate, $endDate),
-            'growth'      => $this->growth($startDate, $endDate),
-            'charts'      => [
-                'revenue_orders' => $this->revenueOrdersChart($startDate, $endDate),
-                'platforms'      => $this->platformRevenueChart($startDate, $endDate),
-                'user_growth'    => $this->userGrowthChart($startDate, $endDate),
+            'revenue'    => $revenue,
+            'orders'     => $orders,
+            'complaints' => $complaints,
+            'categories' => $categories,
+            'products'   => $products,
+            'sellers'    => $sellers,
+            'charts'     => $charts,
+            'highlights' => [
+                'topCategory' => $categories['favoriteCategories'][0] ?? null,
+                'topProduct'  => $products['topProducts'][0] ?? null,
+                'topSeller'   => $sellers['topSellers'][0] ?? null,
             ],
-            'tables' => [
-                'top_orders'        => $this->topOrders($startDate, $endDate),
-                'urgent_complaints' => $this->urgentComplaints(),
-                'top_sellers'       => $this->topSellers($startDate, $endDate),
-                'audit_logs'        => $this->auditLogs(),
-            ],
+            'ai_context' => $this->summarizeForAi([
+                'revenue'    => $revenue,
+                'orders'     => $orders,
+                'complaints' => $complaints,
+                'categories' => $categories,
+                'products'   => $products,
+                'sellers'    => $sellers,
+                'charts'     => $charts,
+                'highlights' => [
+                    'topCategory' => $categories['favoriteCategories'][0] ?? null,
+                    'topProduct'  => $products['topProducts'][0] ?? null,
+                    'topSeller'   => $sellers['topSellers'][0] ?? null,
+                ],
+            ]),
         ];
     }
 
     /**
      * @param  array{
-     *     quick_stats: array<string, int|float>,
-     *     finance: array<string, int|float>,
-     *     operations: array<string, int|float>,
-     *     market: array<string, int|float|array<int, array{name: string, revenue: float}>>,
-     *     growth: array<string, int|float>,
-     *     charts: array<string, array{labels: list<string>, values?: list<float|int>, revenue?: list<float>, orders?: list<int>, users?: list<int>, sellers?: list<int>}>,
-     *     tables: array<string, Collection<int, mixed>>
+     *     revenue: array<string, mixed>,
+     *     orders: array<string, mixed>,
+     *     complaints: array<string, mixed>,
+     *     categories: array<string, mixed>,
+     *     products: array<string, mixed>,
+     *     sellers: array<string, mixed>,
+     *     highlights: array<string, mixed>,
+     *     charts: array<string, mixed>
      * }  $snapshot
      * @return array<string, mixed>
      */
     public function summarizeForAi(array $snapshot): array
     {
-        /** @var Collection<int, Order> $topOrders */
-        $topOrders = $snapshot['tables']['top_orders'];
-        /** @var Collection<int, Complaint> $urgentComplaints */
-        $urgentComplaints = $snapshot['tables']['urgent_complaints'];
-        /** @var Collection<int, object> $topSellers */
-        $topSellers = $snapshot['tables']['top_sellers'];
-        /** @var Collection<int, AuditLog> $auditLogs */
-        $auditLogs = $snapshot['tables']['audit_logs'];
+        return [
+            'revenue'    => $snapshot['revenue'],
+            'orders'     => $snapshot['orders'],
+            'complaints' => $snapshot['complaints'],
+            'categories' => $snapshot['categories'],
+            'products'   => $snapshot['products'],
+            'sellers'    => $snapshot['sellers'],
+            'highlights' => $snapshot['highlights'],
+            'charts'     => $snapshot['charts'],
+        ];
+    }
+
+    /**
+     * @return array{gmv: float, platformRevenue: float, platformFeeRevenue: float, platformOwnedRevenue: float, platformTakeRate: float}
+     */
+    protected function revenueSummary(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $revenueItems = $this->revenueItemsQuery($startDate, $endDate);
+
+        $gmv = (float) (clone $revenueItems)->sum('order_items.subtotal');
+        $platformFeeRevenue = (float) (clone $revenueItems)
+            ->whereNotNull('order_items.seller_id')
+            ->sum('order_items.platform_fee');
+        $platformOwnedRevenue = (float) (clone $revenueItems)
+            ->whereNull('order_items.seller_id')
+            ->sum('order_items.seller_amount');
+        $platformRevenue = round($platformFeeRevenue + $platformOwnedRevenue, 2);
 
         return [
-            'quick_stats' => $snapshot['quick_stats'],
-            'finance'     => $snapshot['finance'],
-            'operations'  => $snapshot['operations'],
-            'market'      => $snapshot['market'],
-            'growth'      => $snapshot['growth'],
-            'charts'      => $snapshot['charts'],
-            'top_orders'  => $topOrders->map(fn (Order $order): array => [
-                'order_code'     => $order->order_code,
-                'buyer'          => $order->buyer?->username,
-                'items_count'    => $order->items_count,
-                'total_price'    => (float) $order->total_price,
-                'payment_status' => $order->payment_status?->label(),
-                'created_at'     => $order->created_at?->toDateTimeString(),
-            ])->values()->all(),
-            'urgent_complaints' => $urgentComplaints->map(fn (Complaint $complaint): array => [
-                'complaint_code' => $complaint->complaint_code,
-                'buyer'          => $complaint->orderItem?->order?->buyer?->username,
-                'seller'         => $complaint->orderItem?->seller?->shop_name,
-                'status'         => $complaint->status?->label(),
-                'reason'         => $complaint->reason,
-                'created_at'     => $complaint->created_at?->toDateTimeString(),
-            ])->values()->all(),
-            'top_sellers' => $topSellers->map(fn (object $seller): array => [
-                'shop_name'         => (string) $seller->shop_name,
-                'successful_orders' => (int) $seller->successful_orders,
-                'gross_revenue'     => (float) $seller->gross_revenue,
-                'platform_revenue'  => (float) $seller->platform_revenue,
-            ])->values()->all(),
-            'audit_logs' => $auditLogs->map(fn (AuditLog $log): array => [
-                'user'       => $log->user?->username,
-                'event'      => $log->event->label(),
-                'auditable'  => class_basename($log->auditable_type).' #'.$log->auditable_id,
-                'created_at' => is_int($log->created_at)
-                    ? CarbonImmutable::createFromTimestamp($log->created_at)->toDateTimeString()
-                    : $log->created_at?->toDateTimeString(),
-            ])->values()->all(),
+            'gmv'                  => round($gmv, 2),
+            'platformRevenue'      => $platformRevenue,
+            'platformFeeRevenue'   => round($platformFeeRevenue, 2),
+            'platformOwnedRevenue' => round($platformOwnedRevenue, 2),
+            'platformTakeRate'     => $gmv > 0 ? round(($platformRevenue / $gmv) * 100, 2) : 0.0,
         ];
+    }
+
+    /**
+     * @param  array{gmv: float, platformRevenue: float, platformFeeRevenue: float, platformOwnedRevenue: float, platformTakeRate: float}  $revenue
+     * @return array{ordersCount: int, revenueItemsCount: int, averageOrderValue: float, revenuePerOrder: float}
+     */
+    protected function orderSummary(CarbonImmutable $startDate, CarbonImmutable $endDate, array $revenue): array
+    {
+        $revenueItems = $this->revenueItemsQuery($startDate, $endDate);
+
+        $ordersCount = (int) Order::query()
+            ->where('payment_status', PaymentStatus::Completed->value)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        $revenueItemsCount = (int) (clone $revenueItems)->count();
+
+        return [
+            'ordersCount'       => $ordersCount,
+            'revenueItemsCount' => $revenueItemsCount,
+            'averageOrderValue' => $ordersCount > 0 ? round($revenue['gmv'] / $ordersCount, 2) : 0.0,
+            'revenuePerOrder'   => $ordersCount > 0 ? round($revenue['platformRevenue'] / $ordersCount, 2) : 0.0,
+        ];
+    }
+
+    /**
+     * @return array{shopAdminComplaintCount: int, sellerComplaintCount: int, shopAdminComplaintRate: float, sellerComplaintRate: float, shopAdminRevenueItems: int, sellerRevenueItems: int, worstSellerComplaintRates: list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, complaint_count: int, complaint_rate: float}>}
+     */
+    protected function complaintSummary(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $revenueScopeCounts = $this->revenueScopeCounts($startDate, $endDate);
+        $complaintScopeCounts = $this->complaintScopeCounts($startDate, $endDate);
+
+        return [
+            'shopAdminComplaintCount'   => $complaintScopeCounts['platform'],
+            'sellerComplaintCount'      => $complaintScopeCounts['seller'],
+            'shopAdminComplaintRate'    => $revenueScopeCounts['platform'] > 0 ? round(($complaintScopeCounts['platform'] / $revenueScopeCounts['platform']) * 100, 2) : 0.0,
+            'sellerComplaintRate'       => $revenueScopeCounts['seller'] > 0 ? round(($complaintScopeCounts['seller'] / $revenueScopeCounts['seller']) * 100, 2) : 0.0,
+            'shopAdminRevenueItems'     => $revenueScopeCounts['platform'],
+            'sellerRevenueItems'        => $revenueScopeCounts['seller'],
+            'worstSellerComplaintRates' => $this->sellerComplaintRates($startDate, $endDate),
+        ];
+    }
+
+    /**
+     * @return array{favoriteCategories: list<array{category_id: int, category_name: string, units_sold: int, revenue: float}>}
+     */
+    protected function categoryPreferences(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $rows = $this->revenueItemsQuery($startDate, $endDate)
+            ->join('product_listings', 'product_listings.id', '=', 'order_items.listing_id')
+            ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->join('category_product', 'category_product.product_id', '=', 'products.id')
+            ->join('categories', 'categories.id', '=', 'category_product.category_id')
+            ->selectRaw('categories.id as category_id, categories.name as category_name')
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as units_sold')
+            ->selectRaw('COALESCE(SUM(order_items.subtotal), 0) as revenue')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('units_sold')
+            ->orderByDesc('revenue')
+            ->limit(6)
+            ->get();
+
+        return [
+            'favoriteCategories' => $rows->map(fn (object $row): array => [
+                'category_id'   => (int) $row->category_id,
+                'category_name' => (string) $row->category_name,
+                'units_sold'    => (int) $row->units_sold,
+                'revenue'       => (float) $row->revenue,
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array{topProducts: list<array{product_id: int, product_name: string, units_sold: int, revenue: float, platform_fee_revenue: float, seller_net_revenue: float}>, topSellerProducts: list<array{seller_name: string, product_name: string, units_sold: int, revenue: float, platform_fee_revenue: float}>}
+     */
+    protected function productPerformance(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $topProducts = $this->revenueItemsQuery($startDate, $endDate)
+            ->join('product_listings', 'product_listings.id', '=', 'order_items.listing_id')
+            ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->selectRaw('products.id as product_id, products.name as product_name')
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as units_sold')
+            ->selectRaw('COALESCE(SUM(order_items.subtotal), 0) as revenue')
+            ->selectRaw('COALESCE(SUM(order_items.platform_fee), 0) as platform_fee_revenue')
+            ->selectRaw('COALESCE(SUM(order_items.seller_amount), 0) as seller_net_revenue')
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('units_sold')
+            ->orderByDesc('revenue')
+            ->limit(6)
+            ->get();
+
+        $topSellerProducts = $this->revenueItemsQuery($startDate, $endDate)
+            ->whereNotNull('order_items.seller_id')
+            ->join('sellers', 'sellers.id', '=', 'order_items.seller_id')
+            ->join('product_listings', 'product_listings.id', '=', 'order_items.listing_id')
+            ->join('product_variants', 'product_variants.id', '=', 'product_listings.variant_id')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->selectRaw('sellers.shop_name as seller_name, products.name as product_name')
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as units_sold')
+            ->selectRaw('COALESCE(SUM(order_items.subtotal), 0) as revenue')
+            ->selectRaw('COALESCE(SUM(order_items.platform_fee), 0) as platform_fee_revenue')
+            ->groupBy('sellers.shop_name', 'products.name')
+            ->orderByDesc('units_sold')
+            ->orderByDesc('revenue')
+            ->limit(6)
+            ->get();
+
+        return [
+            'topProducts' => $topProducts->map(fn (object $row): array => [
+                'product_id'           => (int) $row->product_id,
+                'product_name'         => (string) $row->product_name,
+                'units_sold'           => (int) $row->units_sold,
+                'revenue'              => (float) $row->revenue,
+                'platform_fee_revenue' => (float) $row->platform_fee_revenue,
+                'seller_net_revenue'   => (float) $row->seller_net_revenue,
+            ])->all(),
+            'topSellerProducts' => $topSellerProducts->map(fn (object $row): array => [
+                'seller_name'          => (string) $row->seller_name,
+                'product_name'         => (string) $row->product_name,
+                'units_sold'           => (int) $row->units_sold,
+                'revenue'              => (float) $row->revenue,
+                'platform_fee_revenue' => (float) $row->platform_fee_revenue,
+            ])->all(),
+        ];
+    }
+
+    /**
+     * @return array{topSellers: list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, platform_fee_revenue: float, seller_net_revenue: float, complaint_count: int, complaint_rate: float}>, worstComplaintRates: list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, complaint_count: int, complaint_rate: float}>}
+     */
+    protected function sellerPerformance(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $rows = $this->sellerPerformanceQuery($startDate, $endDate)
+            ->get();
+
+        $complaintCounts = $this->sellerComplaintCounts($startDate, $endDate);
+
+        $mapped = $rows->map(function (object $row) use ($complaintCounts): array {
+            $revenueItemsCount = (int) $row->revenue_items_count;
+            $complaintCount = (int) ($complaintCounts[(int) $row->seller_id] ?? 0);
+
+            return [
+                'seller_id'            => (int) $row->seller_id,
+                'seller_name'          => (string) $row->seller_name,
+                'orders_count'         => (int) $row->orders_count,
+                'units_sold'           => (int) $row->units_sold,
+                'gross_revenue'        => (float) $row->gross_revenue,
+                'platform_fee_revenue' => (float) $row->platform_fee_revenue,
+                'seller_net_revenue'   => (float) $row->seller_net_revenue,
+                'complaint_count'      => $complaintCount,
+                'complaint_rate'       => $revenueItemsCount > 0 ? round(($complaintCount / $revenueItemsCount) * 100, 2) : 0.0,
+                'revenue_items_count'  => $revenueItemsCount,
+            ];
+        });
+
+        $topSellers = $mapped
+            ->sort(function (array $left, array $right): int {
+                return [$right['gross_revenue'], $right['units_sold']] <=> [$left['gross_revenue'], $left['units_sold']];
+            })
+            ->take(5)
+            ->values()
+            ->all();
+
+        $worstComplaintRates = $mapped
+            ->sort(function (array $left, array $right): int {
+                return [$right['complaint_rate'], $right['complaint_count']] <=> [$left['complaint_rate'], $left['complaint_count']];
+            })
+            ->take(5)
+            ->values()
+            ->map(fn (array $row): array => [
+                'seller_id'       => $row['seller_id'],
+                'seller_name'     => $row['seller_name'],
+                'orders_count'    => $row['orders_count'],
+                'units_sold'      => $row['units_sold'],
+                'gross_revenue'   => $row['gross_revenue'],
+                'complaint_count' => $row['complaint_count'],
+                'complaint_rate'  => $row['complaint_rate'],
+            ])->all();
+
+        return [
+            'topSellers'          => $topSellers,
+            'worstComplaintRates' => $worstComplaintRates,
+        ];
+    }
+
+    /**
+     * @return array{labels: list<string>, revenue: list<float>, platformFeeRevenue: list<float>, platformOwnedRevenue: list<float>, orders: list<int>}
+     */
+    protected function dashboardRevenueOrdersChart(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $rows = $this->revenueItemsQuery($startDate, $endDate)
+            ->selectRaw('DATE(orders.created_at) as period')
+            ->selectRaw('COALESCE(SUM(order_items.subtotal), 0) as revenue')
+            ->selectRaw('COALESCE(SUM(CASE WHEN order_items.seller_id IS NULL THEN order_items.seller_amount ELSE 0 END), 0) as platform_owned_revenue')
+            ->selectRaw('COALESCE(SUM(CASE WHEN order_items.seller_id IS NOT NULL THEN order_items.platform_fee ELSE 0 END), 0) as platform_fee_revenue')
+            ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        $byPeriod = $rows->keyBy('period');
+        $labels = [];
+        $platformFeeRevenue = [];
+        $platformOwnedRevenue = [];
+        $revenueSeries = [];
+        $orderSeries = [];
+
+        foreach (CarbonPeriod::create($startDate->toDateString(), $endDate->toDateString()) as $date) {
+            $period = $date->format('Y-m-d');
+            $row = $byPeriod->get($period);
+
+            $labels[] = $date->format('d/m');
+            $revenueSeries[] = (float) ($row->revenue ?? 0);
+            $platformFeeRevenue[] = (float) ($row->platform_fee_revenue ?? 0);
+            $platformOwnedRevenue[] = (float) ($row->platform_owned_revenue ?? 0);
+            $orderSeries[] = (int) ($row->orders_count ?? 0);
+        }
+
+        return [
+            'labels'               => $labels,
+            'revenue'              => $revenueSeries,
+            'platformFeeRevenue'   => $platformFeeRevenue,
+            'platformOwnedRevenue' => $platformOwnedRevenue,
+            'orders'               => $orderSeries,
+        ];
+    }
+
+    /**
+     * @param  list<array{category_id: int, category_name: string, units_sold: int, revenue: float}>  $favoriteCategories
+     * @return array{labels: list<string>, quantities: list<int>, values: list<float>}
+     */
+    protected function categoryPreferencesChart(array $favoriteCategories): array
+    {
+        return [
+            'labels'     => array_values(array_map(fn (array $row): string => $row['category_name'], $favoriteCategories)),
+            'quantities' => array_values(array_map(fn (array $row): int => $row['units_sold'], $favoriteCategories)),
+            'values'     => array_values(array_map(fn (array $row): float => $row['revenue'], $favoriteCategories)),
+        ];
+    }
+
+    /**
+     * @param  list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, platform_fee_revenue: float, seller_net_revenue: float, complaint_count: int, complaint_rate: float}>  $topSellers
+     * @return array{labels: list<string>, grossRevenue: list<float>, values: list<float>}
+     */
+    protected function sellerRevenueChart(array $topSellers): array
+    {
+        return [
+            'labels'       => array_values(array_map(fn (array $row): string => $row['seller_name'], $topSellers)),
+            'grossRevenue' => array_values(array_map(fn (array $row): float => $row['gross_revenue'], $topSellers)),
+            'values'       => array_values(array_map(fn (array $row): float => $row['gross_revenue'], $topSellers)),
+        ];
+    }
+
+    /**
+     * @return array{platform: int, seller: int}
+     */
+    protected function revenueScopeCounts(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $row = $this->revenueItemsQuery($startDate, $endDate)
+            ->selectRaw('SUM(CASE WHEN order_items.seller_id IS NULL THEN 1 ELSE 0 END) as platform_count')
+            ->selectRaw('SUM(CASE WHEN order_items.seller_id IS NOT NULL THEN 1 ELSE 0 END) as seller_count')
+            ->first();
+
+        return [
+            'platform' => (int) ($row?->platform_count ?? 0),
+            'seller'   => (int) ($row?->seller_count ?? 0),
+        ];
+    }
+
+    /**
+     * @return array{platform: int, seller: int}
+     */
+    protected function complaintScopeCounts(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        $row = Complaint::query()
+            ->join('order_items', 'complaints.order_item_id', '=', 'order_items.id')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('complaints.created_at', [$startDate, $endDate])
+            ->whereIn('order_items.status', $this->recognizedRevenueStatuses())
+            ->selectRaw('SUM(CASE WHEN order_items.seller_id IS NULL THEN 1 ELSE 0 END) as platform_count')
+            ->selectRaw('SUM(CASE WHEN order_items.seller_id IS NOT NULL THEN 1 ELSE 0 END) as seller_count')
+            ->first();
+
+        return [
+            'platform' => (int) ($row?->platform_count ?? 0),
+            'seller'   => (int) ($row?->seller_count ?? 0),
+        ];
+    }
+
+    /**
+     * @return list<array{seller_id: int, seller_name: string, orders_count: int, units_sold: int, gross_revenue: float, complaint_count: int, complaint_rate: float}>
+     */
+    protected function sellerComplaintRates(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        return $this->sellerPerformance($startDate, $endDate)['worstComplaintRates'];
+    }
+
+    /**
+     * @return Builder<OrderItem>
+     */
+    protected function revenueItemsQuery(CarbonImmutable $startDate, CarbonImmutable $endDate): Builder
+    {
+        return OrderItem::query()
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->whereIn('order_items.status', $this->recognizedRevenueStatuses());
+    }
+
+    /**
+     * @return Builder<OrderItem>
+     */
+    protected function sellerPerformanceQuery(CarbonImmutable $startDate, CarbonImmutable $endDate): Builder
+    {
+        return $this->revenueItemsQuery($startDate, $endDate)
+            ->whereNotNull('order_items.seller_id')
+            ->join('sellers', 'sellers.id', '=', 'order_items.seller_id')
+            ->selectRaw('sellers.id as seller_id, sellers.shop_name as seller_name')
+            ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
+            ->selectRaw('COUNT(DISTINCT order_items.id) as revenue_items_count')
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as units_sold')
+            ->selectRaw('COALESCE(SUM(order_items.subtotal), 0) as gross_revenue')
+            ->selectRaw('COALESCE(SUM(order_items.platform_fee), 0) as platform_fee_revenue')
+            ->selectRaw('COALESCE(SUM(order_items.seller_amount), 0) as seller_net_revenue')
+            ->groupBy('sellers.id', 'sellers.shop_name');
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    protected function sellerComplaintCounts(CarbonImmutable $startDate, CarbonImmutable $endDate): array
+    {
+        return Complaint::query()
+            ->join('order_items', 'complaints.order_item_id', '=', 'order_items.id')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('complaints.created_at', [$startDate, $endDate])
+            ->whereIn('order_items.status', $this->recognizedRevenueStatuses())
+            ->whereNotNull('order_items.seller_id')
+            ->selectRaw('order_items.seller_id as seller_id')
+            ->selectRaw('COUNT(DISTINCT complaints.id) as complaint_count')
+            ->groupBy('order_items.seller_id')
+            ->pluck('complaint_count', 'seller_id')
+            ->map(fn (mixed $value): int => (int) $value)
+            ->all();
     }
 
     /**

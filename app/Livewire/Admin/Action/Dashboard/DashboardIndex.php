@@ -19,14 +19,14 @@ class DashboardIndex extends Component
 
     public ?string $endDate = null;
 
-    /** @var array{labels: list<string>, revenue: list<float>, orders: list<int>} */
-    public array $revenueOrdersChart = ['labels' => [], 'revenue' => [], 'orders' => []];
+    /** @var array{labels: list<string>, revenue: list<float>, platformFeeRevenue: list<float>, platformOwnedRevenue: list<float>, orders: list<int>} */
+    public array $revenueOrdersChart = ['labels' => [], 'revenue' => [], 'platformFeeRevenue' => [], 'platformOwnedRevenue' => [], 'orders' => []];
 
-    /** @var array{labels: list<string>, values: list<float>} */
-    public array $platformRevenueChart = ['labels' => [], 'values' => []];
+    /** @var array{labels: list<string>, quantities: list<int>, values: list<float>} */
+    public array $categoryPreferencesChart = ['labels' => [], 'quantities' => [], 'values' => []];
 
-    /** @var array{labels: list<string>, users: list<int>, sellers: list<int>} */
-    public array $userGrowthChart = ['labels' => [], 'users' => [], 'sellers' => []];
+    /** @var array{labels: list<string>, grossRevenue: list<float>, values: list<float>} */
+    public array $sellerRevenueChart = ['labels' => [], 'grossRevenue' => [], 'values' => []];
 
     protected StatisticsService $statisticsService;
 
@@ -52,27 +52,24 @@ class DashboardIndex extends Component
         [$startDate, $endDate] = $this->dateRange();
 
         $snapshot = $this->statisticsService->buildSnapshot($startDate, $endDate);
-        $dashboardAiContext = $this->statisticsService->summarizeForAi($snapshot);
 
         $this->revenueOrdersChart = $snapshot['charts']['revenue_orders'];
-        $this->platformRevenueChart = $snapshot['charts']['platforms'];
-        $this->userGrowthChart = $snapshot['charts']['user_growth'];
+        $this->categoryPreferencesChart = $snapshot['charts']['category_preferences'];
+        $this->sellerRevenueChart = $snapshot['charts']['seller_revenue'];
 
         return view('pages.admin.dashboard.index', [
-            'rangeLabel'           => $this->rangeLabel($startDate, $endDate),
-            'quickStats'           => $snapshot['quick_stats'],
-            'finance'              => $snapshot['finance'],
-            'operations'           => $snapshot['operations'],
-            'market'               => $snapshot['market'],
-            'growth'               => $snapshot['growth'],
-            'topOrders'            => $snapshot['tables']['top_orders'],
-            'urgentComplaints'     => $snapshot['tables']['urgent_complaints'],
-            'topSellers'           => $snapshot['tables']['top_sellers'],
-            'auditLogs'            => $snapshot['tables']['audit_logs'],
-            'revenueOrdersChart'   => $this->revenueOrdersChart,
-            'platformRevenueChart' => $this->platformRevenueChart,
-            'userGrowthChart'      => $this->userGrowthChart,
-            'dashboardAiContext'   => $dashboardAiContext,
+            'rangeLabel'               => $this->rangeLabel($startDate, $endDate),
+            'revenue'                  => $snapshot['revenue'],
+            'orders'                   => $snapshot['orders'],
+            'complaints'               => $snapshot['complaints'],
+            'categories'               => $snapshot['categories'],
+            'products'                 => $snapshot['products'],
+            'sellers'                  => $snapshot['sellers'],
+            'highlights'               => $snapshot['highlights'],
+            'revenueOrdersChart'       => $this->revenueOrdersChart,
+            'categoryPreferencesChart' => $this->categoryPreferencesChart,
+            'sellerRevenueChart'       => $this->sellerRevenueChart,
+            'dashboardAiContext'       => $snapshot['ai_context'],
         ])->layout('components.layouts.dashboard', [
             'title' => 'Bảng điều khiển',
         ]);

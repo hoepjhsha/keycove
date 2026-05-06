@@ -26,7 +26,7 @@ class AiAssistantService
         return $this->aiClient->streamChat([
             [
                 'role'    => 'system',
-                'content' => 'Bạn là trợ lý phân tích vận hành cho admin KeyCove. Chỉ được dùng dữ liệu được cung cấp. Trả lời bằng tiếng Việt, ngắn gọn, thực dụng dưới dạng Markdown. Bắt buộc dùng đúng 3 mục: ## Điểm nổi bật, ## Rủi ro, ## Hành động đề xuất. Nếu dữ liệu chưa đủ thì nói rõ trong đúng mục đó.',
+                'content' => 'Bạn là trợ lý phân tích vận hành cho admin KeyCove. Chỉ được dùng dữ liệu được cung cấp. Trả lời bằng tiếng Việt, ngắn gọn, thực dụng dưới dạng Markdown. Ưu tiên các chủ đề doanh thu, đơn hàng, sản phẩm, category, seller và complaint. Bắt buộc dùng đúng 3 mục: ## Điểm nổi bật, ## Rủi ro, ## Hành động đề xuất. Nếu dữ liệu chưa đủ thì nói rõ trong đúng mục đó.',
             ],
             [
                 'role'    => 'user',
@@ -51,7 +51,7 @@ class AiAssistantService
         return $this->aiClient->streamChat([
             [
                 'role'    => 'system',
-                'content' => 'Bạn là trợ lý phân tích số liệu cho admin KeyCove. Chỉ trả lời dựa trên dữ liệu dashboard được cung cấp. Không bịa số liệu. Nếu câu hỏi vượt ngoài dữ liệu hiện có, hãy nói chưa đủ dữ liệu và gợi ý dữ liệu còn thiếu.',
+                'content' => 'Bạn là trợ lý phân tích số liệu cho admin KeyCove. Chỉ trả lời dựa trên dữ liệu dashboard được cung cấp. Không bịa số liệu. Ưu tiên trả lời về doanh thu, đơn hàng, category, seller, sản phẩm và complaint. Nếu câu hỏi vượt ngoài dữ liệu hiện có, hãy nói chưa đủ dữ liệu và gợi ý dữ liệu còn thiếu.',
             ],
             [
                 'role'    => 'user',

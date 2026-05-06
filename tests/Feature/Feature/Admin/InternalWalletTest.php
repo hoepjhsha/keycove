@@ -58,6 +58,96 @@ it('admin can access the internal wallet page', function (): void {
         ->assertSee('Ví nội bộ');
 });
 
+it('shows balance revenue and escrow summaries on the internal wallet page', function (): void {
+    $admin = User::factory()->admin()->create();
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = approvedSeller($sellerUser);
+
+    $sellerListing = activeListing($seller);
+    $platformOwnedListing = activeListing($seller);
+    $platformOwnedListing->forceFill(['seller_id' => null])->save();
+
+    Wallet::query()->create([
+        'seller_id' => null,
+        'type'      => WalletType::Internal,
+        'code'      => 'INTWALLET-SUMMARY',
+        'balance'   => 419000,
+        'holding'   => 0,
+    ]);
+
+    $sellerOrder = Order::factory()->forBuyer($buyer)->create([
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $sellerOrderItem = $sellerOrder->items()->create([
+        'listing_id'            => $sellerListing->id,
+        'seller_id'             => $seller->id,
+        'order_item_code'       => 'OI-20260506-BALANCE-1',
+        'product_name_snapshot' => 'Seller Revenue Listing',
+        'variant_snapshot'      => ['variant_id' => $sellerListing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 19900,
+        'seller_amount'         => 179100,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    $platformOwnedOrder = Order::factory()->forBuyer($buyer)->create([
+        'payment_status' => PaymentStatus::Completed,
+        'total_price'    => 199000,
+    ]);
+
+    $platformOwnedOrderItem = $platformOwnedOrder->items()->create([
+        'listing_id'            => $platformOwnedListing->id,
+        'seller_id'             => null,
+        'order_item_code'       => 'OI-20260506-BALANCE-2',
+        'product_name_snapshot' => 'Platform Owned Listing',
+        'variant_snapshot'      => ['variant_id' => $platformOwnedListing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 199000,
+        'subtotal'              => 199000,
+        'platform_fee'          => 0,
+        'seller_amount'         => 199000,
+        'status'                => OrderStatus::Completed,
+    ]);
+
+    Escrow::query()->create([
+        'order_item_id' => $sellerOrderItem->id,
+        'seller_id'     => $seller->id,
+        'amount'        => 179100,
+        'release_date'  => now()->addDays(3),
+        'status'        => EscrowStatus::Holding,
+    ]);
+
+    $releasedEscrow = Escrow::query()->create([
+        'order_item_id' => $platformOwnedOrderItem->id,
+        'seller_id'     => null,
+        'amount'        => 50000,
+        'release_date'  => now()->subDay(),
+        'status'        => EscrowStatus::Released,
+    ]);
+
+    app(InternalWalletService::class)->escrowReleased($releasedEscrow);
+
+    Livewire::actingAs($admin, 'admin')
+        ->test(InternalWalletIndex::class)
+        ->assertOk()
+        ->assertSee('Số dư nội bộ')
+        ->assertSee('Doanh thu nền tảng')
+        ->assertSee('Giá trị escrow')
+        ->assertSee('419,000.00 VND')
+        ->assertSee('218,900.00 VND')
+        ->assertSee('19,900.00 VND')
+        ->assertSee('199,000.00 VND')
+        ->assertSee('179,100.00 VND')
+        ->assertSee('50,000.00 VND')
+        ->assertSee('Doanh thu platform fee')
+        ->assertSee('Doanh thu sản phẩm platform-owned');
+});
+
 it('records payment receipts and escrow holds for settled orders', function (): void {
     $buyer = User::factory()->create();
     $sellerUser = User::factory()->seller()->create();

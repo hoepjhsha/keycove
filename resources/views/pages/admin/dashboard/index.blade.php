@@ -7,17 +7,17 @@
         ]" />
     @endpush
 
-    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-white via-slate-50 to-sky-50/70 p-6 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+    <section class="rounded-3xl border border-slate-200 bg-linear-to-br from-white via-slate-50 to-sky-50/70 p-6 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
         <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div class="space-y-3">
                 <span class="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
-                    KeyCove Admin Intelligence
+                    KeyCove Admin Dashboard
                 </span>
 
                 <div>
-                    <h2 class="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Toàn cảnh tài chính, vận hành và tăng trưởng của KeyCove</h2>
+                    <h2 class="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Doanh thu, đơn hàng, seller và complaint</h2>
                     <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-400">
-                        Dashboard này tập trung vào GMV, doanh thu sàn, điểm nghẽn vận hành, sức khỏe thị trường và tốc độ tăng trưởng trong giai đoạn <span class="font-semibold text-slate-900 dark:text-white">{{ $rangeLabel }}</span>.
+                        Dashboard này tập trung vào doanh thu nền tảng, nhịp đơn hàng, hàng bán chạy, thể loại được ưu thích, seller dẫn đầu và tín hiệu complaint trong giai đoạn <span class="font-semibold text-slate-900 dark:text-white">{{ $rangeLabel }}</span>.
                     </p>
                 </div>
             </div>
@@ -50,51 +50,91 @@
         </div>
     </section>
 
-    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">GMV</p>
-            <p class="mt-3 text-3xl font-semibold text-slate-950 dark:text-white">{{ number_format($quickStats['gmv'], 0, ',', '.') }} VND</p>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Tổng giá trị giao dịch của các đơn đã thanh toán thành công.</p>
+    <section class="grid gap-4 xl:grid-cols-4">
+        <article class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Doanh thu nền tảng</p>
+            <p class="mt-3 text-3xl font-semibold text-emerald-900 dark:text-white">{{ number_format($revenue['platformRevenue'], 0, ',', '.') }} VND</p>
+            <div class="mt-3 space-y-2 text-sm text-emerald-800/90 dark:text-emerald-100/80">
+                <div class="flex items-center justify-between gap-4">
+                    <span>Platform fee</span>
+                    <span class="font-semibold">{{ number_format($revenue['platformFeeRevenue'], 0, ',', '.') }} VND</span>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                    <span>Product owned</span>
+                    <span class="font-semibold">{{ number_format($revenue['platformOwnedRevenue'], 0, ',', '.') }} VND</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 border-t border-emerald-200/70 pt-2 dark:border-emerald-500/20">
+                    <span>Take rate</span>
+                    <span class="font-semibold">{{ number_format($revenue['platformTakeRate'], 2, ',', '.') }}%</span>
+                </div>
+            </div>
         </article>
 
-        <article class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Doanh thu sàn</p>
-            <p class="mt-3 text-3xl font-semibold text-emerald-900 dark:text-white">{{ number_format($quickStats['netRevenue'], 0, ',', '.') }} VND</p>
-            <p class="mt-2 text-sm text-emerald-700/80 dark:text-emerald-200/80">Tổng phí nền tảng thu được từ các đơn ghi nhận doanh thu.</p>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Lượng đơn</p>
+            <p class="mt-3 text-3xl font-semibold text-slate-950 dark:text-white">{{ number_format($orders['ordersCount']) }}</p>
+            <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <div class="flex items-center justify-between gap-4">
+                    <span>Revenue items</span>
+                    <span class="font-semibold text-slate-900 dark:text-white">{{ number_format($orders['revenueItemsCount']) }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                    <span>AOV</span>
+                    <span class="font-semibold text-slate-900 dark:text-white">{{ number_format($orders['averageOrderValue'], 0, ',', '.') }} VND</span>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                    <span>Revenue / order</span>
+                    <span class="font-semibold text-slate-900 dark:text-white">{{ number_format($orders['revenuePerOrder'], 0, ',', '.') }} VND</span>
+                </div>
+            </div>
         </article>
 
         <article class="rounded-3xl border border-rose-200 bg-rose-50 p-5 shadow-sm dark:border-rose-500/20 dark:bg-rose-500/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700 dark:text-rose-300">Khiếu nại mở</p>
-            <p class="mt-3 text-3xl font-semibold text-rose-900 dark:text-white">{{ number_format($quickStats['openComplaints']) }}</p>
-            <p class="mt-2 text-sm text-rose-700/80 dark:text-rose-200/80">Những tranh chấp đang cần đội ngũ admin xử lý.</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700 dark:text-rose-300">Complaint billboard</p>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl bg-white/80 p-4 dark:bg-slate-950/50">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Shop Admin</p>
+                    <p class="mt-2 text-2xl font-semibold text-rose-700 dark:text-rose-300">{{ number_format($complaints['shopAdminComplaintRate'], 2, ',', '.') }}%</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ number_format($complaints['shopAdminComplaintCount']) }} complaint / {{ number_format($complaints['shopAdminRevenueItems']) }} items</p>
+                </div>
+                <div class="rounded-2xl bg-white/80 p-4 dark:bg-slate-950/50">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Seller</p>
+                    <p class="mt-2 text-2xl font-semibold text-rose-700 dark:text-rose-300">{{ number_format($complaints['sellerComplaintRate'], 2, ',', '.') }}%</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ number_format($complaints['sellerComplaintCount']) }} complaint / {{ number_format($complaints['sellerRevenueItems']) }} items</p>
+                </div>
+            </div>
         </article>
 
-        <article class="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-500/20 dark:bg-amber-500/10">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">Seller chờ duyệt</p>
-            <p class="mt-3 text-3xl font-semibold text-amber-900 dark:text-white">{{ number_format($quickStats['pendingKycSeller']) }}</p>
-            <p class="mt-2 text-sm text-amber-700/80 dark:text-amber-200/80">Hàng đợi KYC cần được phê duyệt để mở rộng nguồn cung.</p>
+        <article class="rounded-3xl border border-sky-200 bg-white p-5 shadow-sm dark:border-sky-500/20 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Top signal</p>
+            <div class="mt-3 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Thể loại hot nhất</p>
+                    <p class="mt-1 font-semibold text-slate-950 dark:text-white">{{ data_get($highlights, 'topCategory.category_name', 'Chưa có dữ liệu') }}</p>
+                    <p class="text-xs">{{ number_format((int) data_get($highlights, 'topCategory.units_sold', 0)) }} units</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Seller dẫn đầu</p>
+                    <p class="mt-1 font-semibold text-slate-950 dark:text-white">{{ data_get($highlights, 'topSeller.seller_name', 'Chưa có dữ liệu') }}</p>
+                    <p class="text-xs">{{ number_format((float) data_get($highlights, 'topSeller.gross_revenue', 0), 0, ',', '.') }} VND</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Sản phẩm dẫn đầu</p>
+                    <p class="mt-1 font-semibold text-slate-950 dark:text-white">{{ data_get($highlights, 'topProduct.product_name', 'Chưa có dữ liệu') }}</p>
+                    <p class="text-xs">{{ number_format((int) data_get($highlights, 'topProduct.units_sold', 0)) }} units</p>
+                </div>
+            </div>
         </article>
     </section>
 
-    <livewire:admin.action.dashboard.dashboard-ai-assistant
-        :context="$dashboardAiContext"
-        :range-label="$rangeLabel"
-        :key="'dashboard-ai-'.$timeFilter.'-'.$startDate.'-'.$endDate"
-    />
-
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_22rem]">
+    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">GMV và số đơn theo thời gian</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Cho thấy quy mô giao dịch và nhịp hoạt động của nền tảng trong giai đoạn đã chọn.</p>
-                </div>
+            <div>
+                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Doanh thu nền tảng và lượng đơn theo thời gian</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Cho thấy nguồn doanh thu đang đến từ đâu và nhịp đơn hàng biến động thế nào.</p>
             </div>
 
-            <div class="mt-6" x-data="revenueOrdersChart()" x-init="
-                render(@js($revenueOrdersChart));
-                $watch('$wire.revenueOrdersChart', (value) => update(value));
-            ">
+            <div class="mt-6" x-data="revenueOrdersChart()" x-init="render(@js($revenueOrdersChart)); $watch('$wire.revenueOrdersChart', (value) => update(value));">
                 <div class="relative h-96 min-h-96 w-full" wire:ignore>
                     <div x-ref="chart" class="h-full w-full"></div>
                 </div>
@@ -103,148 +143,67 @@
 
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div>
-                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Doanh thu theo nền tảng</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Nền tảng nào đang mang lại giá trị giao dịch cao nhất cho KeyCove.</p>
+                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Người dùng thích thể loại nào</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dựa trên lượng sold units của category trong khoảng đã chọn.</p>
             </div>
 
-            <div class="mt-6" x-data="platformRevenueChart()" x-init="
-                render(@js($platformRevenueChart));
-                $watch('$wire.platformRevenueChart', (value) => update(value));
-            ">
+            <div class="mt-6" x-data="categoryPreferencesChart()" x-init="render(@js($categoryPreferencesChart)); $watch('$wire.categoryPreferencesChart', (value) => update(value));">
+                <div class="relative h-96 min-h-96 w-full" wire:ignore>
+                    <div x-ref="chart" class="h-full w-full"></div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Seller bán chạy nhất</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Xếp theo gross revenue, có kèm complaint rate để nhìn cả doanh số lẫn rủi ro.</p>
+            </div>
+
+            <div class="mt-6" x-data="sellerRevenueChart()" x-init="render(@js($sellerRevenueChart)); $watch('$wire.sellerRevenueChart', (value) => update(value));">
                 <div class="relative h-96 min-h-96 w-full" wire:ignore>
                     <div x-ref="chart" class="h-full w-full"></div>
                 </div>
             </div>
         </article>
 
-        <aside class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div>
-                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Nhật ký hệ thống</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Theo dõi các thay đổi và hành động gần nhất trên nền tảng.</p>
-            </div>
-
-            <div class="mt-5 space-y-3">
-                @forelse($auditLogs as $log)
-                    @php
-                        $auditTimestamp = is_int($log->created_at)
-                            ? Illuminate\Support\Carbon::createFromTimestamp($log->created_at)
-                            : $log->created_at;
-                    @endphp
-                    <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/50">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <p class="font-semibold text-slate-950 dark:text-white">{{ $log->user?->username ?? 'Hệ thống' }}</p>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $log->event->label() }} · {{ class_basename($log->auditable_type) }} #{{ $log->auditable_id }}</p>
-                            </div>
-                            <span class="text-xs text-slate-400 dark:text-slate-500">{{ $auditTimestamp?->format('d/m H:i') }}</span>
-                        </div>
-                    </article>
-                @empty
-                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                        Chưa có bản ghi audit nào.
-                    </div>
-                @endforelse
-            </div>
-        </aside>
-    </section>
-
-    <section class="grid gap-6 xl:grid-cols-2 2xl:grid-cols-4">
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Dòng tiền sàn</h3>
-            <div class="mt-5 space-y-4 text-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Số dư escrow đang giữ</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($finance['escrowHolding'], 0, ',', '.') }} VND</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Ví nội bộ</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($finance['internalWalletBalance'], 0, ',', '.') }} VND</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Đã chi trả cho seller</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($finance['completedWithdrawals'], 0, ',', '.') }} VND</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Yêu cầu rút tiền pending</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($finance['pendingWithdrawals'], 0, ',', '.') }} VND</span>
-                </div>
-                <div class="rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                    {{ number_format($finance['completedWithdrawalCount']) }} yêu cầu đã hoàn tất · {{ number_format($finance['pendingWithdrawalCount']) }} yêu cầu đang chờ xử lý.
-                </div>
-            </div>
-        </article>
-
-        <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Điểm nóng vận hành</h3>
-            <div class="mt-5 space-y-4 text-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Tỷ lệ tranh chấp</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($operations['disputeRate'], 2, ',', '.') }}%</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">KYC pending</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($operations['pendingKyc']) }}</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Thời gian xử lý khiếu nại TB</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($operations['avgResolutionHours'], 2, ',', '.') }} giờ</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Listing chờ duyệt</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($operations['pendingListings']) }}</span>
-                </div>
-            </div>
-        </article>
-
-        <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Thị trường & tồn kho</h3>
-            <div class="mt-5 space-y-4 text-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Key sẵn sàng bán</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($market['availableKeys']) }}</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Listing hoạt động</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($market['activeListings']) }}</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Key đã hoàn tiền</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($market['refundedKeys']) }}</span>
-                </div>
-
+            <div class="flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Top Region</p>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        @forelse($market['topRegions'] as $region)
-                            <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
-                                {{ $region['name'] }} · {{ number_format($region['revenue'], 0, ',', '.') }}
-                            </span>
+                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Top sản phẩm chung</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Hàng nào đang bán chạy nhất trên toàn nền tảng.</p>
+                </div>
+            </div>
+
+            <div class="mt-5 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3">Sản phẩm</th>
+                            <th class="px-4 py-3 text-right">Units</th>
+                            <th class="px-4 py-3 text-right">Revenue</th>
+                            <th class="px-4 py-3 text-right">Net</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @forelse($products['topProducts'] as $product)
+                            <tr class="text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3">
+                                    <p class="font-semibold text-slate-950 dark:text-white">{{ $product['product_name'] }}</p>
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($product['units_sold']) }}</td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($product['revenue'], 0, ',', '.') }} VND</td>
+                                <td class="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{{ number_format($product['seller_net_revenue'], 0, ',', '.') }} VND</td>
+                            </tr>
                         @empty
-                            <span class="text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu doanh thu theo khu vực.</span>
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu.</td>
+                            </tr>
                         @endforelse
-                    </div>
-                </div>
-            </div>
-        </article>
-
-        <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Người dùng & tăng trưởng</h3>
-            <div class="mt-5 space-y-4 text-sm">
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Người dùng mới</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($growth['newUsers']) }}</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Seller mới</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($growth['newSellers']) }}</span>
-                </div>
-                <div class="flex items-start justify-between gap-4">
-                    <span class="text-slate-500 dark:text-slate-400">Điểm đánh giá trung bình</span>
-                    <span class="font-semibold text-slate-950 dark:text-white">{{ number_format($growth['avgReviewRating'], 2, ',', '.') }}/5</span>
-                </div>
-                <div class="rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                    Chỉ số này phản ánh tốc độ mở rộng cộng đồng và mức hài lòng chung của người mua trên KeyCove.
-                </div>
+                    </tbody>
+                </table>
             </div>
         </article>
     </section>
@@ -253,112 +212,147 @@
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">5 đơn giá trị cao nhất gần đây</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ưu tiên theo tổng giá trị đơn trong giai đoạn đã lọc.</p>
+                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Sản phẩm seller đang bán chạy</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Sản phẩm nào của seller đang tạo doanh số tốt nhất.</p>
                 </div>
             </div>
 
-            <div class="mt-5 space-y-3">
-                @forelse($topOrders as $order)
-                    <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/50">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="font-semibold text-slate-950 dark:text-white">#{{ $order->order_code }}</p>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $order->buyer?->username ?? '-' }} · {{ $order->items_count }} item · {{ $order->created_at?->format('d/m/Y H:i') }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-semibold text-slate-950 dark:text-white">{{ number_format((float) $order->total_price, 0, ',', '.') }} VND</p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $order->payment_status->label() }}</p>
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                        Chưa có đơn hàng trong khoảng thời gian này.
-                    </div>
-                @endforelse
+            <div class="mt-5 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3">Seller</th>
+                            <th class="px-4 py-3">Sản phẩm</th>
+                            <th class="px-4 py-3 text-right">Units</th>
+                            <th class="px-4 py-3 text-right">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @forelse($products['topSellerProducts'] as $product)
+                            <tr class="text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3 font-semibold text-slate-950 dark:text-white">{{ $product['seller_name'] }}</td>
+                                <td class="px-4 py-3">{{ $product['product_name'] }}</td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($product['units_sold']) }}</td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($product['revenue'], 0, ',', '.') }} VND</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </article>
 
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">5 khiếu nại cần xử lý gấp</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ưu tiên các khiếu nại đang mở và tồn đọng lâu nhất.</p>
+                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Seller performance</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Doanh số seller, platform fee và complaint rate.</p>
                 </div>
             </div>
 
-            <div class="mt-5 space-y-3">
-                @forelse($urgentComplaints as $complaint)
-                    <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/50">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="font-semibold text-slate-950 dark:text-white">{{ $complaint->complaint_code ?? 'Complaint #'.$complaint->id }}</p>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $complaint->orderItem?->order?->buyer?->username ?? '-' }} · {{ $complaint->orderItem?->seller?->shop_name ?? 'Shop Admin' }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs font-semibold text-rose-600 dark:text-rose-300">{{ $complaint->status->label() }}</p>
-                                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{{ $complaint->created_at?->diffForHumans() }}</p>
-                            </div>
-                        </div>
-                        <p class="mt-3 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{{ $complaint->reason }}</p>
-                    </article>
-                @empty
-                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                        Không có khiếu nại khẩn cấp cần xử lý.
-                    </div>
-                @endforelse
+            <div class="mt-5 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3">Seller</th>
+                            <th class="px-4 py-3 text-right">Gross</th>
+                            <th class="px-4 py-3 text-right">Orders</th>
+                            <th class="px-4 py-3 text-right">Complaint</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @forelse($sellers['topSellers'] as $seller)
+                            <tr class="text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3">
+                                    <p class="font-semibold text-slate-950 dark:text-white">{{ $seller['seller_name'] }}</p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ number_format($seller['units_sold']) }} units</p>
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($seller['gross_revenue'], 0, ',', '.') }} VND</td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($seller['orders_count']) }}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <span class="rounded-full bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300">
+                                        {{ number_format($seller['complaint_rate'], 2, ',', '.') }}%
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </article>
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+    <section class="grid gap-6 xl:grid-cols-2">
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Người bán tích cực nhất</h3>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dựa trên số lượng đơn thành công và doanh thu họ tạo ra cho nền tảng.</p>
+                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Seller có complaint rate cao</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Billboard để thấy seller nào đang có rủi ro vận hành.</p>
                 </div>
             </div>
 
-            <div class="mt-5 space-y-3">
-                @forelse($topSellers as $seller)
-                    <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950/50">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="font-semibold text-slate-950 dark:text-white">{{ $seller->shop_name }}</p>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ number_format((int) $seller->successful_orders) }} đơn thành công</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-semibold text-slate-950 dark:text-white">{{ number_format((float) $seller->gross_revenue, 0, ',', '.') }} VND</p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Phí sàn {{ number_format((float) $seller->platform_revenue, 0, ',', '.') }} VND</p>
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <div class="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                        Chưa có dữ liệu seller hoạt động trong khoảng thời gian này.
-                    </div>
-                @endforelse
+            <div class="mt-5 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3">Seller</th>
+                            <th class="px-4 py-3 text-right">Complaint</th>
+                            <th class="px-4 py-3 text-right">Items</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        @forelse($sellers['worstComplaintRates'] as $seller)
+                            <tr class="text-sm text-slate-700 dark:text-slate-200">
+                                <td class="px-4 py-3">
+                                    <p class="font-semibold text-slate-950 dark:text-white">{{ $seller['seller_name'] }}</p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ number_format($seller['gross_revenue'], 0, ',', '.') }} VND gross</p>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <span class="rounded-full bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300">{{ number_format($seller['complaint_rate'], 2, ',', '.') }}%</span>
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold">{{ number_format($seller['complaint_count']) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">Chưa có dữ liệu.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </article>
 
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div>
-                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">Tăng trưởng User / Seller</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Nhịp tăng trưởng cộng đồng người mua và nhà bán hàng trên KeyCove.</p>
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-950 dark:text-white">AI insight và hỏi đáp</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dùng snapshot này để sinh insight hoặc hỏi các câu về doanh thu, seller, category, complaint.</p>
+                </div>
             </div>
 
-            <div class="mt-6" x-data="userGrowthChart()" x-init="
-                render(@js($userGrowthChart));
-                $watch('$wire.userGrowthChart', (value) => update(value));
-            ">
-                <div class="relative h-96 min-h-96 w-full" wire:ignore>
-                    <div x-ref="chart" class="h-full w-full"></div>
-                </div>
+            <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-300">
+                <p class="font-semibold text-slate-900 dark:text-white">AI context đã bao gồm:</p>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                    <li>Revenue, orders, complaint và top signals</li>
+                    <li>Top products, favorite categories, seller performance</li>
+                    <li>Worst complaint sellers để hỏi đáp nhanh</li>
+                </ul>
             </div>
         </article>
     </section>
+
+    <livewire:admin.action.dashboard.dashboard-ai-assistant
+        :context="$dashboardAiContext"
+        :range-label="$rangeLabel"
+        :key="'dashboard-ai-'.$timeFilter.'-'.$startDate.'-'.$endDate"
+    />
 
     @push('scripts')
         @once
@@ -372,7 +366,6 @@
                     isDark,
                     labelColor: isDark ? '#94a3b8' : '#64748b',
                     gridColor: isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(15, 23, 42, 0.08)',
-                    mutedColor: isDark ? '#475569' : '#cbd5e1',
                 };
             };
 
@@ -405,14 +398,14 @@
                                 foreColor: theme.labelColor,
                             },
                             noData: window.adminDashboardNoData(),
-                            colors: ['#0f766e', '#2563eb'],
+                            colors: ['#059669', '#2563eb'],
                             stroke: {
                                 width: [3, 3],
                                 curve: 'smooth',
                             },
                             series: [
-                                { name: 'GMV', data: payload.revenue ?? [] },
-                                { name: 'Số đơn', data: payload.orders ?? [] },
+                                { name: 'Doanh thu nền tảng', type: 'line', data: payload.revenue ?? [] },
+                                { name: 'Số đơn', type: 'line', data: payload.orders ?? [] },
                             ],
                             xaxis: {
                                 categories: payload.labels ?? [],
@@ -420,6 +413,7 @@
                             },
                             yaxis: [
                                 {
+                                    seriesName: 'Doanh thu nền tảng',
                                     labels: {
                                         style: { colors: theme.labelColor },
                                         formatter(value) {
@@ -428,6 +422,7 @@
                                     },
                                 },
                                 {
+                                    seriesName: 'Số đơn',
                                     opposite: true,
                                     labels: {
                                         style: { colors: theme.labelColor },
@@ -444,9 +439,9 @@
                                 theme: theme.isDark ? 'dark' : 'light',
                                 y: {
                                     formatter(value, { seriesIndex }) {
-                                        return seriesIndex === 0
-                                            ? `${adminDashboardCurrencyFormatter.format(value ?? 0)} VND`
-                                            : `${adminDashboardCurrencyFormatter.format(value ?? 0)} đơn`;
+                                        return seriesIndex === 1
+                                            ? `${adminDashboardCurrencyFormatter.format(value ?? 0)} đơn`
+                                            : `${adminDashboardCurrencyFormatter.format(value ?? 0)} VND`;
                                     },
                                 },
                             },
@@ -473,7 +468,7 @@
                 };
             };
 
-            window.platformRevenueChart = function () {
+            window.categoryPreferencesChart = function () {
                 return {
                     chart: null,
                     buildOptions(payload) {
@@ -488,11 +483,8 @@
                                 foreColor: theme.labelColor,
                             },
                             noData: window.adminDashboardNoData(),
-                            series: [{
-                                name: 'Doanh thu',
-                                data: payload.values ?? [],
-                            }],
-                            colors: ['#7c3aed'],
+                            series: [{ name: 'Units', data: payload.quantities ?? [] }],
+                            colors: ['#0ea5e9'],
                             plotOptions: {
                                 bar: {
                                     borderRadius: 10,
@@ -502,12 +494,7 @@
                             dataLabels: { enabled: false },
                             xaxis: {
                                 categories: payload.labels ?? [],
-                                labels: {
-                                    style: { colors: theme.labelColor },
-                                    formatter(value) {
-                                        return adminDashboardCurrencyFormatter.format(value ?? 0);
-                                    },
-                                },
+                                labels: { style: { colors: theme.labelColor } },
                             },
                             yaxis: {
                                 labels: { style: { colors: theme.labelColor } },
@@ -515,10 +502,9 @@
                             grid: { borderColor: theme.gridColor },
                             tooltip: {
                                 theme: theme.isDark ? 'dark' : 'light',
-                                x: { show: false },
                                 y: {
                                     formatter(value) {
-                                        return `${adminDashboardCurrencyFormatter.format(value ?? 0)} VND`;
+                                        return `${adminDashboardCurrencyFormatter.format(value ?? 0)} units`;
                                     },
                                 },
                             },
@@ -545,7 +531,7 @@
                 };
             };
 
-            window.userGrowthChart = function () {
+            window.sellerRevenueChart = function () {
                 return {
                     chart: null,
                     buildOptions(payload) {
@@ -553,37 +539,37 @@
 
                         return {
                             chart: {
-                                type: 'area',
+                                type: 'bar',
                                 height: '100%',
                                 width: '100%',
                                 toolbar: { show: false },
                                 foreColor: theme.labelColor,
                             },
                             noData: window.adminDashboardNoData(),
-                            colors: ['#0ea5e9', '#f59e0b'],
-                            series: [
-                                { name: 'User mới', data: payload.users ?? [] },
-                                { name: 'Seller mới', data: payload.sellers ?? [] },
-                            ],
-                            stroke: { curve: 'smooth', width: 3 },
-                            fill: { opacity: 0.16 },
+                            series: [{ name: 'Gross revenue', data: payload.grossRevenue ?? [] }],
+                            colors: ['#7c3aed'],
+                            plotOptions: {
+                                bar: {
+                                    borderRadius: 10,
+                                    horizontal: true,
+                                },
+                            },
                             dataLabels: { enabled: false },
                             xaxis: {
                                 categories: payload.labels ?? [],
                                 labels: { style: { colors: theme.labelColor } },
                             },
                             yaxis: {
-                                labels: {
-                                    style: { colors: theme.labelColor },
-                                    formatter(value) {
-                                        return adminDashboardCurrencyFormatter.format(value ?? 0);
-                                    },
-                                },
+                                labels: { style: { colors: theme.labelColor } },
                             },
                             grid: { borderColor: theme.gridColor },
-                            legend: { labels: { colors: theme.labelColor } },
                             tooltip: {
                                 theme: theme.isDark ? 'dark' : 'light',
+                                y: {
+                                    formatter(value) {
+                                        return `${adminDashboardCurrencyFormatter.format(value ?? 0)} VND`;
+                                    },
+                                },
                             },
                         };
                     },
