@@ -36,6 +36,41 @@ class SystemConfigSeeder extends Seeder
                 'value'       => '0',
                 'description' => 'Phí xử lý giao dịch rút tiền (%) - Thường miễn phí để thu hút Seller',
             ],
+            [
+                'key'         => 'platform_payout_enabled',
+                'value'       => 'true',
+                'description' => 'Bật/tắt cơ chế payout lợi nhuận định kỳ cho chủ nền tảng',
+            ],
+            [
+                'key'         => 'platform_payout_auto_process',
+                'value'       => 'true',
+                'description' => 'Tự động xử lý payout lợi nhuận khi batch đủ điều kiện được tạo',
+            ],
+            [
+                'key'         => 'platform_payout_settlement_days',
+                'value'       => '7',
+                'description' => 'Số ngày chờ sau khi order item hoàn tất trước khi được tính vào payout lợi nhuận',
+            ],
+            [
+                'key'         => 'platform_payout_bank_name',
+                'value'       => 'Vietcombank',
+                'description' => 'Tên ngân hàng nhận payout lợi nhuận nền tảng',
+            ],
+            [
+                'key'         => 'platform_payout_bank_code',
+                'value'       => 'VCB',
+                'description' => 'Mã ngân hàng nhận payout lợi nhuận nền tảng',
+            ],
+            [
+                'key'         => 'platform_payout_bank_account_number',
+                'value'       => '0123456789',
+                'description' => 'Số tài khoản nhận payout lợi nhuận nền tảng',
+            ],
+            [
+                'key'         => 'platform_payout_bank_account_name',
+                'value'       => 'KEYCOVE OWNER',
+                'description' => 'Tên tài khoản nhận payout lợi nhuận nền tảng',
+            ],
 
             // ==========================================
             // 2. VẬN HÀNH ĐƠN HÀNG (ORDERS & ESCROW)
@@ -44,6 +79,11 @@ class SystemConfigSeeder extends Seeder
                 'key'         => 'escrow_duration_hours',
                 'value'       => '72',
                 'description' => 'Thời gian giữ tiền (Escrow) sau khi giao key trước khi cộng vào ví khả dụng của Seller (Giờ)',
+            ],
+            [
+                'key'         => 'order_auto_complete_days',
+                'value'       => '7',
+                'description' => 'Số ngày sau khi giao key mà không có khiếu nại thì order item tự động hoàn tất',
             ],
             [
                 'key'         => 'order_payment_timeout_minutes',

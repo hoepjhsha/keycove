@@ -13,17 +13,17 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(ExpirePendingOrders::class)
-    ->hourly()
+    ->everyMinute()
     ->withoutOverlapping();
 
 Schedule::command(CompleteSettledOrderItems::class)
-    ->daily()
+    ->everyMinute()
     ->withoutOverlapping();
 
 Schedule::command(RetryProcessingWithdrawals::class, ['--minutes' => 5])
-    ->everyFiveMinutes()
+    ->everyMinute()
     ->withoutOverlapping(10);
 
 Schedule::command(ProcessPlatformProfitPayouts::class)
-    ->weeklyOn(1, '02:00')
+    ->everyMinute()
     ->withoutOverlapping();

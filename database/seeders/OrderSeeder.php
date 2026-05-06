@@ -11,6 +11,7 @@ use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\PlatformPayoutStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\TransactionBalanceType;
@@ -25,6 +26,7 @@ use App\Models\InternalWalletEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentTransaction;
+use App\Models\PlatformPayout;
 use App\Models\ProductKey;
 use App\Models\ProductListing;
 use App\Models\Seller;
@@ -121,6 +123,7 @@ class OrderSeeder extends Seeder
 
         $this->seedOrders();
         $this->seedWithdrawals();
+        $this->seedPlatformPayouts();
         $this->syncDerivedBalances();
     }
 
@@ -212,6 +215,8 @@ class OrderSeeder extends Seeder
         $subtotal = $unitPrice * $quantity;
         $platformFee = $listing->seller_id === null ? 0.0 : round($subtotal * self::PLATFORM_FEE_RATE, 2);
         $sellerAmount = round($subtotal - $platformFee, 2);
+        $deliveredAt = $this->resolveDeliveredAt($createdAt, $status);
+        $completedAt = $this->resolveCompletedAt($createdAt, $status);
 
         $orderItem = OrderItem::create([
             'order_id'              => $order->id,
@@ -231,6 +236,8 @@ class OrderSeeder extends Seeder
             'platform_fee'        => $platformFee,
             'seller_amount'       => $sellerAmount,
             'status'              => $status,
+            'delivered_at'        => $deliveredAt,
+            'completed_at'        => $completedAt,
             'buyer_key_viewed_at' => $this->resolveBuyerKeyViewedAt($createdAt, $status),
             'created_at'          => $createdAt,
             'updated_at'          => $this->resolveOrderUpdatedAt($createdAt, $status),
@@ -662,6 +669,152 @@ class OrderSeeder extends Seeder
         }
     }
 
+    protected function seedPlatformPayouts(): void
+    {
+        $eligibleItems = OrderItem::query()
+            ->with('order')
+            ->where('status', OrderStatus::Completed)
+            ->whereNotNull('completed_at')
+            ->where('completed_at', '<=', now()->subDays(7))
+            ->whereDoesntHave('platformPayoutItem')
+            ->orderBy('completed_at')
+            ->get()
+            ->filter(fn (OrderItem $orderItem): bool => $this->platformProfitAmount($orderItem) > 0)
+            ->values();
+
+        if ($eligibleItems->isEmpty()) {
+            return;
+        }
+
+        $groups = $eligibleItems
+            ->groupBy(fn (OrderItem $orderItem): string => Carbon::parse($orderItem->completed_at)->startOfWeek()->toDateString())
+            ->sortKeys()
+            ->values();
+
+        $recentGroups = $groups->slice(max(0, $groups->count() - 8));
+
+        foreach ($recentGroups as $group) {
+            /** @var Collection<int, OrderItem> $group */
+            $firstItem = $group->first();
+
+            if (! $firstItem instanceof OrderItem || $firstItem->completed_at === null) {
+                continue;
+            }
+
+            $periodStart = Carbon::parse($firstItem->completed_at)->startOfWeek();
+            $periodEnd = $periodStart->copy()->endOfWeek();
+            $processedAt = $periodEnd->copy()->addDays(7)->setTime(2, 0, 0);
+
+            if ($processedAt->greaterThan(now())) {
+                continue;
+            }
+
+            $amount = round($group->sum(fn (OrderItem $orderItem): float => $this->platformProfitAmount($orderItem)), 2);
+
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $idempotencyKey = 'seed-platform-payout-'.$periodStart->format('Ymd');
+            $payoutCode = 'PPO-SEED-'.$periodStart->format('Ymd');
+
+            if (PlatformPayout::query()
+                ->where(function ($query) use ($idempotencyKey, $payoutCode): void {
+                    $query->where('idempotency_key', $idempotencyKey)
+                        ->orWhere('payout_code', $payoutCode);
+                })
+                ->exists()
+            ) {
+                continue;
+            }
+
+            $platformPayout = PlatformPayout::create([
+                'payout_code'          => $payoutCode,
+                'period_start'         => $periodStart->toDateString(),
+                'period_end'           => $periodEnd->toDateString(),
+                'settlement_cutoff_at' => $periodEnd,
+                'amount'               => $amount,
+                'status'               => PlatformPayoutStatus::Completed,
+                'bank_name'            => 'Vietcombank',
+                'bank_code'            => 'VCB',
+                'bank_account_number'  => '0123456789',
+                'bank_account_name'    => 'KEYCOVE OWNER',
+                'processed_at'         => $processedAt,
+                'idempotency_key'      => $idempotencyKey,
+                'metadata'             => [
+                    'seeded'                    => true,
+                    'eligible_order_item_count' => $group->count(),
+                    'settlement_days'           => 7,
+                ],
+                'created_at' => $processedAt->copy()->subMinutes(random_int(20, 180)),
+                'updated_at' => $processedAt,
+            ]);
+
+            foreach ($group as $orderItem) {
+                $platformPayout->items()->create([
+                    'order_item_id' => $orderItem->id,
+                    'amount'        => $this->platformProfitAmount($orderItem),
+                    'profit_type'   => $orderItem->seller_id === null ? 'platform_owned_sale' : 'platform_fee',
+                    'metadata'      => [
+                        'seller_id'    => $orderItem->seller_id,
+                        'order_id'     => $orderItem->order_id,
+                        'completed_at' => $orderItem->completed_at?->toDateTimeString(),
+                        'seeded'       => true,
+                    ],
+                    'created_at' => $processedAt,
+                    'updated_at' => $processedAt,
+                ]);
+            }
+
+            $this->createPlatformPayoutLedger($platformPayout, $processedAt);
+            $this->internalWalletBalance -= $amount;
+        }
+    }
+
+    protected function createPlatformPayoutLedger(PlatformPayout $platformPayout, Carbon $processedAt): void
+    {
+        InternalWalletEntry::create([
+            'wallet_id'       => $this->internalWallet->id,
+            'order_id'        => null,
+            'source_type'     => PlatformPayout::class,
+            'source_id'       => $platformPayout->id,
+            'type'            => InternalWalletEntryType::PlatformProfitPayoutRequested,
+            'direction'       => InternalWalletDirection::Outflow,
+            'amount'          => $platformPayout->amount,
+            'status'          => TransactionStatus::Completed,
+            'affects_balance' => false,
+            'idempotency_key' => 'seed-platform-payout-requested-'.$platformPayout->id,
+            'metadata'        => [
+                'payout_code' => $platformPayout->payout_code,
+                'seeded'      => true,
+            ],
+            'occurred_at' => $platformPayout->created_at ?? $processedAt->copy()->subHour(),
+            'created_at'  => $platformPayout->created_at ?? $processedAt->copy()->subHour(),
+            'updated_at'  => $platformPayout->created_at ?? $processedAt->copy()->subHour(),
+        ]);
+
+        InternalWalletEntry::create([
+            'wallet_id'       => $this->internalWallet->id,
+            'order_id'        => null,
+            'source_type'     => PlatformPayout::class,
+            'source_id'       => $platformPayout->id,
+            'type'            => InternalWalletEntryType::PlatformProfitPayoutCompleted,
+            'direction'       => InternalWalletDirection::Outflow,
+            'amount'          => $platformPayout->amount,
+            'status'          => TransactionStatus::Completed,
+            'affects_balance' => true,
+            'idempotency_key' => 'seed-platform-payout-completed-'.$platformPayout->id,
+            'metadata'        => [
+                'payout_code'     => $platformPayout->payout_code,
+                'gateway_message' => 'Seeded completed payout',
+                'seeded'          => true,
+            ],
+            'occurred_at' => $processedAt,
+            'created_at'  => $processedAt,
+            'updated_at'  => $processedAt,
+        ]);
+    }
+
     protected function syncDerivedBalances(): void
     {
         foreach ($this->walletTotals as $walletId => $totals) {
@@ -773,6 +926,33 @@ class OrderSeeder extends Seeder
         }
 
         return $createdAt->copy()->addHours(random_int(1, 48));
+    }
+
+    protected function resolveDeliveredAt(Carbon $createdAt, OrderStatus $status): ?Carbon
+    {
+        if (! in_array($status, [OrderStatus::Delivered, OrderStatus::Completed, OrderStatus::Disputing, OrderStatus::Refunded], true)) {
+            return null;
+        }
+
+        return $createdAt->copy()->addHours(random_int(4, 36));
+    }
+
+    protected function resolveCompletedAt(Carbon $createdAt, OrderStatus $status): ?Carbon
+    {
+        if ($status !== OrderStatus::Completed) {
+            return null;
+        }
+
+        return $createdAt->copy()->addHours(random_int(48, 144));
+    }
+
+    protected function platformProfitAmount(OrderItem $orderItem): float
+    {
+        if ($orderItem->seller_id === null) {
+            return round((float) $orderItem->seller_amount, 2);
+        }
+
+        return round((float) $orderItem->platform_fee, 2);
     }
 
     protected function statusConsumesInventory(OrderStatus $status): bool

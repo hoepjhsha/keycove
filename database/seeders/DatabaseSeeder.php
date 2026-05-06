@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
             AttributeSeeder::class,
             SystemConfigSeeder::class,
             ProductSeeder::class,
-            OrderSeeder::class,
-            ReviewSeeder::class,
-            DisputeSeeder::class,
+            //            OrderSeeder::class,
+            //            ReviewSeeder::class,
+            //            DisputeSeeder::class,
         ]);
     }
 }

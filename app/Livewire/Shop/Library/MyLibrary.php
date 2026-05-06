@@ -16,6 +16,7 @@ use App\Models\OrderItem;
 use App\Models\Review;
 use App\Models\User;
 use App\Services\Shop\ComplaintService;
+use App\Services\Shop\OrderItemCompletionService;
 use App\Services\Shop\PendingOrderService;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
@@ -214,7 +215,7 @@ class MyLibrary extends Component
         ];
     }
 
-    public function confirmReceived(int $orderItemId): void
+    public function confirmReceived(int $orderItemId, OrderItemCompletionService $orderItemCompletionService): void
     {
         $item = $this->resolveOwnedOrderItem($orderItemId);
 
@@ -224,10 +225,11 @@ class MyLibrary extends Component
             return;
         }
 
-        $item->forceFill([
-            'status'       => OrderStatus::Completed,
-            'completed_at' => now(),
-        ])->save();
+        if (! $orderItemCompletionService->complete($item->id, 'buyer_confirmed')) {
+            session()->flash('library-status', 'Không thể hoàn tất sản phẩm này vì đang có khiếu nại hoặc escrow không còn sẵn sàng giải ngân.');
+
+            return;
+        }
 
         $this->confirmReceivedOrderItemId = null;
 

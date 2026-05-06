@@ -2,16 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Enums\EscrowStatus;
 use App\Enums\GeneralStatus;
+use App\Enums\InternalWalletEntryType;
 use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
+use App\Enums\WalletType;
 use App\Events\ComplaintThreadUpdated;
 use App\Livewire\Shop\Complaint\Thread as ComplaintThread;
 use App\Livewire\Shop\Library\MyLibrary;
 use App\Models\Complaint;
+use App\Models\Escrow;
+use App\Models\InternalWalletEntry;
 use App\Models\OperatingSystem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -24,6 +29,7 @@ use App\Models\Region;
 use App\Models\Review;
 use App\Models\Seller;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Notifications\ComplaintActivityNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -251,6 +257,78 @@ test('authenticated user can confirm received through a modal', function (): voi
         ->assertSee('Viết đánh giá');
 
     expect($orderItem->refresh()->status)->toBe(OrderStatus::Completed);
+});
+
+test('confirming a seller item releases escrow to the seller wallet', function (): void {
+    $user = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = Seller::query()->create([
+        'user_id'             => $sellerUser->id,
+        'shop_name'           => 'Library Seller',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $order = Order::factory()->forBuyer($user)->create([
+        'payment_status' => PaymentStatus::Completed,
+    ]);
+    $listing = createAdminListingForLibrary();
+    $listing->forceFill(['seller_id' => $seller->id])->save();
+
+    $orderItem = OrderItem::query()->create([
+        'order_id'              => $order->id,
+        'listing_id'            => $listing->id,
+        'seller_id'             => $seller->id,
+        'product_name_snapshot' => 'Seller Game Key',
+        'variant_snapshot'      => ['variant_id' => $listing->variant_id],
+        'quantity'              => 1,
+        'unit_price'            => 149000,
+        'subtotal'              => 149000,
+        'platform_fee'          => 14900,
+        'seller_amount'         => 134100,
+        'status'                => OrderStatus::Delivered,
+    ]);
+
+    $escrow = Escrow::query()->create([
+        'order_item_id' => $orderItem->id,
+        'seller_id'     => $seller->id,
+        'amount'        => 134100,
+        'release_date'  => now()->addDays(3),
+        'status'        => EscrowStatus::Holding,
+    ]);
+
+    $sellerWallet = Wallet::query()->create([
+        'seller_id' => $seller->id,
+        'type'      => WalletType::Seller,
+        'code'      => 'LIBSELLER001',
+        'balance'   => 0,
+        'holding'   => 134100,
+    ]);
+
+    $productKey = ProductKey::factory()->withListing($listing)->sold()->create([
+        'order_item_id' => $orderItem->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(MyLibrary::class)
+        ->call('promptKeyReveal', $orderItem->id)
+        ->set('keyAccessPassword', 'password')
+        ->call('revealOrderItemKeys')
+        ->assertHasNoErrors()
+        ->assertSee($productKey->key_code)
+        ->call('openConfirmReceivedModal', $orderItem->id)
+        ->call('confirmReceived', $orderItem->id)
+        ->assertSet('confirmReceivedOrderItemId', null)
+        ->assertSee('Sản phẩm trong đơn đã được đánh dấu hoàn tất.');
+
+    expect($orderItem->fresh()->status)->toBe(OrderStatus::Completed)
+        ->and($escrow->fresh()->status)->toBe(EscrowStatus::Released)
+        ->and($sellerWallet->fresh()->balance)->toBe('134100.00')
+        ->and($sellerWallet->fresh()->holding)->toBe('0.00')
+        ->and(InternalWalletEntry::query()->where('type', InternalWalletEntryType::EscrowReleased)->count())->toBe(1);
 });
 
 test('authenticated user can leave a review for a completed order item', function (): void {
