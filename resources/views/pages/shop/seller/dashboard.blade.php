@@ -33,6 +33,9 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('seller.products.index') }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                        Quản lý sản phẩm
+                    </a>
                     <a href="{{ route('seller.listings.index') }}" class="inline-flex items-center justify-center rounded-2xl bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
                         Quản lý listing
                     </a>

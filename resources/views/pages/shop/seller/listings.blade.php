@@ -62,10 +62,8 @@
                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Cách tạo <span class="text-red-400">*</span></label>
                     <select wire:model.live="createMode" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
                         <option value="existing_variant">Dùng biến thể có sẵn</option>
-                        {{--
                         <option value="existing_product_variant">Tạo biến thể từ sản phẩm có sẵn</option>
                         <option value="new_product">Tạo sản phẩm mới</option>
-                        --}}
                     </select>
                     @error('createMode')
                         <small class="error text-red-500 text-xs">{{ $message }}</small>
@@ -85,7 +83,7 @@
                             <small class="error text-red-500 text-xs">{{ $message }}</small>
                         @enderror
                     </div>
-                {{-- @elseif($createMode === 'existing_product_variant')
+                @elseif($createMode === 'existing_product_variant')
                     <div>
                         <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Sản phẩm <span class="text-red-400">*</span></label>
                         <select wire:model="selectedProductId" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
@@ -183,14 +181,16 @@
                         </div>
 
                         <div>
-                            <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Trạng thái <span class="text-red-400">*</span></label>
-                            <select wire:model="productForm.status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
-                                @foreach(\App\Enums\GeneralStatus::cases() as $status)
-                                    @if($status !== \App\Enums\GeneralStatus::Deleted)
-                                        <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
+                            <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Thumbnail</label>
+                            <input wire:model="productForm.image" type="file" accept="image/*" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
+                            @error('productForm.image')
+                                <small class="error text-red-500 text-xs">{{ $message }}</small>
+                            @enderror
+                            @if($productForm->image)
+                                <div class="mt-3 overflow-hidden rounded-2xl border border-black/8 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/5">
+                                    <img src="{{ $productForm->image->temporaryUrl() }}" alt="Thumbnail preview" class="h-40 w-full rounded-xl object-cover">
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -235,7 +235,6 @@
                             <input wire:model="variantForm.edition" type="text" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="Ví dụ: Bản Standard">
                         </div>
                     </div>
-                --}}
                 @endif
             @endif
 
@@ -247,25 +246,11 @@
                 @enderror
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-1">
                 <div>
-                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Giá <span class="text-red-400">*</span></label>
+                    <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Giá <span class="text-red-400">*</span></label>
                     <input wire:model="listingForm.price" type="number" min="0" step="0.01" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0">
                     @error('listingForm.price')
-                        <small class="error text-red-500 text-xs">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div>
-                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">Trạng thái <span class="text-red-400">*</span></label>
-                    <select wire:model="listingForm.status" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500">
-                        @foreach(\App\Enums\ProductListingStatus::cases() as $status)
-                            @if($status !== \App\Enums\ProductListingStatus::Deleted)
-                                <option value="{{ $status->value }}">{{ $status->label() }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                    @error('listingForm.status')
                         <small class="error text-red-500 text-xs">{{ $message }}</small>
                     @enderror
                 </div>
@@ -336,4 +321,6 @@
             </div>
         </div>
     </x-reusable.modal>
+
+    <x-admin.swal-listener table-name="sellerListingsTable" />
 </div>

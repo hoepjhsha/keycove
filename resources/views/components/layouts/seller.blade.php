@@ -19,6 +19,10 @@
         ? route('seller.listings.index')
         : url('/seller/listings');
 
+    $productsUrl = \Illuminate\Support\Facades\Route::has('seller.products.index')
+        ? route('seller.products.index')
+        : url('/seller/products');
+
     $ordersUrl = \Illuminate\Support\Facades\Route::has('seller.orders.index')
         ? route('seller.orders.index')
         : url('/seller/orders');
@@ -42,6 +46,7 @@
     $navItems = [
         ['label' => 'Tổng quan', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
         ['label' => 'Hồ sơ đăng ký', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
+        ['label' => 'Sản phẩm', 'url' => $productsUrl, 'section' => 'products', 'icon' => 'fa-solid fa-boxes-stacked'],
         ['label' => 'Listing', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
         ['label' => 'Đơn hàng', 'url' => $ordersUrl, 'section' => 'orders', 'icon' => 'fa-solid fa-bag-shopping'],
         ['label' => 'Khiếu nại', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
@@ -50,6 +55,7 @@
     ];
 
     $managementItems = [
+        ['label' => 'Sản phẩm', 'url' => $productsUrl, 'section' => 'products', 'icon' => 'fa-solid fa-boxes-stacked'],
         ['label' => 'Listing', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
         ['label' => 'Đơn hàng', 'url' => $ordersUrl, 'section' => 'orders', 'icon' => 'fa-solid fa-bag-shopping'],
         ['label' => 'Khiếu nại', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
@@ -86,7 +92,7 @@
                     </a>
 
                     <div class="relative shrink-0" x-data="{ open: false }">
-                        <button type="button" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-full px-4 py-2 transition-colors {{ in_array($activeSection, ['listings', 'orders', 'complaints', 'withdrawals'], true) ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
+                        <button type="button" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-full px-4 py-2 transition-colors {{ in_array($activeSection, ['products', 'listings', 'orders', 'complaints', 'withdrawals'], true) ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
                             <i class="fa-solid fa-layer-group text-[12px]"></i>
                             Quản lý
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 transition-transform duration-300" x-bind:class="open ? 'rotate-180' : ''"></i>

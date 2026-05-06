@@ -24,6 +24,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -84,7 +85,7 @@ class SellerListings extends Component
         return [
             'listings'        => (clone $listingsQuery)->count(),
             'activeListings'  => (clone $listingsQuery)->where('status', ProductListingStatus::Active)->count(),
-            'pendingListings' => (clone $listingsQuery)->where('status', ProductListingStatus::Pending)->count(),
+            'pendingListings' => (clone $listingsQuery)->where('status', ProductListingStatus::Draft)->count(),
             'products'        => (clone $productsQuery)->where('status', '!=', GeneralStatus::Deleted->value)->count(),
             'availableKeys'   => ProductKey::query()
                 ->whereHas('listing', function (Builder $query) use ($seller): void {
@@ -105,6 +106,7 @@ class SellerListings extends Component
 
         return Product::query()
             ->select(['id', 'name', 'submitted_by_seller_id', 'status'])
+            ->withoutTrashed()
             ->where(function (Builder $query) use ($seller): void {
                 $query->where(function (Builder $adminQuery): void {
                     $adminQuery->whereNull('submitted_by_seller_id')
@@ -132,8 +134,11 @@ class SellerListings extends Component
     #[Computed]
     public function variantOptions(): Collection
     {
+        $seller = $this->seller;
+
         return ProductVariant::query()
             ->select(['id', 'product_id', 'region_id', 'platform_id', 'os_id', 'edition', 'status'])
+            ->withoutTrashed()
             ->where('status', '!=', ProductVariantStatus::Deleted->value)
             ->with([
                 'product:id,name',
@@ -141,12 +146,16 @@ class SellerListings extends Component
                 'platform:id,name',
                 'operatingSystem:id,name',
             ])
-            ->whereHas('product', function (Builder $query): void {
-                $query->where('status', GeneralStatus::Active)
-                    ->where(function (Builder $productQuery): void {
-                        $productQuery->whereNull('submitted_by_seller_id')
-                            ->orWhereNotNull('submitted_by_seller_id');
+            ->whereHas('product', function (Builder $query) use ($seller): void {
+                $query->where(function (Builder $productQuery) use ($seller): void {
+                    $productQuery->where(function (Builder $adminQuery): void {
+                        $adminQuery->whereNull('submitted_by_seller_id')
+                            ->where('status', GeneralStatus::Active);
+                    })->orWhere(function (Builder $sellerQuery) use ($seller): void {
+                        $sellerQuery->where('submitted_by_seller_id', $seller->id)
+                            ->where('status', '!=', GeneralStatus::Deleted->value);
                     });
+                });
             })
             ->orderBy('product_id')
             ->orderBy('region_id')
@@ -265,31 +274,39 @@ class SellerListings extends Component
         $this->editingListingId = $listing->id;
         $this->listingForm->setListing($listing);
         $this->listingForm->seller_id = $this->seller->id;
+        $this->listingForm->status = $listing->status->value;
         $this->showListingModal = true;
     }
 
     public function saveListing(): void
     {
         try {
-            if ($this->editingListingId !== null) {
-                $listing = $this->resolveOwnedListing($this->editingListingId, true);
-                $this->listingForm->listing = $listing;
-                $this->listingForm->seller_id = $this->seller->id;
-                $this->listingForm->update();
+            DB::transaction(function (): void {
+                if ($this->editingListingId !== null) {
+                    $listing = $this->resolveOwnedListing($this->editingListingId, true);
+                    $this->listingForm->listing = $listing;
+                    $this->listingForm->seller_id = $this->seller->id;
+                    $this->listingForm->status = $listing->status->value;
+                    $this->listingForm->update();
 
-                $message = 'Listing đã được cập nhật thành công.';
-            } else {
+                    return;
+                }
+
                 $this->listingForm->seller_id = $this->seller->id;
 
-                $message = match ($this->createMode) {
-                    'existing_variant' => $this->createListingFromExistingVariant(),
-                    // 'existing_product_variant' => $this->createListingFromExistingProduct(),
-                    // 'new_product'              => $this->createListingWithNewProduct(),
-                    default => throw ValidationException::withMessages([
+                match ($this->createMode) {
+                    'existing_variant'         => $this->createListingFromExistingVariant(),
+                    'existing_product_variant' => $this->createListingFromExistingProduct(),
+                    'new_product'              => $this->createListingWithNewProduct(),
+                    default                    => throw ValidationException::withMessages([
                         'createMode' => 'Cách tạo không hợp lệ.',
                     ]),
                 };
-            }
+            });
+
+            $message = $this->editingListingId !== null
+                ? 'Listing đã được cập nhật thành công.'
+                : 'Listing đã được tạo thành công.';
 
             $this->showListingModal = false;
             $this->dispatch('pg:eventRefresh-sellerListingsTable');
@@ -378,11 +395,10 @@ class SellerListings extends Component
 
         $this->productForm->submitted_by_seller_id = $this->seller->id;
         $this->productForm->status = GeneralStatus::Inactive->value;
-
         $this->variantForm->status = ProductVariantStatus::Draft->value;
+        $this->listingForm->status = ProductListingStatus::Draft->value;
 
         $this->listingForm->seller_id = $this->seller->id;
-        $this->listingForm->status = ProductListingStatus::Pending->value;
     }
 
     protected function resetListingForms(): void
@@ -401,7 +417,7 @@ class SellerListings extends Component
         $this->productForm->status = GeneralStatus::Inactive->value;
         $this->variantForm->status = ProductVariantStatus::Draft->value;
         $this->listingForm->seller_id = $this->seller->id;
-        $this->listingForm->status = ProductListingStatus::Pending->value;
+        $this->listingForm->status = ProductListingStatus::Draft->value;
     }
 
     protected function createListingFromExistingVariant(): string
@@ -410,29 +426,27 @@ class SellerListings extends Component
             'selectedVariantId'        => ['required', 'integer'],
             'listingForm.display_name' => ['nullable', 'string', 'max:255'],
             'listingForm.price'        => ['required', 'numeric', 'min:0'],
-            'listingForm.status'       => ['required', 'integer'],
         ]);
 
         $variant = ProductVariant::query()
+            ->withoutTrashed()
             ->whereKey($this->selectedVariantId)
-            ->where('status', '!=', ProductVariantStatus::Deleted->value)
             ->whereHas('product', function (Builder $query): void {
-                $query->where('status', GeneralStatus::Active)
-                    ->where(function (Builder $productQuery): void {
-                        $productQuery->whereNull('submitted_by_seller_id')
-                            ->orWhere('submitted_by_seller_id', $this->seller->id);
-                    });
+                $this->applyProductAccessRules($query);
             })
             ->firstOrFail();
 
+        $variant->loadMissing('product');
+
         $this->listingForm->variant_id = $variant->id;
+        $this->listingForm->seller_id = $this->seller->id;
+        $this->listingForm->status = $this->defaultChildListingStatus($variant->product)->value;
 
         $this->listingForm->store();
 
         return 'Listing đã được tạo thành công.';
     }
 
-    /*
     protected function createListingFromExistingProduct(): string
     {
         $this->validate([
@@ -443,24 +457,23 @@ class SellerListings extends Component
             'variantForm.edition'      => ['nullable', 'string', 'max:25'],
             'listingForm.display_name' => ['nullable', 'string', 'max:255'],
             'listingForm.price'        => ['required', 'numeric', 'min:0'],
-            'listingForm.status'       => ['required', 'integer'],
         ]);
 
-        $product = $this->resolveOwnedProduct($this->selectedProductId);
+        $product = $this->resolveAllowedProduct($this->selectedProductId);
 
         $this->variantForm->product_id = $product->id;
-        $this->variantForm->status = ProductVariantStatus::Draft->value;
+        $this->variantForm->status = $this->defaultChildVariantStatus($product)->value;
 
         $variant = $this->variantForm->store();
 
         $this->listingForm->variant_id = $variant->id;
+        $this->listingForm->seller_id = $this->seller->id;
+        $this->listingForm->status = $this->defaultChildListingStatus($product)->value;
         $this->listingForm->store();
 
         return 'Listing đã được tạo thành công.';
     }
-    */
 
-    /*
     protected function createListingWithNewProduct(): string
     {
         $this->validate([
@@ -477,24 +490,24 @@ class SellerListings extends Component
             'variantForm.edition'      => ['nullable', 'string', 'max:25'],
             'listingForm.display_name' => ['nullable', 'string', 'max:255'],
             'listingForm.price'        => ['required', 'numeric', 'min:0'],
-            'listingForm.status'       => ['required', 'integer'],
         ]);
 
         $this->productForm->submitted_by_seller_id = $this->seller->id;
+        $this->productForm->status = GeneralStatus::Inactive->value;
 
         $product = $this->productForm->store();
 
         $this->variantForm->product_id = $product->id;
-        $this->variantForm->status = ProductVariantStatus::Draft->value;
+        $this->variantForm->status = $this->defaultChildVariantStatus($product)->value;
         $variant = $this->variantForm->store();
 
         $this->listingForm->variant_id = $variant->id;
         $this->listingForm->seller_id = $this->seller->id;
+        $this->listingForm->status = $this->defaultChildListingStatus($product)->value;
         $this->listingForm->store();
 
         return 'Listing đã được tạo thành công.';
     }
-    */
 
     protected function resolveOwnedListing(int $listingId, bool $withTrashed = false): ProductListing
     {
@@ -507,16 +520,46 @@ class SellerListings extends Component
         return $query->findOrFail($listingId);
     }
 
-    protected function resolveOwnedProduct(int $productId): Product
+    protected function resolveAllowedProduct(int $productId): Product
     {
         return Product::query()
+            ->withoutTrashed()
             ->whereKey($productId)
             ->where(function (Builder $query): void {
-                $query->whereNull('submitted_by_seller_id')
-                    ->orWhere('submitted_by_seller_id', $this->seller->id);
+                $this->applyProductAccessRules($query);
             })
-            ->where('status', '!=', GeneralStatus::Deleted->value)
             ->firstOrFail();
+    }
+
+    protected function applyProductAccessRules(Builder $query): void
+    {
+        $query->where(function (Builder $accessQuery): void {
+            $accessQuery->where(function (Builder $adminQuery): void {
+                $adminQuery->whereNull('submitted_by_seller_id')
+                    ->where('status', GeneralStatus::Active);
+            })->orWhere(function (Builder $sellerQuery): void {
+                $sellerQuery->where('submitted_by_seller_id', $this->seller->id)
+                    ->where('status', '!=', GeneralStatus::Deleted->value);
+            });
+        });
+    }
+
+    protected function defaultChildVariantStatus(Product $product): ProductVariantStatus
+    {
+        return $product->status === GeneralStatus::Active
+            ? ProductVariantStatus::Active
+            : ProductVariantStatus::Draft;
+    }
+
+    protected function defaultChildListingStatus(Product|ProductVariant $model): ProductListingStatus
+    {
+        $productStatus = $model instanceof ProductVariant
+            ? $model->product?->status
+            : $model->status;
+
+        return $productStatus === GeneralStatus::Active
+            ? ProductListingStatus::Active
+            : ProductListingStatus::Draft;
     }
 
     protected function syncListingStockCount(ProductListing|int $listing): void

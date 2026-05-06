@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Seller\Table;
 
+use App\Enums\GeneralStatus;
 use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\UserRole;
@@ -156,8 +157,10 @@ final class SellerListingsTable extends PowerGridComponent
     public function actions(ProductListing $row): array
     {
         $deleteClass = $row->status === ProductListingStatus::Deleted ? 'hidden' : '';
+        $toggleable = in_array($row->status, [ProductListingStatus::Active, ProductListingStatus::Hidden], true)
+            && $row->variant?->product?->status === GeneralStatus::Active;
 
-        return [
+        $actions = [
             Button::add('keys')
                 ->slot('<i class="fa-solid fa-key"></i>')
                 ->id()
@@ -166,8 +169,10 @@ final class SellerListingsTable extends PowerGridComponent
                     'x-tooltip' => 'Quản lý key',
                 ])
                 ->dispatch('openKeysModal', ['listingId' => $row->id]),
+        ];
 
-            Button::add('toggle-status')
+        if ($toggleable) {
+            $actions[] = Button::add('toggle-status')
                 ->slot($row->status === ProductListingStatus::Active
                     ? '<i class="fa-solid fa-circle-xmark text-red-400 hover:text-red-700"></i>'
                     : '<i class="fa-solid fa-circle-check text-green-500 hover:text-green-800"></i>')
@@ -176,35 +181,37 @@ final class SellerListingsTable extends PowerGridComponent
                 ->attributes([
                     'x-tooltip' => $row->status === ProductListingStatus::Active ? 'Tắt bán' : 'Kích hoạt',
                 ])
-                ->dispatch('toggleListingStatus', ['rowId' => $row->id]),
+                ->dispatch('toggleListingStatus', ['rowId' => $row->id]);
+        }
 
-            Button::add('edit')
-                ->slot('<i class="fa-solid fa-pen-to-square"></i>')
-                ->id()
-                ->class('px-1 py-1 text-blue-600 transition-all hover:scale-110 hover:text-blue-800 '.$deleteClass)
-                ->attributes([
-                    'x-tooltip' => 'Sửa listing',
-                ])
-                ->dispatch('editListing', ['listingId' => $row->id]),
+        $actions[] = Button::add('edit')
+            ->slot('<i class="fa-solid fa-pen-to-square"></i>')
+            ->id()
+            ->class('px-1 py-1 text-blue-600 transition-all hover:scale-110 hover:text-blue-800 '.$deleteClass)
+            ->attributes([
+                'x-tooltip' => 'Sửa listing',
+            ])
+            ->dispatch('editListing', ['listingId' => $row->id]);
 
-            Button::add('delete')
-                ->slot('<i class="fa-solid fa-trash-can"></i>')
-                ->id()
-                ->class('px-1 py-1 text-red-500 transition-all hover:scale-110 hover:text-red-700 '.$deleteClass)
-                ->attributes([
-                    'x-tooltip' => 'Xóa',
-                ])
-                ->dispatch('deleteListing', ['rowId' => $row->id]),
+        $actions[] = Button::add('delete')
+            ->slot('<i class="fa-solid fa-trash-can"></i>')
+            ->id()
+            ->class('px-1 py-1 text-red-500 transition-all hover:scale-110 hover:text-red-700 '.$deleteClass)
+            ->attributes([
+                'x-tooltip' => 'Xóa',
+            ])
+            ->dispatch('deleteListing', ['rowId' => $row->id]);
 
-            Button::add('restore')
-                ->slot('<i class="fa-solid fa-rotate-left"></i>')
-                ->id()
-                ->class('px-1 py-1 text-yellow-500 transition-all hover:scale-110 hover:text-yellow-700 '.($row->status === ProductListingStatus::Deleted ? '' : 'hidden'))
-                ->attributes([
-                    'x-tooltip' => 'Khôi phục',
-                ])
-                ->dispatch('restoreListing', ['rowId' => $row->id]),
-        ];
+        $actions[] = Button::add('restore')
+            ->slot('<i class="fa-solid fa-rotate-left"></i>')
+            ->id()
+            ->class('px-1 py-1 text-yellow-500 transition-all hover:scale-110 hover:text-yellow-700 '.($row->status === ProductListingStatus::Deleted ? '' : 'hidden'))
+            ->attributes([
+                'x-tooltip' => 'Khôi phục',
+            ])
+            ->dispatch('restoreListing', ['rowId' => $row->id]);
+
+        return $actions;
     }
 
     #[On('toggleListingStatus')]
@@ -222,13 +229,20 @@ final class SellerListingsTable extends PowerGridComponent
     public function performToggleListingStatus(int $id): void
     {
         $listing = $this->resolveOwnedListing($id);
+        $listing->loadMissing('variant.product');
+
+        if ($listing->variant?->product?->status !== GeneralStatus::Active) {
+            return;
+        }
+
+        if (! in_array($listing->status, [ProductListingStatus::Active, ProductListingStatus::Hidden], true)) {
+            return;
+        }
 
         $listing->status = match ($listing->status) {
-            ProductListingStatus::Active  => ProductListingStatus::Hidden,
-            ProductListingStatus::Hidden  => ProductListingStatus::Draft,
-            ProductListingStatus::Draft   => ProductListingStatus::Active,
-            ProductListingStatus::Pending => ProductListingStatus::Active,
-            default                       => ProductListingStatus::Draft,
+            ProductListingStatus::Active => ProductListingStatus::Hidden,
+            ProductListingStatus::Hidden => ProductListingStatus::Active,
+            default                      => $listing->status,
         };
 
         $listing->save();
@@ -283,7 +297,10 @@ final class SellerListingsTable extends PowerGridComponent
     {
         $listing = $this->resolveOwnedListing($id, true);
         $listing->restore();
-        $listing->status = ProductListingStatus::Draft;
+        $listing->loadMissing('variant.product');
+        $listing->status = $listing->variant?->product?->status === GeneralStatus::Active
+            ? ProductListingStatus::Hidden
+            : ProductListingStatus::Draft;
         $listing->save();
 
         $this->dispatch('swal:success', ['message' => 'Listing đã được khôi phục thành công.']);
