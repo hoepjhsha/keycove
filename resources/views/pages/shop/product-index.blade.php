@@ -3,89 +3,92 @@
     <div aria-hidden="true" class="pointer-events-none absolute -top-8 right-0 -z-10 h-56 w-56 rounded-full bg-[#D32F2F]/8 blur-3xl dark:bg-[#D32F2F]/10"></div>
     <div aria-hidden="true" class="pointer-events-none absolute left-0 top-32 -z-10 h-56 w-56 rounded-full bg-indigo-500/8 blur-3xl dark:bg-indigo-400/10"></div>
 
-    <div class="mx-auto max-w-7xl space-y-6">
-        <section class="relative overflow-hidden rounded-[2rem] border border-black/8 bg-linear-to-br from-white via-[#FCF9F4] to-[#F6EBD9] p-5 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)] sm:p-6 lg:p-8 dark:border-white/10 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-            <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-radial from-white/80 via-white/10 to-transparent lg:block dark:from-white/10 dark:via-white/5"></div>
-            <div class="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
-                <div class="space-y-4">
-                    <nav aria-label="Breadcrumb">
-                        <ol class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                            <li>
-                                <a href="{{ route('app.products.index') }}" class="transition-colors hover:text-[#D32F2F] dark:hover:text-[#ff8b8b]">
-                                    <i class="fa-solid fa-house"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </li>
-                            <li class="font-semibold text-gray-800 dark:text-gray-200" aria-current="page">Sản phẩm</li>
-                        </ol>
-                    </nav>
+    @php
+        $selectedCategory = collect($categories)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $category);
+        $selectedPlatform = collect($platforms)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $platform);
+        $selectedRegion = collect($regions)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $region);
+        $selectedOs = collect($operatingSystems)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $os);
 
-                    <div class="space-y-3">
-                        <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
-                            <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                            Catalog cửa hàng
-                        </p>
-                        <div class="space-y-2">
-                            <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Duyệt các key game và phần mềm đã sẵn sàng để mua</h1>
-                            <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Tìm key nhanh hơn với thẻ sản phẩm rõ ràng, bộ lọc chi tiết và trải nghiệm mua sắm gọn gàng.</p>
-                        </div>
+        $hasActiveFilters = filled($search)
+            || filled($category)
+            || filled($platform)
+            || filled($region)
+            || filled($os)
+            || filled($edition)
+            || filled($minPrice)
+            || filled($maxPrice)
+            || (bool) $inStock;
+
+        $activeFilterTags = collect([
+            filled($search) ? 'Tìm: '.trim($search) : null,
+            $selectedCategory ? 'Danh mục: '.data_get($selectedCategory, 'name', $selectedCategory->name ?? '') : null,
+            $selectedPlatform ? 'Nền tảng: '.data_get($selectedPlatform, 'name', $selectedPlatform->name ?? '') : null,
+            $selectedRegion ? 'Khu vực: '.data_get($selectedRegion, 'name', $selectedRegion->name ?? '') : null,
+            $selectedOs ? 'OS: '.data_get($selectedOs, 'name', $selectedOs->name ?? '') : null,
+            filled($edition) ? 'Phiên bản: '.trim($edition) : null,
+            filled($minPrice) ? 'Tối thiểu: '.number_format((float) $minPrice, 0, ',', '.').' VND' : null,
+            filled($maxPrice) ? 'Tối đa: '.number_format((float) $maxPrice, 0, ',', '.').' VND' : null,
+            $inStock ? 'Chỉ còn hàng' : null,
+        ])->filter()->values();
+
+        $activeFilterCount = $activeFilterTags->count();
+    @endphp
+
+    <div class="mx-auto max-w-7xl space-y-6">
+        <section class="rounded-[2rem] border border-black/8 bg-gray-950 p-5 text-white shadow-[0_28px_90px_-44px_rgba(0,0,0,0.6)] sm:p-6 lg:p-8">
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+                <div class="space-y-5">
+                    <div class="flex flex-wrap items-center gap-3 text-sm">
+                        <a href="{{ route('app.shop.index') }}" wire:navigate.hover class="text-white/60 transition hover:text-white">Trang chủ</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-white/30"></i>
+                        <span class="font-semibold">Sản phẩm</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-semibold tracking-tight sm:text-5xl">Tìm đúng key.</h1>
+                        <p class="max-w-xl text-sm text-white/65 sm:text-base">Gõ tên game, chọn danh mục, rồi lọc sâu nếu cần.</p>
+                    </div>
+
+                    <div class="grid gap-3 rounded-[1.7rem] border border-white/10 bg-white/10 p-3 backdrop-blur lg:grid-cols-[minmax(0,1fr)_13rem_12rem]">
+                        <label>
+                            <span class="sr-only">Tìm sản phẩm</span>
+                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Tìm game, publisher, edition..." class="h-14 w-full rounded-2xl border border-white/10 bg-white px-5 text-base text-gray-950 shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                        </label>
+
+                        <select wire:model.live="category" class="h-14 rounded-2xl border border-white/10 bg-white px-4 text-sm text-gray-950 shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <option value="">Tất cả danh mục</option>
+                            @foreach($categories as $categoryOption)
+                                <option value="{{ data_get($categoryOption, 'slug') }}">{{ data_get($categoryOption, 'name') }}</option>
+                            @endforeach
+                        </select>
+
+                        <select wire:model.live="sortBy" class="h-14 rounded-2xl border border-white/10 bg-white px-4 text-sm text-gray-950 shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            @foreach($sortOptions as $option)
+                                <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Catalog đang bán</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($availableListings) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing có thể tìm kiếm</p>
-                    </div>
+                <div class="rounded-[1.7rem] border border-white/10 bg-white/10 p-5 backdrop-blur">
+                    <p class="text-sm text-white/55">Kết quả</p>
+                    <p class="mt-2 text-4xl font-semibold">{{ number_format($availableListings) }}</p>
+                    <p class="mt-3 text-sm text-white/65">{{ $activeFilterCount > 0 ? $activeFilterCount.' bộ lọc đang bật' : 'Chưa lọc' }}</p>
 
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Đang hiển thị</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $listings->count() }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing trên trang này</p>
-                    </div>
-
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Kiểu hiển thị</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ ucfirst($viewMode) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Chuyển giữa lưới và danh sách</p>
-                    </div>
+                    <button type="button" wire:click="clearFilters" @disabled(! $hasActiveFilters) class="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-gray-950 transition hover:bg-[#D32F2F] hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
+                        Xóa lọc
+                    </button>
                 </div>
             </div>
+
+            @if($hasActiveFilters)
+                <div class="mt-5 flex flex-wrap gap-2">
+                    @foreach($activeFilterTags as $tag)
+                        <span class="rounded-full bg-white/12 px-3 py-1.5 text-xs font-medium text-white/80">{{ $tag }}</span>
+                    @endforeach
+                </div>
+            @endif
         </section>
-
-        @php
-            $selectedCategory = collect($categories)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $category);
-            $selectedPlatform = collect($platforms)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $platform);
-            $selectedRegion = collect($regions)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $region);
-            $selectedOs = collect($operatingSystems)->first(fn ($option) => data_get($option, 'slug', $option->slug ?? '') === $os);
-
-            $hasActiveFilters = filled($search)
-                || filled($category)
-                || filled($platform)
-                || filled($region)
-                || filled($os)
-                || filled($edition)
-                || filled($minPrice)
-                || filled($maxPrice)
-                || (bool) $inStock;
-
-            $activeFilterTags = collect([
-                filled($search) ? 'Tìm: '.trim($search) : null,
-                $selectedCategory ? 'Danh mục: '.data_get($selectedCategory, 'name', $selectedCategory->name ?? '') : null,
-                $selectedPlatform ? 'Nền tảng: '.data_get($selectedPlatform, 'name', $selectedPlatform->name ?? '') : null,
-                $selectedRegion ? 'Khu vực: '.data_get($selectedRegion, 'name', $selectedRegion->name ?? '') : null,
-                $selectedOs ? 'OS: '.data_get($selectedOs, 'name', $selectedOs->name ?? '') : null,
-                filled($edition) ? 'Phiên bản: '.trim($edition) : null,
-                filled($minPrice) ? 'Tối thiểu: '.number_format((float) $minPrice, 0, ',', '.').' VND' : null,
-                filled($maxPrice) ? 'Tối đa: '.number_format((float) $maxPrice, 0, ',', '.').' VND' : null,
-                $inStock ? 'Chỉ còn hàng' : null,
-            ])->filter()->values();
-
-            $activeFilterCount = $activeFilterTags->count();
-        @endphp
 
         <div x-data="{ filtersOpen: @js($hasActiveFilters) }" class="space-y-5">
             <section class="rounded-[2rem] border border-black/8 bg-white/85 p-5 shadow-[0_24px_70px_-45px_rgba(0,0,0,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/80">

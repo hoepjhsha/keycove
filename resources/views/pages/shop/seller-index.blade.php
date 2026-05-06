@@ -3,58 +3,60 @@
     <div aria-hidden="true" class="pointer-events-none absolute -top-8 right-0 -z-10 h-56 w-56 rounded-full bg-[#D32F2F]/8 blur-3xl dark:bg-[#D32F2F]/10"></div>
     <div aria-hidden="true" class="pointer-events-none absolute left-0 top-32 -z-10 h-56 w-56 rounded-full bg-indigo-500/8 blur-3xl dark:bg-indigo-400/10"></div>
 
-    <div class="mx-auto max-w-7xl space-y-6">
-        <section class="relative overflow-hidden rounded-[2rem] border border-black/8 bg-linear-to-br from-white via-[#FCF9F4] to-[#F6EBD9] p-5 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)] sm:p-6 lg:p-8 dark:border-white/10 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-            <div class="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
-                <div class="space-y-4">
-                    <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                        Duyệt người bán
-                    </p>
+    @php
+        $hasActiveFilters = filled($search) || $sortBy !== 'newest';
+        $sortLabel = match ($sortBy) {
+            'price_asc' => 'Giá thấp trước',
+            'price_desc' => 'Giá cao trước',
+            default => 'Mới nhất',
+        };
+    @endphp
 
-                    <div class="space-y-2">
-                        <h1 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl dark:text-white">Tất cả listing từ người bán</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">Duyệt các listing đang hoạt động từ người bán và mở nhanh trang chi tiết sản phẩm.</p>
+    <div class="mx-auto max-w-7xl space-y-6">
+        <section class="rounded-[2rem] border border-black/8 bg-white/95 p-5 shadow-[0_28px_80px_-44px_rgba(0,0,0,0.45)] backdrop-blur sm:p-6 lg:p-8 dark:border-white/10 dark:bg-gray-900/90">
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+                <div class="space-y-5">
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                        <a href="{{ route('app.shop.index') }}" wire:navigate.hover class="transition hover:text-[#D32F2F]">Trang chủ</a>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+                        <span class="font-semibold text-gray-950 dark:text-white">Người bán</span>
                     </div>
 
-                    <div class="flex flex-col gap-3 rounded-[1.6rem] border border-black/8 bg-white/90 p-3 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.45)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-gray-950/80">
-                        <label class="flex-1">
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl dark:text-white">Listing từ seller.</h1>
+                        <p class="max-w-xl text-sm text-gray-600 sm:text-base dark:text-gray-400">Tìm shop, game hoặc mức giá phù hợp.</p>
+                    </div>
+
+                    <div class="grid gap-3 rounded-[1.7rem] border border-black/8 bg-[#FCF9F4] p-3 dark:border-white/10 dark:bg-gray-950 lg:grid-cols-[minmax(0,1fr)_13rem_7rem]">
+                        <label>
                             <span class="sr-only">Tìm listing người bán</span>
-                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Tìm listing, sản phẩm, người bán..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <input wire:model.live.debounce.300ms="search" type="search" placeholder="Tìm seller, game, listing..." class="h-14 w-full rounded-2xl border border-black/10 bg-white px-5 text-base text-gray-950 shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
                         </label>
 
-                        <select wire:model.live="sortBy" class="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                            <option value="newest">Mới nhất trước</option>
-                            <option value="price_asc">Giá: thấp đến cao</option>
-                            <option value="price_desc">Giá: cao đến thấp</option>
+                        <select wire:model.live="sortBy" class="h-14 rounded-2xl border border-black/10 bg-white px-4 text-sm text-gray-950 shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+                            <option value="newest">Mới nhất</option>
+                            <option value="price_asc">Giá thấp</option>
+                            <option value="price_desc">Giá cao</option>
                         </select>
 
-                        <button type="button" wire:click="clearFilters" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Xóa lọc
+                        <button type="button" wire:click="clearFilters" @disabled(! $hasActiveFilters) class="inline-flex h-14 items-center justify-center rounded-2xl bg-black px-4 text-sm font-semibold text-white transition-colors hover:bg-[#D32F2F] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                            Xóa
                         </button>
                     </div>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Listing người bán</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($availableListings) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing đang hoạt động từ người bán</p>
-                    </div>
-
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Tìm kiếm</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $search === '' ? 'Tất cả' : 'Đã lọc' }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tìm người bán, listing hoặc sản phẩm</p>
-                    </div>
-
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Sắp xếp</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ ucfirst(str_replace('_', ' ', $sortBy)) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sắp xếp nhanh</p>
+                <div class="rounded-[1.7rem] border border-black/8 bg-gray-950 p-5 text-white dark:border-white/10">
+                    <p class="text-sm text-white/55">Kết quả</p>
+                    <p class="mt-2 text-4xl font-semibold">{{ number_format($availableListings) }}</p>
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        <span class="rounded-full bg-white/12 px-3 py-1.5 text-xs font-medium text-white/80">{{ $sortLabel }}</span>
+                        @if(filled($search))
+                            <span class="max-w-full truncate rounded-full bg-[#D32F2F]/25 px-3 py-1.5 text-xs font-medium text-white">{{ trim($search) }}</span>
+                        @endif
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
         <section class="space-y-4">
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 2xl:grid-cols-4 xl:grid-cols-3">

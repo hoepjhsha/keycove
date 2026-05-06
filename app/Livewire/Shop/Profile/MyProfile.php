@@ -178,24 +178,11 @@ class MyProfile extends Component
             $profile?->last_name,
         ])->filter()->implode(' '));
 
-        $profileCompletion = (int) round(
-            collect([
-                filled($profile?->first_name),
-                filled($profile?->last_name),
-                filled($profile?->avatar),
-                filled($profile?->dob),
-                $profile?->gender?->value !== 0,
-                filled($profile?->phone_number),
-                filled($profile?->bio),
-            ])->filter()->count() / 7 * 100
-        );
-
         return view('pages.shop.profile.my-profile', [
             'user'                     => $user,
             'profile'                  => $profile,
             'avatarUrl'                => $avatarUrl,
             'fullName'                 => $fullName !== '' ? $fullName : $user->username,
-            'profileCompletion'        => $profileCompletion,
             'hasApprovedSellerAccount' => $user->seller?->kyc_status === KycStatus::Approved,
             'genderOptions'            => Gender::cases(),
         ])->layout('components.layouts.shop');
