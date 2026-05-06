@@ -69,14 +69,7 @@ class DashboardAiAssistant extends Component
         $this->streamedInsight = '';
 
         try {
-            $response = $aiAssistantService->streamDashboardInsight(
-                $this->context,
-                $this->rangeLabel,
-                function (string $chunk): void {
-                    $this->streamedInsight .= $chunk;
-                    $this->stream(to: 'dashboard-insight-stream', content: $chunk);
-                },
-            );
+            $response = $aiAssistantService->generateDashboardInsight($this->context, $this->rangeLabel);
 
             $this->storeInsight($response->content);
             $this->setInsight($response->content);
@@ -101,6 +94,17 @@ class DashboardAiAssistant extends Component
         $this->ask($aiAssistantService);
     }
 
+    public function askSuggested(string $question, AiAssistantService $aiAssistantService): void
+    {
+        $this->question = trim($question);
+
+        if ($this->question === '') {
+            return;
+        }
+
+        $this->ask($aiAssistantService);
+    }
+
     public function ask(AiAssistantService $aiAssistantService): void
     {
         $question = $this->validatedQuestion();
@@ -114,15 +118,7 @@ class DashboardAiAssistant extends Component
         $this->streamedAnswer = '';
 
         try {
-            $response = $aiAssistantService->streamDashboardQuestion(
-                $this->context,
-                $this->rangeLabel,
-                $question,
-                function (string $chunk): void {
-                    $this->streamedAnswer .= $chunk;
-                    $this->stream(to: 'dashboard-answer-stream', content: $chunk);
-                },
-            );
+            $response = $aiAssistantService->answerDashboardQuestion($this->context, $this->rangeLabel, $question);
 
             $this->setAnswer($response->content);
         } catch (Throwable $exception) {

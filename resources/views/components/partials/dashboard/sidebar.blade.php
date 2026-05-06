@@ -1,4 +1,4 @@
-<aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+<aside class="hidden md:flex h-screen min-h-0 w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
     <a href="{{ route('admin.dashboard.index') }}" class="h-16 flex justify-center items-center px-6 hover:opacity-80 transition-opacity">
         <img class="block dark:hidden max-h-10 w-auto object-contain"
              src="{{ Vite::asset('resources/images/logo-light-horizontal.png') }}"

@@ -195,7 +195,7 @@ it('renders admin dashboard metrics and charts for authenticated admins', functi
         ->assertSee('Seller dẫn đầu')
         ->assertSee('Seller performance')
         ->assertSee('Sản phẩm seller đang bán chạy')
-        ->assertSee('AI insight và hỏi đáp')
+        ->assertSee('Hỏi về dashboard')
         ->assertSee('Keycove Seller');
 
     Carbon::setTestNow();
