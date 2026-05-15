@@ -79,6 +79,7 @@ class Chatbot extends Component
                 'last_interacted_at' => now(),
             ])->save();
         } catch (Throwable $exception) {
+            report($exception);
             $this->errorMessage = $exception->getMessage();
         } finally {
             $this->isReplyStreaming = false;

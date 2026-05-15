@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Throwable;
 
@@ -24,9 +25,20 @@ class DashboardAiAssistant extends Component
     #[Locked]
     public string $rangeLabel = '';
 
+    public bool $isOpen = false;
+
+    public string $activePanel = 'insight';
+
     public string $question = '';
 
     public string $submittedQuestion = '';
+
+    /** @var list<array{id:int, role:string, content:string}> */
+    #[Locked]
+    public array $chatMessages = [];
+
+    #[Locked]
+    public int $chatMessageSequence = 0;
 
     public ?string $insight = null;
 
@@ -44,6 +56,10 @@ class DashboardAiAssistant extends Component
 
     public bool $isAnswerExpanded = false;
 
+    public ?string $insightErrorMessage = null;
+
+    public ?string $chatErrorMessage = null;
+
     public ?string $errorMessage = null;
 
     /**
@@ -59,12 +75,16 @@ class DashboardAiAssistant extends Component
 
     public function queueInsightGeneration(AiAssistantService $aiAssistantService): void
     {
+        $this->openAssistant('insight');
+
         $this->generateInsight($aiAssistantService);
     }
 
     public function generateInsight(AiAssistantService $aiAssistantService): void
     {
+        $this->openAssistant('insight');
         $this->ensureIsNotRateLimited('insight', 6);
+        $this->insightErrorMessage = null;
         $this->errorMessage = null;
         $this->streamedInsight = '';
 
@@ -74,7 +94,9 @@ class DashboardAiAssistant extends Component
             $this->storeInsight($response->content);
             $this->setInsight($response->content);
         } catch (Throwable $exception) {
-            $this->errorMessage = $exception->getMessage();
+            report($exception);
+            $this->insightErrorMessage = $exception->getMessage();
+            $this->errorMessage = $this->insightErrorMessage;
         } finally {
             $this->streamedInsight = '';
         }
@@ -91,11 +113,14 @@ class DashboardAiAssistant extends Component
 
     public function queueQuestion(AiAssistantService $aiAssistantService): void
     {
+        $this->openAssistant('chat');
+
         $this->ask($aiAssistantService);
     }
 
     public function askSuggested(string $question, AiAssistantService $aiAssistantService): void
     {
+        $this->openAssistant('chat');
         $this->question = trim($question);
 
         if ($this->question === '') {
@@ -107,13 +132,17 @@ class DashboardAiAssistant extends Component
 
     public function ask(AiAssistantService $aiAssistantService): void
     {
+        $this->openAssistant('chat');
         $question = $this->validatedQuestion();
+
+        $this->ensureIsNotRateLimited('question', 10);
 
         $this->submittedQuestion = $question;
         $this->question = '';
         $this->setAnswer(null);
+        $this->appendChatMessage('user', $question);
 
-        $this->ensureIsNotRateLimited('question', 10);
+        $this->chatErrorMessage = null;
         $this->errorMessage = null;
         $this->streamedAnswer = '';
 
@@ -121,8 +150,12 @@ class DashboardAiAssistant extends Component
             $response = $aiAssistantService->answerDashboardQuestion($this->context, $this->rangeLabel, $question);
 
             $this->setAnswer($response->content);
+            $this->appendChatMessage('assistant', $response->content);
         } catch (Throwable $exception) {
-            $this->errorMessage = $exception->getMessage();
+            report($exception);
+            $this->chatErrorMessage = $exception->getMessage();
+            $this->errorMessage = $this->chatErrorMessage;
+            $this->appendChatMessage('error', $this->chatErrorMessage);
         } finally {
             $this->streamedAnswer = '';
         }
@@ -135,6 +168,23 @@ class DashboardAiAssistant extends Component
         }
 
         $this->isAnswerExpanded = ! $this->isAnswerExpanded;
+    }
+
+    #[On('dashboard-ai-open')]
+    public function openAssistant(string $panel = 'insight'): void
+    {
+        $this->isOpen = true;
+        $this->setPanel($panel);
+    }
+
+    public function closeAssistant(): void
+    {
+        $this->isOpen = false;
+    }
+
+    public function setPanel(string $panel): void
+    {
+        $this->activePanel = $this->normalizePanel($panel);
     }
 
     public function render(): View
@@ -223,6 +273,26 @@ class DashboardAiAssistant extends Component
         if (! $this->hasLongAnswer) {
             $this->isAnswerExpanded = false;
         }
+    }
+
+    protected function appendChatMessage(string $role, string $content): void
+    {
+        $normalizedContent = trim($content);
+
+        if ($normalizedContent === '') {
+            return;
+        }
+
+        $this->chatMessages[] = [
+            'id'      => ++$this->chatMessageSequence,
+            'role'    => $role,
+            'content' => $normalizedContent,
+        ];
+    }
+
+    protected function normalizePanel(string $panel): string
+    {
+        return in_array($panel, ['insight', 'chat'], true) ? $panel : 'insight';
     }
 
     protected function insightPath(): string

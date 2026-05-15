@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Services\Ai;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 class AiClient
 {
@@ -21,23 +23,21 @@ class AiClient
         $apiKey = (string) config('services.ai.api_key');
         $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
         $model = (string) config('services.ai.model', '');
-        $timeout = max(1, (int) config('services.ai.timeout', 30));
 
         if ($apiKey === '' || $baseUrl === '' || $model === '') {
             throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_BASE_URL, AI_API_KEY và AI_MODEL.');
         }
 
         try {
-            $response = Http::acceptJson()
+            $response = $this->request()
+                ->acceptJson()
                 ->withToken($apiKey)
                 ->withHeaders($this->providerHeaders())
-                ->connectTimeout(10)
-                ->timeout($timeout)
                 ->post("$baseUrl/chat/completions", $this->payload($model, $messages));
 
             $response->throw();
         } catch (ConnectionException|RequestException $exception) {
-            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+            throw $this->toServiceException($exception);
         }
 
         return $this->responseFromPayload($response->json());
@@ -55,24 +55,22 @@ class AiClient
         $apiKey = (string) config('services.ai.api_key');
         $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
         $model = (string) config('services.ai.model', '');
-        $timeout = max(1, (int) config('services.ai.timeout', 30));
 
         if ($apiKey === '' || $baseUrl === '' || $model === '') {
             throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_BASE_URL, AI_API_KEY và AI_MODEL.');
         }
 
         try {
-            $response = Http::accept('text/event-stream')
+            $response = $this->request()
+                ->accept('text/event-stream')
                 ->withToken($apiKey)
                 ->withHeaders($this->providerHeaders())
-                ->connectTimeout(10)
-                ->timeout($timeout)
                 ->withOptions(['stream' => true])
                 ->post("$baseUrl/chat/completions", $this->payload($model, $messages, stream: true));
 
             $response->throw();
         } catch (ConnectionException|RequestException $exception) {
-            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+            throw $this->toServiceException($exception);
         }
 
         return $this->streamedResponse($response, $onChunk);
@@ -110,24 +108,22 @@ class AiClient
         $apiKey = (string) config('services.ai.api_key');
         $baseUrl = rtrim((string) config('services.ai.base_url', ''), '/');
         $model = (string) config('services.ai.model', '');
-        $timeout = max(1, (int) config('services.ai.timeout', 30));
 
         if ($apiKey === '' || $baseUrl === '' || $model === '') {
             throw new RuntimeException('AI chưa được cấu hình đầy đủ. Hãy kiểm tra AI_PROVIDER, AI_BASE_URL, AI_API_KEY và AI_MODEL.');
         }
 
         try {
-            $response = Http::acceptJson()
+            $response = $this->request()
+                ->acceptJson()
                 ->withHeaders([
                     'X-goog-api-key' => $apiKey,
                 ])
-                ->connectTimeout(10)
-                ->timeout($timeout)
                 ->post("$baseUrl/models/$model:generateContent", $this->geminiPayload($messages));
 
             $response->throw();
         } catch (ConnectionException|RequestException $exception) {
-            throw new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception);
+            throw $this->toServiceException($exception);
         }
 
         return $this->responseFromGeminiPayload($response->json());
@@ -279,6 +275,52 @@ class AiClient
         $baseUrl = strtolower((string) config('services.ai.base_url', ''));
 
         return str_contains($baseUrl, 'generativelanguage.googleapis.com') ? 'gemini' : 'openai';
+    }
+
+    protected function request(): PendingRequest
+    {
+        return Http::connectTimeout(max(1, (int) config('services.ai.connect_timeout', 10)))
+            ->timeout(max(1, (int) config('services.ai.timeout', 30)))
+            ->retry(
+                max(1, (int) config('services.ai.retry_times', 2)),
+                fn (int $attempt, Throwable $exception): int             => max(0, (int) config('services.ai.retry_sleep_ms', 250)) * $attempt,
+                fn (Throwable $exception, PendingRequest $request): bool => $this->shouldRetry($exception),
+            );
+    }
+
+    protected function shouldRetry(Throwable $exception): bool
+    {
+        if ($exception instanceof ConnectionException) {
+            return true;
+        }
+
+        if (! $exception instanceof RequestException) {
+            return false;
+        }
+
+        $status = $exception->response?->status();
+
+        return $status === 408 || $status === 429 || ($status !== null && $status >= 500);
+    }
+
+    protected function toServiceException(ConnectionException|RequestException $exception): RuntimeException
+    {
+        if ($exception instanceof ConnectionException) {
+            $message = str_contains(strtolower($exception->getMessage()), 'timed out')
+                ? 'Dịch vụ AI phản hồi quá chậm nên yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.'
+                : 'Kết nối tới dịch vụ AI đang không ổn định. Vui lòng thử lại sau.';
+
+            return new RuntimeException($message, previous: $exception);
+        }
+
+        $status = $exception->response?->status();
+
+        return match (true) {
+            $status === 408                    => new RuntimeException('Dịch vụ AI phản hồi quá chậm nên yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.', previous: $exception),
+            $status === 429                    => new RuntimeException('Dịch vụ AI đang bận. Vui lòng thử lại sau ít phút.', previous: $exception),
+            $status !== null && $status >= 500 => new RuntimeException('Dịch vụ AI đang tạm lỗi. Vui lòng thử lại sau.', previous: $exception),
+            default                            => new RuntimeException('Không thể kết nối tới dịch vụ AI lúc này. Vui lòng thử lại sau.', previous: $exception),
+        };
     }
 
     protected function streamedResponse(Response $response, callable $onChunk): AiResponse

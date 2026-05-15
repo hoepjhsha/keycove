@@ -13,9 +13,9 @@ class AiAssistantService
     /**
      * @param  array<string, mixed>  $context
      */
-    public function generateDashboardInsight(array $context, string $rangeLabel): string
+    public function generateDashboardInsight(array $context, string $rangeLabel): AiResponse
     {
-        return $this->streamDashboardInsight($context, $rangeLabel, static fn (string $chunk): null => null)->content;
+        return $this->streamDashboardInsight($context, $rangeLabel, static fn (string $chunk): null => null);
     }
 
     /**
@@ -42,9 +42,9 @@ class AiAssistantService
     /**
      * @param  array<string, mixed>  $context
      */
-    public function answerDashboardQuestion(array $context, string $rangeLabel, string $question): string
+    public function answerDashboardQuestion(array $context, string $rangeLabel, string $question): AiResponse
     {
-        return $this->streamDashboardQuestion($context, $rangeLabel, $question, static fn (string $chunk): null => null)->content;
+        return $this->streamDashboardQuestion($context, $rangeLabel, $question, static fn (string $chunk): null => null);
     }
 
     /**

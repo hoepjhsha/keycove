@@ -30,6 +30,7 @@ it('stores user and assistant messages in the site chatbot conversation', functi
     ]);
 
     config()->set('services.ai.api_key', 'test-key');
+    config()->set('services.ai.provider', 'openai');
     config()->set('services.ai.base_url', 'https://api.openai.com/v1');
     config()->set('services.ai.model', 'test-model');
 
@@ -81,6 +82,7 @@ it('passes reasoning details back to the provider on follow-up messages', functi
     ]);
 
     config()->set('services.ai.api_key', 'test-key');
+    config()->set('services.ai.provider', 'openai');
     config()->set('services.ai.base_url', 'https://api.openai.com/v1');
     config()->set('services.ai.model', 'test-model');
 
@@ -113,6 +115,7 @@ it('passes reasoning details back to the provider on follow-up messages', functi
 
 it('shows a friendly configuration error when the AI service is missing', function (): void {
     config()->set('services.ai.api_key', null);
+    config()->set('services.ai.provider', 'openai');
     config()->set('services.ai.base_url', 'https://api.openai.com/v1');
     config()->set('services.ai.model', 'test-model');
 

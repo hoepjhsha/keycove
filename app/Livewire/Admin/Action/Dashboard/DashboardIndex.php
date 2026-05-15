@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Bảng điều khiển')]
+#[Title('Dashboard')]
 class DashboardIndex extends Component
 {
     public string $timeFilter = 'last_30_days';
@@ -71,7 +71,7 @@ class DashboardIndex extends Component
             'sellerRevenueChart'       => $this->sellerRevenueChart,
             'dashboardAiContext'       => $snapshot['ai_context'],
         ])->layout('components.layouts.dashboard', [
-            'title' => 'Bảng điều khiển',
+            'title' => 'Dashboard',
         ]);
     }
 

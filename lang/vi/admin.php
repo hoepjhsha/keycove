@@ -182,7 +182,7 @@ return [
     ],
 
     'nav' => [
-        'dashboard'           => 'Bảng điều khiển',
+        'dashboard'           => 'Dashboard',
         'catalog_keys'        => 'Danh mục & key',
         'attributes'          => 'Thuộc tính',
         'products_list'       => 'Danh sách sản phẩm',
@@ -218,7 +218,7 @@ return [
     ],
 
     'titles' => [
-        'dashboard'                => 'Bảng điều khiển',
+        'dashboard'                => 'Dashboard',
         'login'                    => 'Đăng nhập',
         'manage_categories'        => 'Quản lý danh mục',
         'manage_complaints'        => 'Quản lý khiếu nại',
