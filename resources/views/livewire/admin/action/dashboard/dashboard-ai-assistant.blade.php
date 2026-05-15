@@ -21,10 +21,10 @@
     ];
 @endphp
 
-<section class="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+<section class="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+    <article class="min-w-0 self-start rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex items-start justify-between gap-4">
-            <div>
+            <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">AI Analyst</p>
                 <h3 class="mt-2 text-lg font-semibold text-slate-950 dark:text-white">AI Insight</h3>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Tóm tắt cho giai đoạn {{ $rangeLabel }}.</p>
@@ -32,7 +32,7 @@
 
             <button type="button"
                     wire:click="queueInsightGeneration"
-                    class="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 data-loading:cursor-wait data-loading:opacity-60 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400">
+                    class="inline-flex shrink-0 items-center justify-center rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 data-loading:cursor-wait data-loading:opacity-60 dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400">
                 {{ $insight ? 'Làm mới insight' : 'Tạo insight' }}
             </button>
         </div>
@@ -75,10 +75,11 @@
                     </div>
 
                     <div @class([
-                        'relative mt-4 overflow-hidden transition-all',
-                        'max-h-80' => $hasLongInsight && ! $isInsightExpanded,
+                        'relative mt-4 min-w-0 transition-all',
+                        'max-h-80 overflow-hidden' => $hasLongInsight && ! $isInsightExpanded,
+                        'max-h-[32rem] overflow-y-auto pr-2' => $hasLongInsight && $isInsightExpanded,
                     ])>
-                        <article class="space-y-3 text-sm leading-6 text-slate-700 dark:text-slate-200 [&_h2:first-child]:mt-0 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_p:first-child]:mt-0 [&_p]:mt-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
+                        <article class="space-y-3 break-words text-sm leading-6 text-slate-700 dark:text-slate-200 [&_h2:first-child]:mt-0 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_p:first-child]:mt-0 [&_p]:mt-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
                             {!! $insightHtml !!}
                         </article>
 
@@ -95,15 +96,15 @@
         </div>
     </article>
 
-    <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <article class="min-w-0 self-start rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex items-start justify-between gap-4">
-            <div>
+            <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">AI Chat</p>
                 <h3 class="mt-2 text-lg font-semibold text-slate-950 dark:text-white">Hỏi về dashboard</h3>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Hỏi nhanh về doanh thu, seller, category hoặc complaint.</p>
             </div>
 
-            <div class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400">
+            <div class="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400">
                 Gemini / {{ $rangeLabel }}
             </div>
         </div>
@@ -161,10 +162,11 @@
                             </div>
 
                             <div @class([
-                                'relative overflow-hidden transition-all',
-                                'max-h-80' => $hasLongAnswer && ! $isAnswerExpanded,
+                                'relative min-w-0 transition-all',
+                                'max-h-80 overflow-hidden' => $hasLongAnswer && ! $isAnswerExpanded,
+                                'max-h-[32rem] overflow-y-auto pr-2' => $hasLongAnswer && $isAnswerExpanded,
                             ])>
-                                <article class="space-y-3 [&_h2:first-child]:mt-0 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_p:first-child]:mt-0 [&_p]:mt-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
+                                <article class="space-y-3 break-words [&_h2:first-child]:mt-0 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_p:first-child]:mt-0 [&_p]:mt-3 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
                                     {!! $answerHtml !!}
                                 </article>
 
@@ -199,7 +201,7 @@
             <textarea id="dashboard-ai-question"
                       wire:model="question"
                       rows="3"
-                      class="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                      class="w-full resize-none rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                       placeholder="Hỏi về doanh thu, seller, category hoặc complaint..."></textarea>
             @error('question')
                 <p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ $message }}</p>
