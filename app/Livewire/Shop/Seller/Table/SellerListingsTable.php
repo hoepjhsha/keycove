@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Seller\Table;
 
+use App\Contracts\Repositories\ProductListingRepositoryInterface;
 use App\Enums\GeneralStatus;
-use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\UserRole;
 use App\Models\ProductListing;
 use App\Models\Seller;
 use App\Models\User;
+use App\Services\ProductListingService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -28,6 +30,18 @@ final class SellerListingsTable extends PowerGridComponent
 
     public string $sortDirection = 'desc';
 
+    protected ProductListingRepositoryInterface $productListingRepository;
+
+    protected ProductListingService $productListingService;
+
+    public function boot(
+        ProductListingRepositoryInterface $productListingRepository,
+        ProductListingService $productListingService,
+    ): void {
+        $this->productListingRepository = $productListingRepository;
+        $this->productListingService = $productListingService;
+    }
+
     public function setUp(): array
     {
         return [
@@ -42,21 +56,7 @@ final class SellerListingsTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return ProductListing::query()
-            ->select('product_listings.*')
-            ->withTrashed()
-            ->where('seller_id', $this->sellerId())
-            ->with([
-                'variant.product.submittedBySeller.user',
-                'variant.region',
-                'variant.platform',
-                'variant.operatingSystem',
-            ])
-            ->withCount([
-                'keys as available_keys_count' => function (Builder $query): void {
-                    $query->where('status', ProductKeyStatus::Available->value);
-                },
-            ]);
+        return $this->productListingRepository->getSellerTableQuery($this->sellerId());
     }
 
     public function relationSearch(): array
@@ -229,23 +229,10 @@ final class SellerListingsTable extends PowerGridComponent
     public function performToggleListingStatus(int $id): void
     {
         $listing = $this->resolveOwnedListing($id);
-        $listing->loadMissing('variant.product');
 
-        if ($listing->variant?->product?->status !== GeneralStatus::Active) {
+        if (! $this->productListingService->toggleVisibility($listing)) {
             return;
         }
-
-        if (! in_array($listing->status, [ProductListingStatus::Active, ProductListingStatus::Hidden], true)) {
-            return;
-        }
-
-        $listing->status = match ($listing->status) {
-            ProductListingStatus::Active => ProductListingStatus::Hidden,
-            ProductListingStatus::Hidden => ProductListingStatus::Active,
-            default                      => $listing->status,
-        };
-
-        $listing->save();
 
         $this->dispatch('swal:success', ['message' => 'Trạng thái listing đã được cập nhật.']);
     }
@@ -267,17 +254,13 @@ final class SellerListingsTable extends PowerGridComponent
         try {
             $listing = $this->resolveOwnedListing($id);
 
-            if ($listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists()) {
-                throw new \RuntimeException('Không thể xóa listing có key đã bán.');
-            }
-
-            $listing->status = ProductListingStatus::Deleted;
-            $listing->save();
-            $listing->delete();
+            $this->productListingService->delete($listing);
 
             $this->dispatch('swal:success', ['message' => 'Listing đã được xóa thành công.']);
-        } catch (\Throwable $e) {
-            $this->dispatch('swal:error', ['message' => $e->getMessage()]);
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
+        } catch (\Throwable $exception) {
+            $this->dispatch('swal:error', ['message' => $exception->getMessage()]);
         }
     }
 
@@ -296,12 +279,11 @@ final class SellerListingsTable extends PowerGridComponent
     public function performRestoreListing(int $id): void
     {
         $listing = $this->resolveOwnedListing($id, true);
-        $listing->restore();
         $listing->loadMissing('variant.product');
-        $listing->status = $listing->variant?->product?->status === GeneralStatus::Active
-            ? ProductListingStatus::Hidden
-            : ProductListingStatus::Draft;
-        $listing->save();
+        $this->productListingService->restore(
+            $listing,
+            $this->productListingService->restoredStatusForProduct($listing->variant ?? $listing),
+        );
 
         $this->dispatch('swal:success', ['message' => 'Listing đã được khôi phục thành công.']);
     }
@@ -336,12 +318,11 @@ final class SellerListingsTable extends PowerGridComponent
 
     protected function resolveOwnedListing(int $id, bool $withTrashed = false): ProductListing
     {
-        $query = ProductListing::query()->where('seller_id', $this->sellerId());
+        return $this->productListingRepository->findOwnedBySellerOrFail($this->sellerId(), $id, $withTrashed);
+    }
 
-        if ($withTrashed) {
-            $query->withTrashed();
-        }
-
-        return $query->findOrFail($id);
+    protected function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())->flatten()->first() ?? $exception->getMessage();
     }
 }

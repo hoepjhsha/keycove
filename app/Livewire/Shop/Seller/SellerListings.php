@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Seller;
 
+use App\Contracts\Repositories\ProductKeyRepositoryInterface;
+use App\Contracts\Repositories\ProductListingRepositoryInterface;
+use App\Contracts\Repositories\ProductRepositoryInterface;
+use App\Contracts\Repositories\ProductVariantRepositoryInterface;
 use App\Enums\GeneralStatus;
-use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Enums\ProductVariantStatus;
 use App\Enums\UserRole;
@@ -21,8 +24,12 @@ use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Seller;
 use App\Models\User;
+use App\Services\ProductKeyService;
+use App\Services\ProductListingService;
+use App\Services\ProductService;
+use App\Services\ProductVariantService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -36,6 +43,22 @@ use Livewire\WithFileUploads;
 class SellerListings extends Component
 {
     use WithFileUploads;
+
+    protected ProductRepositoryInterface $productRepository;
+
+    protected ProductVariantRepositoryInterface $productVariantRepository;
+
+    protected ProductListingRepositoryInterface $productListingRepository;
+
+    protected ProductKeyRepositoryInterface $productKeyRepository;
+
+    protected ProductService $productService;
+
+    protected ProductVariantService $productVariantService;
+
+    protected ProductListingService $productListingService;
+
+    protected ProductKeyService $productKeyService;
 
     public bool $showListingModal = false;
 
@@ -59,6 +82,26 @@ class SellerListings extends Component
 
     public ProductListingForm $listingForm;
 
+    public function boot(
+        ProductRepositoryInterface $productRepository,
+        ProductVariantRepositoryInterface $productVariantRepository,
+        ProductListingRepositoryInterface $productListingRepository,
+        ProductKeyRepositoryInterface $productKeyRepository,
+        ProductService $productService,
+        ProductVariantService $productVariantService,
+        ProductListingService $productListingService,
+        ProductKeyService $productKeyService,
+    ): void {
+        $this->productRepository = $productRepository;
+        $this->productVariantRepository = $productVariantRepository;
+        $this->productListingRepository = $productListingRepository;
+        $this->productKeyRepository = $productKeyRepository;
+        $this->productService = $productService;
+        $this->productVariantService = $productVariantService;
+        $this->productListingService = $productListingService;
+        $this->productKeyService = $productKeyService;
+    }
+
     #[Computed]
     public function seller(): Seller
     {
@@ -79,20 +122,12 @@ class SellerListings extends Component
     {
         $seller = $this->seller;
 
-        $listingsQuery = ProductListing::query()->where('seller_id', $seller->id);
-        $productsQuery = Product::query()->where('submitted_by_seller_id', $seller->id);
-
         return [
-            'listings'        => (clone $listingsQuery)->count(),
-            'activeListings'  => (clone $listingsQuery)->where('status', ProductListingStatus::Active)->count(),
-            'pendingListings' => (clone $listingsQuery)->where('status', ProductListingStatus::Draft)->count(),
-            'products'        => (clone $productsQuery)->where('status', '!=', GeneralStatus::Deleted->value)->count(),
-            'availableKeys'   => ProductKey::query()
-                ->whereHas('listing', function (Builder $query) use ($seller): void {
-                    $query->where('seller_id', $seller->id);
-                })
-                ->where('status', ProductKeyStatus::Available->value)
-                ->count(),
+            'listings'        => $this->productListingRepository->countOwnedBySeller($seller->id),
+            'activeListings'  => $this->productListingRepository->countOwnedBySeller($seller->id, ProductListingStatus::Active),
+            'pendingListings' => $this->productListingRepository->countOwnedBySeller($seller->id, ProductListingStatus::Draft),
+            'products'        => $this->productRepository->countOwnedBySeller($seller->id),
+            'availableKeys'   => $this->productKeyRepository->countAvailableForSeller($seller->id),
         ];
     }
 
@@ -104,20 +139,8 @@ class SellerListings extends Component
     {
         $seller = $this->seller;
 
-        return Product::query()
-            ->select(['id', 'name', 'submitted_by_seller_id', 'status'])
-            ->withoutTrashed()
-            ->where(function (Builder $query) use ($seller): void {
-                $query->where(function (Builder $adminQuery): void {
-                    $adminQuery->whereNull('submitted_by_seller_id')
-                        ->where('status', GeneralStatus::Active);
-                })->orWhere(function (Builder $sellerQuery) use ($seller): void {
-                    $sellerQuery->where('submitted_by_seller_id', $seller->id)
-                        ->where('status', '!=', GeneralStatus::Deleted->value);
-                });
-            })
-            ->orderBy('name')
-            ->get()
+        return $this->productRepository
+            ->getAccessibleForSeller($seller->id)
             ->map(function (Product $product) use ($seller): array {
                 return [
                     'id'     => $product->id,
@@ -136,32 +159,8 @@ class SellerListings extends Component
     {
         $seller = $this->seller;
 
-        return ProductVariant::query()
-            ->select(['id', 'product_id', 'region_id', 'platform_id', 'os_id', 'edition', 'status'])
-            ->withoutTrashed()
-            ->where('status', '!=', ProductVariantStatus::Deleted->value)
-            ->with([
-                'product:id,name',
-                'region:id,name',
-                'platform:id,name',
-                'operatingSystem:id,name',
-            ])
-            ->whereHas('product', function (Builder $query) use ($seller): void {
-                $query->where(function (Builder $productQuery) use ($seller): void {
-                    $productQuery->where(function (Builder $adminQuery): void {
-                        $adminQuery->whereNull('submitted_by_seller_id')
-                            ->where('status', GeneralStatus::Active);
-                    })->orWhere(function (Builder $sellerQuery) use ($seller): void {
-                        $sellerQuery->where('submitted_by_seller_id', $seller->id)
-                            ->where('status', '!=', GeneralStatus::Deleted->value);
-                    });
-                });
-            })
-            ->orderBy('product_id')
-            ->orderBy('region_id')
-            ->orderBy('platform_id')
-            ->orderBy('os_id')
-            ->get()
+        return $this->productVariantRepository
+            ->getAccessibleForSeller($seller->id)
             ->map(function (ProductVariant $variant): array {
                 return [
                     'id'    => $variant->id,
@@ -221,10 +220,7 @@ class SellerListings extends Component
             return null;
         }
 
-        return ProductListing::query()
-            ->where('seller_id', $this->seller->id)
-            ->with(['variant.product'])
-            ->find($this->viewingKeysListingId);
+        return $this->productListingRepository->findOwnedBySellerForView($this->seller->id, $this->viewingKeysListingId);
     }
 
     /**
@@ -237,10 +233,7 @@ class SellerListings extends Component
             return collect();
         }
 
-        return ProductKey::query()
-            ->where('listing_id', $this->viewingKeysListingId)
-            ->orderByDesc('created_at')
-            ->get();
+        return $this->productKeyRepository->getListingKeys($this->viewingKeysListingId);
     }
 
     public function render(): View
@@ -287,7 +280,7 @@ class SellerListings extends Component
                     $this->listingForm->listing = $listing;
                     $this->listingForm->seller_id = $this->seller->id;
                     $this->listingForm->status = $listing->status->value;
-                    $this->listingForm->update();
+                    $this->productListingService->update($listing, $this->listingForm->validatedData());
 
                     return;
                 }
@@ -331,59 +324,38 @@ class SellerListings extends Component
 
     public function saveKey(): void
     {
-        $listing = $this->resolveOwnedListing((int) $this->viewingKeysListingId);
+        try {
+            $listing = $this->resolveOwnedListing((int) $this->viewingKeysListingId);
 
-        $this->validate([
-            'keyCode' => ['required', 'string', 'max:500'],
-        ]);
-
-        $keyCode = trim($this->keyCode);
-        $keyHash = hash('sha256', $keyCode);
-
-        if (ProductKey::query()->where('listing_id', $listing->id)->where('key_hash', $keyHash)->exists()) {
-            throw ValidationException::withMessages([
-                'keyCode' => 'Key này đã tồn tại trong listing đã chọn.',
+            $this->validate([
+                'keyCode' => ['required', 'string', 'max:500'],
             ]);
+
+            $this->productKeyService->create($listing, $this->keyCode, 'keyCode');
+            $this->keyCode = '';
+
+            $this->dispatch('pg:eventRefresh-sellerListingsTable');
+            $this->dispatch('swal:success', ['message' => 'Key đã được tạo thành công.']);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $this->dispatch('swal:error', ['message' => $exception->getMessage()]);
         }
-
-        ProductKey::query()->create([
-            'listing_id'    => $listing->id,
-            'key_code'      => $keyCode,
-            'key_hash'      => $keyHash,
-            'status'        => ProductKeyStatus::Available->value,
-            'order_item_id' => null,
-        ]);
-
-        $this->syncListingStockCount($listing);
-        $this->keyCode = '';
-
-        $this->dispatch('pg:eventRefresh-sellerListingsTable');
-        $this->dispatch('swal:success', ['message' => 'Key đã được tạo thành công.']);
     }
 
     #[On('deleteKey')]
     public function deleteKey(int $keyId): void
     {
         try {
-            $key = ProductKey::query()
-                ->whereKey($keyId)
-                ->whereHas('listing', function (Builder $query): void {
-                    $query->where('seller_id', $this->seller->id);
-                })
-                ->firstOrFail();
+            $key = $this->productKeyRepository->findOwnedBySellerOrFail($this->seller->id, $keyId);
 
-            if ($key->status !== ProductKeyStatus::Available || $key->order_item_id !== null) {
-                throw new \RuntimeException('Không thể xóa key không ở trạng thái khả dụng.');
-            }
-
-            $listingId = $key->listing_id;
-            $key->delete();
-
-            $this->syncListingStockCount($listingId);
+            $this->productKeyService->delete($key);
             $this->dispatch('pg:eventRefresh-sellerListingsTable');
             $this->dispatch('swal:success', ['message' => 'Key đã được xóa thành công.']);
-        } catch (\Throwable $e) {
-            $this->dispatch('swal:error', ['message' => $e->getMessage()]);
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
+        } catch (\Throwable $exception) {
+            $this->dispatch('swal:error', ['message' => $exception->getMessage()]);
         }
     }
 
@@ -428,21 +400,15 @@ class SellerListings extends Component
             'listingForm.price'        => ['required', 'numeric', 'min:0'],
         ]);
 
-        $variant = ProductVariant::query()
-            ->withoutTrashed()
-            ->whereKey($this->selectedVariantId)
-            ->whereHas('product', function (Builder $query): void {
-                $this->applyProductAccessRules($query);
-            })
-            ->firstOrFail();
+        $variant = $this->resolveAllowedVariant((int) $this->selectedVariantId);
 
         $variant->loadMissing('product');
 
         $this->listingForm->variant_id = $variant->id;
         $this->listingForm->seller_id = $this->seller->id;
-        $this->listingForm->status = $this->defaultChildListingStatus($variant->product)->value;
+        $this->listingForm->status = $this->productListingService->defaultStatusForProduct($variant)->value;
 
-        $this->listingForm->store();
+        $this->productListingService->create($this->listingForm->validatedData(), 'listingForm.status');
 
         return 'Listing đã được tạo thành công.';
     }
@@ -462,14 +428,14 @@ class SellerListings extends Component
         $product = $this->resolveAllowedProduct($this->selectedProductId);
 
         $this->variantForm->product_id = $product->id;
-        $this->variantForm->status = $this->defaultChildVariantStatus($product)->value;
+        $this->variantForm->status = $this->productVariantService->defaultStatusForProduct($product)->value;
 
-        $variant = $this->variantForm->store();
+        $variant = $this->productVariantService->create($this->variantForm->validatedData(), 'variantForm.edition');
 
         $this->listingForm->variant_id = $variant->id;
         $this->listingForm->seller_id = $this->seller->id;
-        $this->listingForm->status = $this->defaultChildListingStatus($product)->value;
-        $this->listingForm->store();
+        $this->listingForm->status = $this->productListingService->defaultStatusForProduct($product)->value;
+        $this->productListingService->create($this->listingForm->validatedData(), 'listingForm.status');
 
         return 'Listing đã được tạo thành công.';
     }
@@ -495,81 +461,49 @@ class SellerListings extends Component
         $this->productForm->submitted_by_seller_id = $this->seller->id;
         $this->productForm->status = GeneralStatus::Inactive->value;
 
-        $product = $this->productForm->store();
+        $product = $this->productService->create($this->productForm->validatedData(), 'productForm.slug');
 
         $this->variantForm->product_id = $product->id;
-        $this->variantForm->status = $this->defaultChildVariantStatus($product)->value;
-        $variant = $this->variantForm->store();
+        $this->variantForm->status = $this->productVariantService->defaultStatusForProduct($product)->value;
+        $variant = $this->productVariantService->create($this->variantForm->validatedData(), 'variantForm.edition');
 
         $this->listingForm->variant_id = $variant->id;
         $this->listingForm->seller_id = $this->seller->id;
-        $this->listingForm->status = $this->defaultChildListingStatus($product)->value;
-        $this->listingForm->store();
+        $this->listingForm->status = $this->productListingService->defaultStatusForProduct($product)->value;
+        $this->productListingService->create($this->listingForm->validatedData(), 'listingForm.status');
 
         return 'Listing đã được tạo thành công.';
     }
 
     protected function resolveOwnedListing(int $listingId, bool $withTrashed = false): ProductListing
     {
-        $query = ProductListing::query()->where('seller_id', $this->seller->id);
+        return $this->productListingRepository->findOwnedBySellerOrFail($this->seller->id, $listingId, $withTrashed);
+    }
 
-        if ($withTrashed) {
-            $query->withTrashed();
+    protected function resolveAllowedProduct(?int $productId): Product
+    {
+        try {
+            return $this->productRepository->findAccessibleForSellerOrFail($this->seller->id, (int) $productId);
+        } catch (ModelNotFoundException) {
+            throw ValidationException::withMessages([
+                'selectedProductId' => 'Sản phẩm không hợp lệ hoặc không nằm trong danh mục khả dụng.',
+            ]);
         }
-
-        return $query->findOrFail($listingId);
     }
 
-    protected function resolveAllowedProduct(int $productId): Product
+    protected function resolveAllowedVariant(int $variantId): ProductVariant
     {
-        return Product::query()
-            ->withoutTrashed()
-            ->whereKey($productId)
-            ->where(function (Builder $query): void {
-                $this->applyProductAccessRules($query);
-            })
-            ->firstOrFail();
+        try {
+            return $this->productVariantRepository->findAccessibleForSellerOrFail($this->seller->id, $variantId);
+        } catch (ModelNotFoundException) {
+            throw ValidationException::withMessages([
+                'selectedVariantId' => 'Biến thể không hợp lệ hoặc không nằm trong danh mục khả dụng.',
+            ]);
+        }
     }
 
-    protected function applyProductAccessRules(Builder $query): void
+    protected function firstValidationMessage(ValidationException $exception): string
     {
-        $query->where(function (Builder $accessQuery): void {
-            $accessQuery->where(function (Builder $adminQuery): void {
-                $adminQuery->whereNull('submitted_by_seller_id')
-                    ->where('status', GeneralStatus::Active);
-            })->orWhere(function (Builder $sellerQuery): void {
-                $sellerQuery->where('submitted_by_seller_id', $this->seller->id)
-                    ->where('status', '!=', GeneralStatus::Deleted->value);
-            });
-        });
-    }
-
-    protected function defaultChildVariantStatus(Product $product): ProductVariantStatus
-    {
-        return $product->status === GeneralStatus::Active
-            ? ProductVariantStatus::Active
-            : ProductVariantStatus::Draft;
-    }
-
-    protected function defaultChildListingStatus(Product|ProductVariant $model): ProductListingStatus
-    {
-        $productStatus = $model instanceof ProductVariant
-            ? $model->product?->status
-            : $model->status;
-
-        return $productStatus === GeneralStatus::Active
-            ? ProductListingStatus::Active
-            : ProductListingStatus::Draft;
-    }
-
-    protected function syncListingStockCount(ProductListing|int $listing): void
-    {
-        $listing = $listing instanceof ProductListing
-            ? $listing
-            : $this->resolveOwnedListing($listing, true);
-
-        $listing->forceFill([
-            'stock_count' => $listing->keys()->where('status', ProductKeyStatus::Available->value)->count(),
-        ])->save();
+        return collect($exception->errors())->flatten()->first() ?? $exception->getMessage();
     }
 }

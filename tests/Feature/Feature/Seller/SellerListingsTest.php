@@ -105,7 +105,7 @@ test('seller can create a new product and keeps child records hidden until appro
         ->set('productForm.slug', 'my-seller-product')
         ->set('productForm.publisher', 'KeyCove')
         ->set('productForm.developer', 'KeyCove Studio')
-        ->set('productForm.image', UploadedFile::fake()->image('thumbnail.jpg'))
+        ->set('productForm.image', UploadedFile::fake()->create('thumbnail.jpg', 120, 'image/jpeg'))
         ->set('variantForm.region_id', $region->id)
         ->set('variantForm.platform_id', $platform->id)
         ->set('variantForm.os_id', $os->id)

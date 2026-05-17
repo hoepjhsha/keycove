@@ -340,7 +340,7 @@ test('authenticated user can leave a review for a completed order item', functio
 
     Storage::fake(config('filesystems.public_disk'));
 
-    $reviewImage = UploadedFile::fake()->image('review-proof.png');
+    $reviewImage = UploadedFile::fake()->create('review-proof.png', 120, 'image/png');
     $reviewDocument = UploadedFile::fake()->create('invoice.pdf', 120, 'application/pdf');
 
     $orderItem = OrderItem::query()->create([

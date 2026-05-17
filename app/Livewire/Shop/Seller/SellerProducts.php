@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Shop\Seller;
 
+use App\Contracts\Repositories\ProductRepositoryInterface;
+use App\Contracts\Repositories\ProductVariantRepositoryInterface;
 use App\Enums\GeneralStatus;
-use App\Enums\ProductListingStatus;
-use App\Enums\ProductVariantStatus;
 use App\Enums\UserRole;
 use App\Livewire\Admin\Form\Product\ProductCreateForm;
 use App\Livewire\Admin\Form\Product\ProductEditForm;
@@ -18,13 +18,12 @@ use App\Models\ProductVariant;
 use App\Models\Region;
 use App\Models\Seller;
 use App\Models\User;
+use App\Services\ProductService;
+use App\Services\ProductVariantService;
 use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -36,6 +35,14 @@ use Livewire\WithFileUploads;
 class SellerProducts extends Component
 {
     use WithFileUploads;
+
+    protected ProductRepositoryInterface $productRepository;
+
+    protected ProductVariantRepositoryInterface $productVariantRepository;
+
+    protected ProductService $productService;
+
+    protected ProductVariantService $productVariantService;
 
     public bool $showProductModal = false;
 
@@ -52,6 +59,18 @@ class SellerProducts extends Component
     public ProductEditForm $editForm;
 
     public ProductVariantForm $variantForm;
+
+    public function boot(
+        ProductRepositoryInterface $productRepository,
+        ProductVariantRepositoryInterface $productVariantRepository,
+        ProductService $productService,
+        ProductVariantService $productVariantService,
+    ): void {
+        $this->productRepository = $productRepository;
+        $this->productVariantRepository = $productVariantRepository;
+        $this->productService = $productService;
+        $this->productVariantService = $productVariantService;
+    }
 
     #[Computed]
     public function seller(): Seller
@@ -74,27 +93,7 @@ class SellerProducts extends Component
     #[Computed]
     public function products(): EloquentCollection
     {
-        return Product::query()
-            ->withTrashed()
-            ->where('submitted_by_seller_id', $this->seller->id)
-            ->with([
-                'variants' => function ($query): void {
-                    $query
-                        ->withTrashed()
-                        ->with([
-                            'region:id,name',
-                            'platform:id,name',
-                            'operatingSystem:id,name',
-                        ])
-                        ->withCount('listings')
-                        ->orderBy('region_id')
-                        ->orderBy('platform_id')
-                        ->orderBy('os_id');
-                },
-            ])
-            ->withCount(['variants', 'listings'])
-            ->orderByDesc('created_at')
-            ->get();
+        return $this->productRepository->getSellerProductsWithVariants($this->seller->id);
     }
 
     public function render(): View
@@ -112,17 +111,11 @@ class SellerProducts extends Component
 
     public function metrics(): array
     {
-        $query = Product::query()->where('submitted_by_seller_id', $this->seller->id)->withoutTrashed();
-
         return [
-            'products'        => (clone $query)->count(),
-            'pendingProducts' => (clone $query)->where('status', GeneralStatus::Inactive)->count(),
-            'activeProducts'  => (clone $query)->where('status', GeneralStatus::Active)->count(),
-            'variants'        => ProductVariant::query()
-                ->whereHas('product', function (Builder $builder): void {
-                    $builder->where('submitted_by_seller_id', $this->seller->id);
-                })
-                ->count(),
+            'products'        => $this->productRepository->countOwnedBySeller($this->seller->id),
+            'pendingProducts' => $this->productRepository->countOwnedBySeller($this->seller->id, GeneralStatus::Inactive),
+            'activeProducts'  => $this->productRepository->countOwnedBySeller($this->seller->id, GeneralStatus::Active),
+            'variants'        => $this->productVariantRepository->countOwnedBySeller($this->seller->id),
         ];
     }
 
@@ -198,11 +191,16 @@ class SellerProducts extends Component
                 }
 
                 $this->editForm->status = GeneralStatus::Inactive->value;
-                $this->editForm->update();
+                $this->productService->update(
+                    $product,
+                    $this->editForm->validatedData(),
+                    'editForm.slug',
+                    'editForm.status',
+                );
             } else {
                 $this->createForm->submitted_by_seller_id = $this->seller->id;
                 $this->createForm->status = GeneralStatus::Inactive->value;
-                $this->createForm->store();
+                $this->productService->create($this->createForm->validatedData(), 'createForm.slug');
             }
 
             $this->showProductModal = false;
@@ -226,24 +224,23 @@ class SellerProducts extends Component
         $this->resetVariantForm();
         $this->variantProductId = $product->id;
         $this->variantForm->product_id = $product->id;
-        $this->variantForm->status = $product->status === GeneralStatus::Active
-            ? ProductVariantStatus::Active->value
-            : ProductVariantStatus::Draft->value;
+        $this->variantForm->status = $this->productVariantService->defaultStatusForProduct($product)->value;
         $this->showVariantModal = true;
     }
 
     public function openEditVariantModal(int $variantId): void
     {
         $variant = $this->resolveOwnedVariant($variantId, true);
+        $variant->loadMissing(['product' => fn ($query) => $query->withTrashed()]);
 
         $this->resetVariantForm();
         $this->editingVariantId = $variant->id;
         $this->variantProductId = $variant->product_id;
         $this->variantForm->setVariant($variant);
 
-        if ($variant->product?->status !== GeneralStatus::Active) {
-            $this->variantForm->status = ProductVariantStatus::Draft->value;
-        }
+        $this->variantForm->status = $this->productVariantService
+            ->editableStatusForSeller($variant->product, $variant)
+            ->value;
 
         $this->showVariantModal = true;
     }
@@ -272,13 +269,7 @@ class SellerProducts extends Component
     public function performDeleteProduct(int $id): void
     {
         try {
-            DB::transaction(function () use ($id): void {
-                $product = $this->resolveOwnedProduct($id, true);
-
-                $product->status = GeneralStatus::Deleted;
-                $product->save();
-                $product->delete();
-            });
+            $this->productService->delete($this->resolveOwnedProduct($id, true));
 
             $this->dispatch('swal:success', ['message' => 'Product đã được xóa thành công.']);
         } catch (ModelNotFoundException $e) {
@@ -292,13 +283,7 @@ class SellerProducts extends Component
     public function performRestoreProduct(int $id): void
     {
         try {
-            DB::transaction(function () use ($id): void {
-                $product = $this->resolveOwnedProduct($id, true);
-
-                $product->restore();
-                $product->status = GeneralStatus::Inactive;
-                $product->save();
-            });
+            $this->productService->restore($this->resolveOwnedProduct($id, true));
 
             $this->dispatch('swal:success', ['message' => 'Product đã được khôi phục thành công.']);
         } catch (ModelNotFoundException $e) {
@@ -342,25 +327,13 @@ class SellerProducts extends Component
     public function performDeleteVariant(int $id): void
     {
         try {
-            DB::transaction(function () use ($id): void {
-                $variant = ProductVariant::query()
-                    ->whereHas('product', function (Builder $query): void {
-                        $query->where('submitted_by_seller_id', $this->seller->id);
-                    })
-                    ->findOrFail($id);
-
-                if ($variant->listings()->where('status', '!=', ProductListingStatus::Deleted->value)->exists()) {
-                    throw new \RuntimeException('Không thể xóa variant có listing chưa bị xóa.');
-                }
-
-                $variant->status = ProductVariantStatus::Deleted;
-                $variant->save();
-                $variant->delete();
-            });
+            $this->productVariantService->delete($this->resolveOwnedVariant($id, true), true);
 
             $this->dispatch('swal:success', ['message' => 'Variant đã được xóa thành công.']);
         } catch (ModelNotFoundException $e) {
             $this->dispatch('swal:error', ['message' => 'Variant không tồn tại hoặc không thuộc quyền quản lý của bạn.']);
+        } catch (ValidationException $e) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($e)]);
         } catch (\Throwable $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -370,18 +343,13 @@ class SellerProducts extends Component
     public function performRestoreVariant(int $id): void
     {
         try {
-            DB::transaction(function () use ($id): void {
-                $variant = $this->resolveOwnedVariant($id, true);
+            $variant = $this->resolveOwnedVariant($id, true);
+            $variant->loadMissing(['product' => fn ($query) => $query->withTrashed()]);
 
-                $variant->restore();
-                $variant->loadMissing(['product' => function (BelongsTo $query): void {
-                    $query->withTrashed();
-                }]);
-                $variant->status = $variant->product?->status === GeneralStatus::Active
-                    ? ProductVariantStatus::Hidden
-                    : ProductVariantStatus::Draft;
-                $variant->save();
-            });
+            $this->productVariantService->restore(
+                $variant,
+                $this->productVariantService->restoredStatusForProduct($variant->product),
+            );
 
             $this->dispatch('swal:success', ['message' => 'Variant đã được khôi phục thành công.']);
         } catch (ModelNotFoundException $e) {
@@ -396,25 +364,10 @@ class SellerProducts extends Component
     {
         try {
             $variant = $this->resolveOwnedVariant($id);
-            $variant->loadMissing('product');
 
-            if ($variant->product?->status !== GeneralStatus::Active) {
-                return;
+            if ($this->productVariantService->toggleVisibility($variant)) {
+                $this->dispatch('swal:success', ['message' => 'Trạng thái variant đã được cập nhật.']);
             }
-
-            if (! in_array($variant->status, [ProductVariantStatus::Active, ProductVariantStatus::Hidden], true)) {
-                return;
-            }
-
-            $variant->status = match ($variant->status) {
-                ProductVariantStatus::Active => ProductVariantStatus::Hidden,
-                ProductVariantStatus::Hidden => ProductVariantStatus::Active,
-                default                      => $variant->status,
-            };
-
-            $variant->save();
-
-            $this->dispatch('swal:success', ['message' => 'Trạng thái variant đã được cập nhật.']);
         } catch (ModelNotFoundException $e) {
             $this->dispatch('swal:error', ['message' => 'Variant không tồn tại hoặc không thuộc quyền quản lý của bạn.']);
         } catch (\Throwable $e) {
@@ -431,16 +384,19 @@ class SellerProducts extends Component
             if ($this->editingVariantId !== null) {
                 $variant = $this->resolveOwnedVariant($this->editingVariantId);
                 $this->variantForm->variant = $variant;
-                $this->variantForm->status = $product->status === GeneralStatus::Active
-                    && in_array($variant->status, [ProductVariantStatus::Active, ProductVariantStatus::Hidden], true)
-                    ? $variant->status->value
-                    : ProductVariantStatus::Draft->value;
-                $this->variantForm->update();
+                $this->variantForm->status = $this->productVariantService
+                    ->editableStatusForSeller($product, $variant)
+                    ->value;
+
+                $this->productVariantService->update(
+                    $variant,
+                    $this->variantForm->validatedData(),
+                    'variantForm.edition',
+                    'variantForm.status',
+                );
             } else {
-                $this->variantForm->status = $product->status === GeneralStatus::Active
-                    ? ProductVariantStatus::Active->value
-                    : ProductVariantStatus::Draft->value;
-                $this->variantForm->store();
+                $this->variantForm->status = $this->productVariantService->defaultStatusForProduct($product)->value;
+                $this->productVariantService->create($this->variantForm->validatedData(), 'variantForm.edition');
             }
 
             $this->showVariantModal = false;
@@ -494,26 +450,12 @@ class SellerProducts extends Component
 
     protected function resolveOwnedVariant(int $variantId, bool $withTrashed = false): ProductVariant
     {
-        $query = ProductVariant::query()->whereHas('product', function (Builder $builder): void {
-            $builder->withTrashed()->where('submitted_by_seller_id', $this->seller->id);
-        });
-
-        if ($withTrashed) {
-            $query->withTrashed();
-        }
-
-        return $query->findOrFail($variantId);
+        return $this->productVariantRepository->findOwnedBySellerOrFail($this->seller->id, $variantId, $withTrashed);
     }
 
     protected function resolveOwnedProduct(int $productId, bool $withTrashed = false): Product
     {
-        $query = Product::query()->where('submitted_by_seller_id', $this->seller->id);
-
-        if ($withTrashed) {
-            $query->withTrashed();
-        }
-
-        return $query->findOrFail($productId);
+        return $this->productRepository->findOwnedBySellerOrFail($this->seller->id, $productId, $withTrashed);
     }
 
     public function productImageUrl(?string $path): ?string
@@ -523,5 +465,10 @@ class SellerProducts extends Component
         }
 
         return StorageUtility::getUrl($path);
+    }
+
+    protected function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())->flatten()->first() ?? $exception->getMessage();
     }
 }

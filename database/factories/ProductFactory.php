@@ -171,11 +171,12 @@ class ProductFactory extends Factory
         ];
 
         $gameName = fake()->randomElement($gameNames);
+        $slug = Str::slug($gameName).'-'.Str::lower(Str::random(8));
 
         return [
             'name'                 => $gameName,
-            'slug'                 => Str::slug($gameName),
-            'image_thumbnail_path' => 'products/thumbnails/'.Str::slug($gameName).'.jpg',
+            'slug'                 => $slug,
+            'image_thumbnail_path' => 'products/thumbnails/'.$slug.'.jpg',
             'publisher'            => fake()->randomElement($publishers),
             'developer'            => fake()->randomElement($developers),
             'release_date'         => fake()->dateTimeBetween('-10 years', '+6 months'),

@@ -25,13 +25,26 @@ use App\Models\Seller;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 it('redirects guests away from the admin dashboard route', function (): void {
-    $this->get('/admin/dashboard')
-        ->assertRedirect('/admin/auth/login');
+    auth()->guard('admin')->logout();
+    $request = Request::create('/admin/dashboard', 'GET');
+
+    try {
+        app(Authenticate::class)->handle($request, fn () => response('ok'), 'admin');
+    } catch (AuthenticationException $exception) {
+        expect($exception->redirectTo($request))->toBe('/admin/auth/login');
+
+        return;
+    }
+
+    $this->fail('Guest request was not rejected by the admin guard.');
 });
 
 it('renders admin dashboard metrics and charts for authenticated admins', function (): void {

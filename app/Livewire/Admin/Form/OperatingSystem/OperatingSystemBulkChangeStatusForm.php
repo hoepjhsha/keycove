@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\OperatingSystem;
 
 use App\Enums\GeneralStatus;
-use App\Models\OperatingSystem;
+use App\Services\Admin\OperatingSystemService;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -25,13 +24,6 @@ class OperatingSystemBulkChangeStatusForm extends Form
     {
         $this->validate();
 
-        if ($this->status === GeneralStatus::Deleted->value) {
-            throw ValidationException::withMessages([
-                'editForm.status' => __('admin.validation.status_deleted_bulk'),
-            ]);
-        }
-
-        return OperatingSystem::whereIn('id', $ids)
-            ->update(['status' => $this->status]);
+        return app(OperatingSystemService::class)->bulkChangeStatus($ids, (int) $this->status, 'bulkChangeStatusForm.status');
     }
 }

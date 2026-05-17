@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
-            ['label' => 'Products List', 'url' => route('admin.products.index')],
+            ['label' => 'Products List', 'url' => \Illuminate\Support\Facades\Route::has('admin.products.index') ? route('admin.products.index') : url('/admin/products')],
             ['label' => $product->name, 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
@@ -353,9 +353,9 @@
 
             <div>
                 <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.price') }} <span class="text-red-400">*</span></label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">VND</span>
-                    <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-8 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
+                <div class="relative mt-1">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-500 dark:text-slate-400">VND</span>
+                    <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-14 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
                 </div>
                 @error('listingForm.price')
                     <small class="error text-red-500 text-xs">{{ $message }}</small>

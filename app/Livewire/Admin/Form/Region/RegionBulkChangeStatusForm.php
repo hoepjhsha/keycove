@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\Region;
 
 use App\Enums\GeneralStatus;
-use App\Models\Region;
+use App\Services\Admin\RegionService;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -25,13 +24,6 @@ class RegionBulkChangeStatusForm extends Form
     {
         $this->validate();
 
-        if ($this->status === GeneralStatus::Deleted->value) {
-            throw ValidationException::withMessages([
-                'editForm.status' => __('admin.validation.status_deleted_bulk'),
-            ]);
-        }
-
-        return Region::whereIn('id', $ids)
-            ->update(['status' => $this->status]);
+        return app(RegionService::class)->bulkChangeStatus($ids, (int) $this->status, 'bulkChangeStatusForm.status');
     }
 }

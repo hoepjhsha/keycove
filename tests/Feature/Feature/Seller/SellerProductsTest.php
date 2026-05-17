@@ -51,7 +51,7 @@ test('seller can create a product before approval', function (): void {
         ->set('createForm.slug', 'my-seller-product')
         ->set('createForm.publisher', 'KeyCove')
         ->set('createForm.developer', 'KeyCove Studio')
-        ->set('createForm.image', UploadedFile::fake()->image('thumbnail.jpg'))
+        ->set('createForm.image', UploadedFile::fake()->create('thumbnail.jpg', 120, 'image/jpeg'))
         ->call('saveProduct')
         ->assertHasNoErrors();
 

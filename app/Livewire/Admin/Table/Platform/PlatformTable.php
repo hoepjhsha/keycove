@@ -232,10 +232,12 @@ final class PlatformTable extends PowerGridComponent
     public function performToggleStatus($id): void
     {
         $platform = Platform::findOrFail($id);
+
         $platform->status = match ($platform->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
             default                 => GeneralStatus::Inactive,
         };
+
         $platform->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.platforms')])]);
@@ -255,12 +257,11 @@ final class PlatformTable extends PowerGridComponent
     #[On('performDelete')]
     public function performDelete($id): void
     {
-        DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id): void {
             $platform = Platform::findOrFail($id);
 
             $platform->status = GeneralStatus::Deleted;
             $platform->save();
-
             $platform->delete();
         });
 
@@ -282,10 +283,10 @@ final class PlatformTable extends PowerGridComponent
     public function performRevertDelete($id): void
     {
         $platform = Platform::withTrashed()->findOrFail($id);
-
         $platform->restore();
 
         $platform->status = GeneralStatus::Inactive;
+
         $platform->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.platforms')])]);
@@ -322,13 +323,10 @@ final class PlatformTable extends PowerGridComponent
             return;
         }
 
-        DB::transaction(function () {
-
-            Platform::whereIn('id', $this->checkboxValues)
-                ->update([
-                    'status' => GeneralStatus::Deleted,
-                ]);
-
+        DB::transaction(function (): void {
+            Platform::whereIn('id', $this->checkboxValues)->update([
+                'status' => GeneralStatus::Deleted,
+            ]);
             Platform::whereIn('id', $this->checkboxValues)->delete();
         });
 

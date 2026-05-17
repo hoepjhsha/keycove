@@ -6,8 +6,9 @@ namespace App\Livewire\Admin\Form\Product;
 
 use App\Enums\ProductKeyStatus;
 use App\Models\ProductKey;
+use App\Models\ProductListing;
+use App\Services\ProductKeyService;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -32,36 +33,34 @@ class ProductKeyForm extends Form
         $this->status = $key->status->value;
     }
 
-    public function store(): ProductKey
+    /**
+     * @return array{listing_id: int, key_code: string, status: int}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        return ProductKey::create([
-            'listing_id'    => $this->listing_id,
-            'key_code'      => $this->key_code,
-            'key_hash'      => hash('sha256', $this->key_code),
-            'status'        => ProductKeyStatus::Available->value,
-            'order_item_id' => null,
-        ]);
+        return [
+            'listing_id' => $this->listing_id,
+            'key_code'   => $this->key_code,
+            'status'     => $this->status,
+        ];
+    }
+
+    public function store(): ProductKey
+    {
+        $data = $this->validatedData();
+
+        return app(ProductKeyService::class)->create(
+            ProductListing::findOrFail($data['listing_id']),
+            $data['key_code'],
+            'keyForm.key_code',
+        );
     }
 
     public function deleteKey(int $id): bool
     {
-        $key = ProductKey::findOrFail($id);
-
-        if ($key->status !== ProductKeyStatus::Available) {
-            throw ValidationException::withMessages([
-                'general' => __('admin.validation.product_key_delete_available'),
-            ]);
-        }
-
-        if ($key->order_item_id !== null) {
-            throw ValidationException::withMessages([
-                'general' => __('admin.validation.product_key_delete_assigned'),
-            ]);
-        }
-
-        return (bool) $key->delete();
+        return app(ProductKeyService::class)->delete(ProductKey::findOrFail($id));
     }
 
     public function resetForm(): void

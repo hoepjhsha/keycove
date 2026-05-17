@@ -5,26 +5,18 @@ declare(strict_types=1);
 namespace App\Livewire\Shop\Library;
 
 use App\Enums\ComplaintStatus;
-use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
 use App\Managers\PaymentManager;
-use App\Models\Complaint;
-use App\Models\ComplaintMessage;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Review;
 use App\Models\User;
 use App\Services\Shop\ComplaintService;
+use App\Services\Shop\MyLibraryService;
 use App\Services\Shop\OrderItemCompletionService;
+use App\Services\Shop\OrderReviewService;
 use App\Services\Shop\PendingOrderService;
-use App\Utilities\StorageUtility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -76,11 +68,11 @@ class MyLibrary extends Component
      */
     public array $revealedKeys = [];
 
-    protected bool $hasComplaintCodeColumn = false;
+    protected MyLibraryService $myLibraryService;
 
-    public function mount(): void
+    public function boot(MyLibraryService $myLibraryService): void
     {
-        $this->hasComplaintCodeColumn = Schema::hasColumn('complaints', 'complaint_code');
+        $this->myLibraryService = $myLibraryService;
     }
 
     public function continuePayment(int $orderId, PendingOrderService $pendingOrderService, PaymentManager $paymentManager)
@@ -99,21 +91,14 @@ class MyLibrary extends Component
     {
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
 
-        if (! $this->canRevealKeys($orderItem)) {
-            return;
-        }
+        $keyState = $this->myLibraryService->revealedKeyState($orderItem);
 
-        $keys = $this->orderItemKeys($orderItem);
-
-        if ($keys === []) {
+        if ($keyState === null) {
             return;
         }
 
         if ($orderItem->buyer_key_viewed_at !== null) {
-            $this->revealedKeys[$orderItem->id] = [
-                'keys'    => $keys,
-                'visible' => true,
-            ];
+            $this->revealedKeys[$orderItem->id] = $keyState;
             $this->keyAccessOrderItemId = null;
             $this->keyAccessPassword = '';
 
@@ -150,28 +135,16 @@ class MyLibrary extends Component
 
         $orderItem = $this->resolveOwnedOrderItem((int) $this->keyAccessOrderItemId);
 
-        if (! $this->canRevealKeys($orderItem)) {
-            return;
-        }
+        $keyState = $this->myLibraryService->revealedKeyState($orderItem);
 
-        $keys = $this->orderItemKeys($orderItem);
-
-        if ($keys === []) {
+        if ($keyState === null) {
             $this->addError('keyAccessPassword', 'Sản phẩm này chưa có key được gắn vào.');
 
             return;
         }
 
-        $this->revealedKeys[$orderItem->id] = [
-            'keys'    => $keys,
-            'visible' => true,
-        ];
-
-        if ($orderItem->buyer_key_viewed_at === null) {
-            $orderItem->forceFill([
-                'buyer_key_viewed_at' => now(),
-            ])->save();
-        }
+        $this->revealedKeys[$orderItem->id] = $keyState;
+        $this->myLibraryService->markKeysViewed($orderItem);
 
         $this->keyAccessPassword = '';
         $this->keyAccessOrderItemId = null;
@@ -190,11 +163,7 @@ class MyLibrary extends Component
     public function toggleOrderItemKeys(int $orderItemId): void
     {
         $orderItem = $this->resolveOwnedOrderItem($orderItemId);
-        $keys = $this->orderItemKeys($orderItem);
-
-        if ($keys === []) {
-            return;
-        }
+        $keyState = $this->myLibraryService->revealedKeyState($orderItem, false);
 
         if ($orderItem->buyer_key_viewed_at === null) {
             $this->resetValidation('keyAccessPassword');
@@ -204,13 +173,14 @@ class MyLibrary extends Component
             return;
         }
 
-        $currentState = $this->revealedKeys[$orderItem->id] ?? [
-            'keys'    => $keys,
-            'visible' => false,
-        ];
+        if ($keyState === null) {
+            return;
+        }
+
+        $currentState = $this->revealedKeys[$orderItem->id] ?? $keyState;
 
         $this->revealedKeys[$orderItem->id] = [
-            'keys'    => $keys,
+            'keys'    => $currentState['keys'],
             'visible' => ! ($currentState['visible'] ?? false),
         ];
     }
@@ -272,7 +242,7 @@ class MyLibrary extends Component
         $this->resetValidation('reviewMedia');
     }
 
-    public function submitReview(): void
+    public function submitReview(OrderReviewService $orderReviewService): void
     {
         $this->validate([
             'reviewRating'  => ['required', 'integer', 'between:1,5'],
@@ -285,32 +255,13 @@ class MyLibrary extends Component
             return;
         }
 
-        $user = $this->resolveUser();
-
-        $created = DB::transaction(function () use ($user): bool {
-            $item = OrderItem::query()
-                ->whereKey($this->reviewOrderItemId)
-                ->whereHas('order', function ($query) use ($user): void {
-                    $query->where('buyer_id', $user->id);
-                })
-                ->where('status', OrderStatus::Completed->value)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($item->review()->exists()) {
-                return false;
-            }
-
-            Review::create([
-                'user_id'       => $user->id,
-                'order_item_id' => $item->id,
-                'rating'        => (int) $this->reviewRating,
-                'comment'       => filled(trim($this->reviewComment)) ? trim($this->reviewComment) : null,
-                'media'         => $this->storeUploadedFiles($this->reviewMedia, 'reviews/media'),
-            ]);
-
-            return true;
-        }, attempts: 3);
+        $created = $orderReviewService->submit(
+            $this->resolveUser(),
+            $this->reviewOrderItemId,
+            (int) $this->reviewRating,
+            $this->reviewComment,
+            $this->reviewMedia,
+        );
 
         if (! $created) {
             $this->cancelReviewForm();
@@ -458,116 +409,13 @@ class MyLibrary extends Component
 
     public function render(): View
     {
-        $user = $this->resolveUser();
-        $user->loadMissing('seller');
-
-        $hasApprovedSellerAccount = $user->seller?->kyc_status === KycStatus::Approved;
-
-        $orders = $user->orders()
-            ->with([
-                'items' => fn ($query) => $query
-                    ->select(['id', 'order_id', 'listing_id', 'order_item_code', 'product_name_snapshot', 'quantity', 'unit_price', 'subtotal', 'status', 'buyer_key_viewed_at'])
-                    ->with(['listing.variant.product', 'listing.variant.region', 'listing.variant.platform', 'listing.variant.operatingSystem', 'complaint.messages.sender', 'complaint.resolvedBy', 'review'])
-                    ->withCount('keys')
-                    ->orderBy('id'),
-            ])
-            ->withCount('items')
-            ->orderByDesc('created_at')
-            ->limit(12)
-            ->get();
-
-        $selectedOrderItem = $this->viewingOrderItemId !== null
-            ? $orders->flatMap(fn (Order $order): Collection => $order->items)->firstWhere('id', $this->viewingOrderItemId)
-            : null;
-
-        $selectedComplaintOrderItem = $this->viewingComplaintOrderItemId !== null
-            ? $orders->flatMap(fn (Order $order): Collection => $order->items)->firstWhere('id', $this->viewingComplaintOrderItemId)
-            : null;
-
-        $selectedComplaintOrder = $selectedComplaintOrderItem !== null
-            ? $orders->firstWhere('id', $selectedComplaintOrderItem->order_id)
-            : null;
-
-        $selectedComplaint = $selectedComplaintOrderItem?->complaint;
-
-        $selectedReviewMedia = $selectedOrderItem?->review !== null
-            ? $this->resolveStoredPaths($selectedOrderItem->review->media)
-            : [];
-
-        $selectedConfirmReceivedOrderItem = $this->confirmReceivedOrderItemId !== null
-            ? $orders->flatMap(fn (Order $order): Collection => $order->items)->firstWhere('id', $this->confirmReceivedOrderItemId)
-            : null;
-
-        return view('pages.shop.library.my-library', [
-            'user'                             => $user,
-            'orders'                           => $orders,
-            'pendingPaymentCount'              => $orders->where('payment_status', PaymentStatus::Pending)->count(),
-            'completedOrderCount'              => $orders->filter(fn (Order $order): bool => $order->status === OrderStatus::Completed)->count(),
-            'hasApprovedSellerAccount'         => $hasApprovedSellerAccount,
-            'revealedKeys'                     => $this->revealedKeys,
-            'selectedOrderItem'                => $selectedOrderItem,
-            'selectedComplaintOrderItem'       => $selectedComplaintOrderItem,
-            'selectedComplaintOrder'           => $selectedComplaintOrder,
-            'selectedComplaint'                => $selectedComplaint,
-            'selectedComplaintEvidence'        => $this->resolveStoredPaths($selectedComplaint?->evidence),
-            'selectedComplaintMessages'        => $this->resolveComplaintMessages($selectedComplaint),
-            'selectedReviewMedia'              => $selectedReviewMedia,
-            'selectedConfirmReceivedOrderItem' => $selectedConfirmReceivedOrderItem,
-        ])->layout('components.layouts.shop');
-    }
-
-    /**
-     * @return array<int, array{label: string, url: ?string}>
-     */
-    protected function resolveStoredPaths(?array $paths): array
-    {
-        return collect($paths ?? [])
-            ->filter(fn ($path): bool => is_string($path) && $path !== '')
-            ->map(fn (string $path): array => [
-                'label' => Str::afterLast($path, '/'),
-                'url'   => StorageUtility::getUrl($path),
-            ])
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @return array<int, array{id: int, sender_name: string, message: string, created_at: string|null, attachments: array<int, array{label: string, url: ?string}>}>
-     */
-    protected function resolveComplaintMessages(?Complaint $complaint): array
-    {
-        if ($complaint === null) {
-            return [];
-        }
-
-        return $complaint->messages
-            ->map(function (ComplaintMessage $message): array {
-                return [
-                    'id'          => $message->id,
-                    'sender_name' => $message->sender?->username ?? 'Hỗ trợ',
-                    'message'     => $message->message,
-                    'created_at'  => $message->created_at?->format('d/m/Y H:i'),
-                    'attachments' => $this->resolveStoredPaths($message->attachments),
-                ];
-            })
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @param  array<int, mixed>  $files
-     * @return list<string>
-     */
-    protected function storeUploadedFiles(array $files, string $directory): array
-    {
-        return collect($files)
-            ->filter()
-            ->map(function ($file) use ($directory): string|false {
-                return StorageUtility::store($file, $directory, config('filesystems.public_disk'));
-            })
-            ->filter(fn ($path): bool => is_string($path) && $path !== '')
-            ->values()
-            ->all();
+        return view('pages.shop.library.my-library', $this->myLibraryService->pageData(
+            $this->resolveUser(),
+            $this->revealedKeys,
+            $this->viewingOrderItemId,
+            $this->viewingComplaintOrderItemId,
+            $this->confirmReceivedOrderItemId,
+        ))->layout('components.layouts.shop');
     }
 
     protected function resolveUser(): User
@@ -581,30 +429,17 @@ class MyLibrary extends Component
 
     protected function resolveOwnedOrder(int $orderId): Order
     {
-        return $this->resolveUser()
-            ->orders()
-            ->with(['items.keys', 'items.escrow', 'paymentTransactions', 'transactions'])
-            ->findOrFail($orderId);
+        return $this->myLibraryService->resolveOwnedOrder($this->resolveUser(), $orderId);
     }
 
     protected function resolveOwnedOrderItem(int $orderItemId): OrderItem
     {
-        return OrderItem::query()
-            ->whereKey($orderItemId)
-            ->whereHas('order', function ($query): void {
-                $query->where('buyer_id', $this->resolveUser()->id);
-            })
-            ->with(['complaint', 'review'])
-            ->firstOrFail();
+        return $this->myLibraryService->resolveOwnedOrderItem($this->resolveUser(), $orderItemId);
     }
 
     protected function canRevealKeys(OrderItem $orderItem): bool
     {
-        return in_array($orderItem->status, [
-            OrderStatus::Delivered,
-            OrderStatus::Disputing,
-            OrderStatus::Completed,
-        ], true);
+        return $this->myLibraryService->canRevealKeys($orderItem);
     }
 
     /**
@@ -612,12 +447,6 @@ class MyLibrary extends Component
      */
     protected function orderItemKeys(OrderItem $orderItem): array
     {
-        return $orderItem->keys()
-            ->orderBy('id')
-            ->get(['id', 'order_item_id', 'key_code'])
-            ->pluck('key_code')
-            ->filter(fn (?string $keyCode): bool => filled($keyCode))
-            ->values()
-            ->all();
+        return $this->myLibraryService->orderItemKeys($orderItem);
     }
 }

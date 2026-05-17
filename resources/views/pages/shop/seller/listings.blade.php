@@ -280,6 +280,9 @@
                     Thêm key
                 </button>
             </form>
+            @error('keyCode')
+                <small class="-mt-1 block text-xs text-red-500">{{ $message }}</small>
+            @enderror
 
             <div class="overflow-hidden rounded-2xl border border-black/8 dark:border-white/10">
                 <table class="min-w-full divide-y divide-black/8 text-sm dark:divide-white/10">

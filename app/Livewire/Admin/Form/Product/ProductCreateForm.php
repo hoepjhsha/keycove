@@ -6,9 +6,8 @@ namespace App\Livewire\Admin\Form\Product;
 
 use App\Enums\GeneralStatus;
 use App\Models\Product;
-use Illuminate\Support\Str;
+use App\Services\ProductService;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
@@ -101,37 +100,14 @@ class ProductCreateForm extends Form
         $this->systemRequirements = array_values($this->systemRequirements);
     }
 
-    public function store(): Product
+    /**
+     * @return array{name: string, slug: string, publisher: ?string, developer: ?string, release_date: ?string, description: ?string, status: int, categories: array<int, int|string>, image: mixed, submitted_by_seller_id: ?int, system_requirements: ?array<string, string>}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        $imagePath = null;
-        if ($this->image) {
-            $disk = config('filesystems.public_disk');
-            $imagePath = $this->image->store(
-                'products/thumbnails',
-                $disk,
-            );
-        }
-
-        // Convert system requirements to JSON
-        $requirements = collect($this->systemRequirements)
-            ->filter(fn ($item) => ! empty($item['key']) && ! empty($item['value']))
-            ->mapWithKeys(fn ($item) => [$item['key'] => $item['value']])
-            ->all();
-
-        if (empty($this->slug)) {
-            $this->slug = Str::slug($this->name);
-        }
-
-        if (Product::where('slug', $this->slug)->exists()) {
-            throw ValidationException::withMessages([
-                'createForm.slug' => __('admin.validation.duplicate_product_slug'),
-            ]);
-        }
-
-        $product = Product::create([
-            'submitted_by_seller_id' => $this->submitted_by_seller_id,
+        return [
             'name'                   => $this->name,
             'slug'                   => $this->slug,
             'publisher'              => $this->publisher,
@@ -139,14 +115,28 @@ class ProductCreateForm extends Form
             'release_date'           => $this->release_date,
             'description'            => $this->description,
             'status'                 => $this->status,
-            'image_thumbnail_path'   => $imagePath,
-            'system_requirement'     => ! empty($requirements) ? $requirements : null,
-        ]);
+            'categories'             => $this->categories,
+            'image'                  => $this->image,
+            'submitted_by_seller_id' => $this->submitted_by_seller_id,
+            'system_requirements'    => $this->normalizeSystemRequirements(),
+        ];
+    }
 
-        if (! empty($this->categories)) {
-            $product->categories()->sync($this->categories);
-        }
+    public function store(): Product
+    {
+        return app(ProductService::class)->create($this->validatedData(), 'createForm.slug');
+    }
 
-        return $product;
+    /**
+     * @return ?array<string, string>
+     */
+    private function normalizeSystemRequirements(): ?array
+    {
+        $requirements = collect($this->systemRequirements)
+            ->filter(fn (array $item): bool => ! empty($item['key']) && ! empty($item['value']))
+            ->mapWithKeys(fn (array $item): array => [$item['key'] => $item['value']])
+            ->all();
+
+        return $requirements !== [] ? $requirements : null;
     }
 }
