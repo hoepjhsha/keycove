@@ -20,11 +20,6 @@
                     <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input wire:model.live.debounce.300ms="search" type="text" class="w-full sm:w-72 rounded-xl border border-slate-300 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100" placeholder="{{ __('admin.placeholders.search_settings') }}">
                 </label>
-
-                <button wire:click="$set('showCreateModal', true)" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700">
-                    <i class="fa-solid fa-plus"></i>
-                    {{ __('admin.system_settings.add_setting') }}
-                </button>
             </div>
         </div>
 
@@ -68,12 +63,6 @@
                             <button wire:click="saveInlineValue({{ $config->id }})" type="button" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
                                 {{ __('admin.common.save') }}
                             </button>
-                            <button wire:click="editSystemConfig({{ $config->id }})" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
-                                {{ __('admin.common.edit') }}
-                            </button>
-                            <button wire:click="deleteSystemConfig({{ $config->id }})" type="button" class="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10">
-                                {{ __('admin.common.delete') }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -88,39 +77,6 @@
             @endforelse
         </div>
     </div>
-
-    <x-reusable.modal wire:model="showCreateModal" :title="__('admin.modal.create_system_setting')" max-width="2xl">
-        <form id="createSystemConfigForm" class="space-y-4" wire:submit="createSystemConfig">
-            <div class="mb-2">
-                <label for="key" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.key') }}<span class="text-red-400">*</span></label>
-                <input wire:model="createForm.key" type="text" id="key" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" placeholder="site_name" required>
-                @error('createForm.key')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="value" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.value') }}<span class="text-red-400">*</span></label>
-                <input wire:model="createForm.value" type="text" id="value" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" required>
-                @error('createForm.value')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="description" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.description') }}</label>
-                <textarea wire:model="createForm.description" id="description" rows="3" class="form-textarea w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" placeholder="{{ __('admin.system_settings.short_description_placeholder') }}"></textarea>
-                @error('createForm.description')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="flex items-center justify-end space-x-2">
-                <button wire:target="createSystemConfig" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:bg-transparent dark:text-blue-500 dark:hover:text-white dark:border-blue-700 dark:hover:bg-blue-500 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.submit') }}</button>
-                <button wire:click="$set('showCreateModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:bg-transparent dark:text-red-500 dark:hover:text-white dark:border-gray-700 dark:hover:bg-red-500 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
-            </div>
-        </form>
-    </x-reusable.modal>
 
     <x-reusable.modal wire:model="showViewModal" :title="__('admin.modal.system_setting_details')" max-width="2xl">
         @if($viewData)
@@ -161,38 +117,4 @@
         </x-slot:footer>
     </x-reusable.modal>
 
-    <x-reusable.modal wire:model="showEditModal" :title="__('admin.modal.edit_system_setting', ['id' => $editForm->systemConfig?->id])" max-width="2xl">
-        <form id="editSystemConfigForm" class="space-y-4" wire:submit="updateSystemConfig">
-            <div class="mb-2">
-                <label for="edit_key" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.key') }}<span class="text-red-400">*</span></label>
-                <input wire:model="editForm.key" type="text" id="edit_key" class="form-input w-full rounded-md mt-1 border border-slate-300/60 bg-slate-100 px-3 py-1 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400" disabled>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('admin.system_settings.key_locked') }}</p>
-            </div>
-
-            <div class="mb-2">
-                <label for="edit_value" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.value') }}<span class="text-red-400">*</span></label>
-                <input wire:model="editForm.value" type="text" id="edit_value" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-1 focus:outline-none focus:ring-0 placeholder:text-slate-400/70" required>
-                @error('editForm.value')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="mb-2">
-                <label for="edit_description" class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.description') }}</label>
-                <textarea wire:model="editForm.description" id="edit_description" rows="3" class="form-textarea w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 placeholder:text-slate-400/70"></textarea>
-                @error('editForm.description')
-                    <small class="text-red-500 text-xs">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="flex items-center justify-end space-x-2">
-                <button wire:target="updateSystemConfig" type="submit" class="inline-block focus:outline-none text-blue-500 hover:bg-blue-500 hover:text-white bg-transparent border border-blue-200 dark:border-blue-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.update') }}</button>
-                <button wire:click="$set('showEditModal', false)" type="button" class="inline-block focus:outline-none text-red-500 hover:bg-red-500 hover:text-white bg-transparent border border-gray-200 dark:border-gray-700 text-sm font-medium py-1 px-3 rounded mb-1">{{ __('admin.common.cancel') }}</button>
-            </div>
-        </form>
-    </x-reusable.modal>
-
-    @push('scripts')
-        <x-admin.swal-listener />
-    @endpush
 </div>

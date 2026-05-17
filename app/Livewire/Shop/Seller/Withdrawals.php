@@ -157,9 +157,15 @@ class Withdrawals extends Component
 
         $walletBalance = (float) ($seller->wallet?->balance ?? 0);
 
-        $configuredMax = $configuredValue !== null
-            ? max(0.0, (float) $configuredValue)
-            : $walletBalance;
+        if ($configuredValue === null || trim((string) $configuredValue) === '') {
+            return $walletBalance;
+        }
+
+        $configuredMax = max(0.0, (float) $configuredValue);
+
+        if ($configuredMax === 0.0) {
+            return $walletBalance;
+        }
 
         return min($configuredMax, $walletBalance);
     }
