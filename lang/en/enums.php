@@ -170,6 +170,7 @@ return [
     'audit_event' => [
         'EscrowReleased' => 'Released',
         'EscrowFrozen'   => 'Frozen',
+        'EscrowUnfrozen' => 'Unfrozen',
         'EscrowExtended' => 'Extended',
         'EscrowVoided'   => 'Voided',
     ],

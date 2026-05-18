@@ -170,6 +170,7 @@ return [
     'audit_event' => [
         'EscrowReleased' => 'Đã giải ngân',
         'EscrowFrozen'   => 'Đã đóng băng',
+        'EscrowUnfrozen' => 'Đã mở đóng băng',
         'EscrowExtended' => 'Đã gia hạn',
         'EscrowVoided'   => 'Đã hủy bỏ',
     ],

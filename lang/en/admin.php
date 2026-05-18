@@ -176,6 +176,7 @@ return [
         'applied_at'                    => 'Applied At',
         'extend_holding_time'           => 'Extend Holding Time',
         'freeze_escrow'                 => 'Freeze Escrow',
+        'unfreeze_escrow'               => 'Unfreeze Escrow',
         'kyc_status'                    => 'KYC Status',
         'release_escrow'                => 'Release Escrow',
         'yes'                           => 'Yes',
@@ -310,7 +311,9 @@ return [
         'release_escrow'            => 'Release Escrow?',
         'release_escrow_text'       => 'Are you sure you want to release this escrow amount to the seller? This action cannot be undone.',
         'freeze_escrow'             => 'Freeze Escrow?',
-        'freeze_escrow_text'        => 'Are you sure you want to freeze this escrow? The holding timer will be paused. This action can be undone by extending the holding time.',
+        'freeze_escrow_text'        => 'Are you sure you want to freeze this escrow? This action can be undone by unfreezing the escrow.',
+        'unfreeze_escrow'           => 'Unfreeze Escrow?',
+        'unfreeze_escrow_text'      => 'Are you sure you want to return this escrow to Holding status?',
     ],
 
     'messages' => [
@@ -334,6 +337,8 @@ return [
         'escrow_extend_failed'           => 'Failed to extend escrow: :error',
         'escrow_freeze_failed'           => 'Failed to freeze escrow: :error',
         'escrow_frozen'                  => 'Escrow frozen successfully.',
+        'escrow_unfreeze_failed'         => 'Failed to unfreeze escrow: :error',
+        'escrow_unfrozen'                => 'Escrow unfrozen successfully.',
         'escrow_release_failed'          => 'Failed to release escrow: :error',
         'escrow_released'                => 'Escrow released successfully.',
         'refund_failed'                  => 'Refund failed: :error',

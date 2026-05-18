@@ -176,6 +176,7 @@ return [
         'applied_at'                    => 'Ngày đăng ký',
         'extend_holding_time'           => 'Gia hạn thời gian giữ',
         'freeze_escrow'                 => 'Đóng băng ký quỹ',
+        'unfreeze_escrow'               => 'Mở đóng băng ký quỹ',
         'kyc_status'                    => 'Trạng thái KYC',
         'release_escrow'                => 'Giải ngân ký quỹ',
         'yes'                           => 'Đồng ý',
@@ -310,7 +311,9 @@ return [
         'release_escrow'            => 'Giải ngân ký quỹ?',
         'release_escrow_text'       => 'Bạn có chắc muốn giải ngân khoản ký quỹ này cho người bán? Hành động này không thể hoàn tác.',
         'freeze_escrow'             => 'Đóng băng ký quỹ?',
-        'freeze_escrow_text'        => 'Bạn có chắc muốn đóng băng ký quỹ này? Bộ đếm thời gian giữ sẽ tạm dừng. Có thể hoàn tác bằng cách gia hạn thời gian giữ.',
+        'freeze_escrow_text'        => 'Bạn có chắc muốn đóng băng ký quỹ này? Có thể hoàn tác bằng nút mở đóng băng ký quỹ.',
+        'unfreeze_escrow'           => 'Mở đóng băng ký quỹ?',
+        'unfreeze_escrow_text'      => 'Bạn có chắc muốn chuyển ký quỹ này về trạng thái đang giữ?',
     ],
 
     'messages' => [
@@ -334,6 +337,8 @@ return [
         'escrow_extend_failed'           => 'Không thể gia hạn ký quỹ: :error',
         'escrow_freeze_failed'           => 'Không thể đóng băng ký quỹ: :error',
         'escrow_frozen'                  => 'Đã đóng băng ký quỹ thành công.',
+        'escrow_unfreeze_failed'         => 'Không thể mở đóng băng ký quỹ: :error',
+        'escrow_unfrozen'                => 'Đã mở đóng băng ký quỹ thành công.',
         'escrow_release_failed'          => 'Không thể giải ngân ký quỹ: :error',
         'escrow_released'                => 'Đã giải ngân ký quỹ thành công.',
         'refund_failed'                  => 'Hoàn tiền thất bại: :error',
