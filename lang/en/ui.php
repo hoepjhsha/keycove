@@ -69,6 +69,7 @@ return [
         'i_agree_to_the'                                   => 'I agree to the',
         'terms_and_conditions'                             => 'Terms & Conditions',
         'email_verified_message'                           => 'Your email address has been successfully verified.<br>Thank you for confirming your account.',
+        'email_verified_status'                            => 'Your email address has been verified.',
         'enter_your_credentials_to_access_the_admin_panel' => 'Please enter your credentials to access the admin panel',
         'logout'                                           => 'Logout',
     ],

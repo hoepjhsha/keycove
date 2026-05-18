@@ -70,6 +70,7 @@ return [
         'i_agree_to_the'                                   => 'Tôi đồng ý với',
         'terms_and_conditions'                             => 'Điều khoản & Điều kiện',
         'email_verified_message'                           => 'Địa chỉ email của bạn đã được xác minh thành công.<br>Cảm ơn bạn đã xác nhận tài khoản của mình.',
+        'email_verified_status'                            => 'Địa chỉ email của bạn đã được xác minh.',
         'enter_your_credentials_to_access_the_admin_panel' => 'Vui lòng nhập thông tin đăng nhập để truy cập bảng quản trị',
     ],
     'shop' => [
