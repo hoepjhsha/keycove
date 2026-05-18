@@ -11,7 +11,9 @@ use App\Livewire\Shop\Product\ProductShow;
 use App\Livewire\Shop\Seller\Apply;
 use App\Livewire\Shop\Seller\ComplaintIndex as SellerComplaintIndex;
 use App\Livewire\Shop\Seller\Dashboard;
+use App\Livewire\Shop\Seller\OrderIndex as SellerOrderIndex;
 use App\Livewire\Shop\Seller\SellerListings;
+use App\Livewire\Shop\Seller\SellerProducts;
 use App\Livewire\Shop\Seller\Withdrawals;
 use App\Livewire\Shop\SellerBrowse\SellerIndex;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -59,6 +61,10 @@ Route::livewire('/seller/dashboard', Dashboard::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
     ->name('seller.dashboard.index');
 
+Route::livewire('/seller/products', SellerProducts::class)
+    ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
+    ->name('seller.products.index');
+
 Route::livewire('/seller/complaints', SellerComplaintIndex::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
     ->name('seller.complaints.index');
@@ -70,6 +76,10 @@ Route::livewire('/seller/complaints/{complaint}', ComplaintThread::class)
 Route::livewire('/seller/listings', SellerListings::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
     ->name('seller.listings.index');
+
+Route::livewire('/seller/orders', SellerOrderIndex::class)
+    ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])
+    ->name('seller.orders.index');
 
 Route::livewire('/seller/withdrawals', Withdrawals::class)
     ->middleware(['auth', 'seller.email.verified', 'seller.portal.approved'])

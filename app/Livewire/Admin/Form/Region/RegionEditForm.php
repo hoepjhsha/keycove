@@ -6,7 +6,7 @@ namespace App\Livewire\Admin\Form\Region;
 
 use App\Enums\GeneralStatus;
 use App\Models\Region;
-use Illuminate\Support\Str;
+use App\Services\Admin\RegionService;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
@@ -62,32 +62,35 @@ class RegionEditForm extends Form
         $this->status = $region->status->value;
     }
 
-    public function update(): bool
+    /**
+     * @return array{name: string, slug: string, parent_id: int|null, flag_code: string, status: int}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        if (empty($this->slug)) {
-            $this->slug = Str::slug($this->name);
-        }
-
-        if (Region::where('slug', $this->slug)->where('id', '!=', $this->region->id)->exists()) {
-            throw ValidationException::withMessages([
-                'editForm.slug' => __('admin.validation.duplicate_region_slug'),
-            ]);
-        }
-
-        if ($this->status === GeneralStatus::Deleted->value) {
-            throw ValidationException::withMessages([
-                'editForm.status' => __('admin.validation.status_deleted_update'),
-            ]);
-        }
-
-        return $this->region->update([
+        return [
             'name'      => $this->name,
             'slug'      => $this->slug,
             'parent_id' => $this->parentId,
             'flag_code' => $this->flag_code,
             'status'    => $this->status,
-        ]);
+        ];
+    }
+
+    public function update(): bool
+    {
+        if (! $this->region instanceof Region) {
+            throw ValidationException::withMessages([
+                'region' => 'Khu vực không tồn tại.',
+            ]);
+        }
+
+        return app(RegionService::class)->update(
+            $this->region,
+            $this->validatedData(),
+            'editForm.slug',
+            'editForm.status',
+        );
     }
 }

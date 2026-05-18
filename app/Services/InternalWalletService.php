@@ -14,6 +14,7 @@ use App\Models\Escrow;
 use App\Models\InternalWalletEntry;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
+use App\Models\PlatformPayout;
 use App\Models\Wallet;
 use App\Models\Withdraw;
 use Illuminate\Support\Carbon;
@@ -171,6 +172,79 @@ class InternalWalletService
         );
     }
 
+    public function platformProfitPayoutRequested(PlatformPayout $platformPayout, ?TransactionStatus $status = null): InternalWalletEntry
+    {
+        $entry = InternalWalletEntry::query()
+            ->where('idempotency_key', $this->platformPayoutRequestKey($platformPayout))
+            ->first();
+
+        if ($entry !== null) {
+            if ($status !== null && $entry->status !== $status) {
+                $entry->forceFill([
+                    'status' => $status,
+                ])->save();
+            }
+
+            return $entry;
+        }
+
+        return $this->recordEntry(
+            type: InternalWalletEntryType::PlatformProfitPayoutRequested,
+            direction: InternalWalletDirection::Outflow,
+            amount: (float) $platformPayout->amount,
+            status: $status ?? TransactionStatus::Pending,
+            affectsBalance: false,
+            occurredAt: $platformPayout->created_at ?? now(),
+            sourceType: PlatformPayout::class,
+            sourceId: $platformPayout->id,
+            orderId: null,
+            idempotencyKey: $this->platformPayoutRequestKey($platformPayout),
+            metadata: [
+                'payout_code'  => $platformPayout->payout_code,
+                'period_start' => $platformPayout->period_start?->toDateString(),
+                'period_end'   => $platformPayout->period_end?->toDateString(),
+            ],
+        );
+    }
+
+    public function platformProfitPayoutCompleted(PlatformPayout $platformPayout, ?Carbon $occurredAt = null, array $metadata = []): InternalWalletEntry
+    {
+        $this->updatePlatformPayoutRequestStatus($platformPayout, TransactionStatus::Completed, $metadata);
+
+        return $this->recordEntry(
+            type: InternalWalletEntryType::PlatformProfitPayoutCompleted,
+            direction: InternalWalletDirection::Outflow,
+            amount: (float) $platformPayout->amount,
+            status: TransactionStatus::Completed,
+            affectsBalance: true,
+            occurredAt: $occurredAt ?? $platformPayout->processed_at ?? now(),
+            sourceType: PlatformPayout::class,
+            sourceId: $platformPayout->id,
+            orderId: null,
+            idempotencyKey: sprintf('internal-wallet:platform-profit-payout-completed:%d', $platformPayout->id),
+            metadata: $metadata,
+        );
+    }
+
+    public function platformProfitPayoutFailed(PlatformPayout $platformPayout, ?Carbon $occurredAt = null, array $metadata = []): InternalWalletEntry
+    {
+        $this->updatePlatformPayoutRequestStatus($platformPayout, TransactionStatus::Failed, $metadata);
+
+        return $this->recordEntry(
+            type: InternalWalletEntryType::PlatformProfitPayoutFailed,
+            direction: InternalWalletDirection::Outflow,
+            amount: (float) $platformPayout->amount,
+            status: TransactionStatus::Failed,
+            affectsBalance: false,
+            occurredAt: $occurredAt ?? $platformPayout->processed_at ?? now(),
+            sourceType: PlatformPayout::class,
+            sourceId: $platformPayout->id,
+            orderId: null,
+            idempotencyKey: sprintf('internal-wallet:platform-profit-payout-failed:%d', $platformPayout->id),
+            metadata: $metadata,
+        );
+    }
+
     public function wallet(): Wallet
     {
         return Wallet::firstOrCreate(
@@ -256,6 +330,24 @@ class InternalWalletService
     protected function withdrawRequestKey(Withdraw $withdraw): string
     {
         return sprintf('internal-wallet:seller-payout-requested:%d', $withdraw->id);
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    protected function updatePlatformPayoutRequestStatus(PlatformPayout $platformPayout, TransactionStatus $status, array $metadata = []): void
+    {
+        $entry = $this->platformProfitPayoutRequested($platformPayout);
+
+        $entry->forceFill([
+            'status'   => $status,
+            'metadata' => array_merge($entry->metadata ?? [], $metadata),
+        ])->save();
+    }
+
+    protected function platformPayoutRequestKey(PlatformPayout $platformPayout): string
+    {
+        return sprintf('internal-wallet:platform-profit-payout-requested:%d', $platformPayout->id);
     }
 
     protected function withdrawStatusToTransactionStatus(WithdrawStatus $status): TransactionStatus

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\Category;
 
 use App\Models\Category;
-use Illuminate\Support\Str;
+use App\Services\Admin\CategoryService;
 use Illuminate\Validation\Rules\Exists;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -34,24 +33,22 @@ class CategoryCreateForm extends Form
     ])]
     public string $slug = '';
 
-    public function store()
+    /**
+     * @return array{name: string, slug: string, parent_id: int|null}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        if (empty($this->slug)) {
-            $this->slug = Str::slug($this->name);
-        }
-
-        if (Category::where('slug', $this->slug)->exists()) {
-            throw ValidationException::withMessages([
-                'createForm.slug' => __('admin.validation.duplicate_category_slug'),
-            ]);
-        }
-
-        return Category::create([
+        return [
             'name'      => $this->name,
             'slug'      => $this->slug,
             'parent_id' => $this->parentId,
-        ]);
+        ];
+    }
+
+    public function store(): Category
+    {
+        return app(CategoryService::class)->create($this->validatedData(), 'createForm.slug');
     }
 }

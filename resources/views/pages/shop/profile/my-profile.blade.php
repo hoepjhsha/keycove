@@ -62,7 +62,6 @@
                                     <span>{{ $initials !== '' ? $initials : 'KC' }}</span>
                                 @endif
                             </div>
-                            <div class="absolute -bottom-2 -right-2 rounded-full border border-white/70 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm dark:border-gray-900 dark:bg-gray-950 dark:text-gray-300">{{ $profileCompletion }}%</div>
                         </div>
 
                         <div class="min-w-0 space-y-4">
@@ -104,11 +103,6 @@
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Hoàn thiện hồ sơ</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $profileCompletion }}%</p>
-                    </div>
-
                     <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Trạng thái email</p>
                         <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ $user->hasVerifiedEmail() ? 'Đã xác minh' : 'Đang chờ' }}</p>

@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-      x-data="{ theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') }"
-      x-init="$watch('theme', val => localStorage.setItem('theme', val))"
-      x-bind:data-theme="theme"
->
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light" class="scheme-light">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <meta name="color-scheme" content="only light">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
         <title>{{ __('admin.errors.500.meta') }}</title>

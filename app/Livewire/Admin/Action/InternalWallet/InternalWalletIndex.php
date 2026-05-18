@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Action\InternalWallet;
 
 use App\Enums\EscrowStatus;
+use App\Enums\InternalWalletEntryType;
+use App\Enums\OrderStatus;
 use App\Enums\TransactionStatus;
 use App\Enums\WalletType;
-use App\Enums\WithdrawStatus;
 use App\Models\Escrow;
 use App\Models\InternalWalletEntry;
+use App\Models\OrderItem;
 use App\Models\Wallet;
-use App\Models\Withdraw;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -82,41 +83,48 @@ class InternalWalletIndex extends Component
      */
     protected function metrics(): array
     {
-        $cashIn = (float) InternalWalletEntry::query()
-            ->where('affects_balance', true)
-            ->where('status', TransactionStatus::Completed)
-            ->where('direction', 0)
-            ->sum('amount');
-
-        $cashOut = (float) InternalWalletEntry::query()
-            ->where('affects_balance', true)
-            ->where('status', TransactionStatus::Completed)
-            ->where('direction', 1)
-            ->sum('amount');
-
         $walletBalance = (float) Wallet::query()
             ->where('type', WalletType::Internal)
             ->value('balance');
 
-        $sellerAvailableLiability = (float) Wallet::query()
-            ->where('type', WalletType::Seller)
-            ->sum('balance');
+        $recognizedRevenueQuery = OrderItem::query()->whereIn('status', $this->recognizedRevenueStatuses());
 
-        $sellerHoldingLiability = (float) Escrow::query()
+        $platformFeeRevenue = (float) (clone $recognizedRevenueQuery)
+            ->whereNotNull('seller_id')
+            ->sum('platform_fee');
+
+        $platformOwnedRevenue = (float) (clone $recognizedRevenueQuery)
+            ->whereNull('seller_id')
+            ->sum('seller_amount');
+
+        $escrowHolding = (float) Escrow::query()
             ->whereIn('status', [EscrowStatus::Holding, EscrowStatus::Frozen])
             ->sum('amount');
 
-        $pendingWithdrawalLiability = (float) Withdraw::query()
-            ->whereIn('status', [WithdrawStatus::Pending, WithdrawStatus::Processing])
+        $escrowReleased = (float) InternalWalletEntry::query()
+            ->where('type', InternalWalletEntryType::EscrowReleased)
+            ->where('status', TransactionStatus::Completed)
             ->sum('amount');
 
         return [
-            'cashIn'                     => $cashIn,
-            'cashOut'                    => $cashOut,
-            'netBalance'                 => $walletBalance,
-            'sellerAvailableLiability'   => $sellerAvailableLiability,
-            'sellerHoldingLiability'     => $sellerHoldingLiability,
-            'pendingWithdrawalLiability' => $pendingWithdrawalLiability,
+            'internalBalance'      => $walletBalance,
+            'platformRevenue'      => round($platformFeeRevenue + $platformOwnedRevenue, 2),
+            'platformFeeRevenue'   => $platformFeeRevenue,
+            'platformOwnedRevenue' => $platformOwnedRevenue,
+            'escrowHolding'        => $escrowHolding,
+            'escrowReleased'       => $escrowReleased,
+        ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function recognizedRevenueStatuses(): array
+    {
+        return [
+            OrderStatus::Delivered->value,
+            OrderStatus::Disputing->value,
+            OrderStatus::Completed->value,
         ];
     }
 

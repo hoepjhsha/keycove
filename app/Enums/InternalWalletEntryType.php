@@ -18,4 +18,7 @@ enum InternalWalletEntryType: int
     case SellerPayoutCompleted = 5;
     case SellerPayoutFailed = 6;
     case Adjustment = 7;
+    case PlatformProfitPayoutRequested = 8;
+    case PlatformProfitPayoutCompleted = 9;
+    case PlatformProfitPayoutFailed = 10;
 }

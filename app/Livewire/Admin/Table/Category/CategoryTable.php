@@ -217,10 +217,12 @@ final class CategoryTable extends PowerGridComponent
     public function performToggleStatus($id): void
     {
         $category = Category::findOrFail($id);
+
         $category->status = match ($category->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
             default                 => GeneralStatus::Inactive,
         };
+
         $category->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.categories')])]);
@@ -240,15 +242,13 @@ final class CategoryTable extends PowerGridComponent
     #[On('performDelete')]
     public function performDelete($id): void
     {
-        DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id): void {
             $category = Category::findOrFail($id);
 
-            // Detach this category from all associated products
             $category->products()->detach();
 
             $category->status = GeneralStatus::Deleted;
             $category->save();
-
             $category->delete();
         });
 
@@ -270,10 +270,10 @@ final class CategoryTable extends PowerGridComponent
     public function performRevertDelete($id): void
     {
         $category = Category::withTrashed()->findOrFail($id);
-
         $category->restore();
 
         $category->status = GeneralStatus::Inactive;
+
         $category->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.categories')])]);
@@ -310,15 +310,14 @@ final class CategoryTable extends PowerGridComponent
             return;
         }
 
-        DB::transaction(function () {
-            // Detach products for all selected categories
-            DB::table('category_product')->whereIn('category_id', $this->checkboxValues)->delete();
+        DB::transaction(function (): void {
+            DB::table('category_product')
+                ->whereIn('category_id', $this->checkboxValues)
+                ->delete();
 
-            Category::whereIn('id', $this->checkboxValues)
-                ->update([
-                    'status' => GeneralStatus::Deleted,
-                ]);
-
+            Category::whereIn('id', $this->checkboxValues)->update([
+                'status' => GeneralStatus::Deleted,
+            ]);
             Category::whereIn('id', $this->checkboxValues)->delete();
         });
 

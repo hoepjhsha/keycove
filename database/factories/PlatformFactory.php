@@ -39,11 +39,12 @@ class PlatformFactory extends Factory
         ];
 
         $platform = fake()->randomElement($platforms);
+        $slug = Str::slug($platform['name']).'-'.Str::lower(Str::random(8));
 
         return [
             'name'      => $platform['name'],
-            'slug'      => Str::slug($platform['name']),
-            'icon_path' => 'icons/platforms/'.Str::slug($platform['name']).'.svg',
+            'slug'      => $slug,
+            'icon_path' => 'icons/platforms/'.$slug.'.svg',
             'base_url'  => $platform['url'],
             'status'    => GeneralStatus::Active,
         ];

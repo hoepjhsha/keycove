@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\GeneralStatus;
+use App\Enums\ProductListingStatus;
+use App\Enums\ProductVariantStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -80,5 +82,45 @@ class Product extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (Product $product): void {
+            if ($product->submitted_by_seller_id === null) {
+                return;
+            }
+
+            if ($product->status === GeneralStatus::Active && $product->approved_by === null) {
+                $product->forceFill([
+                    'approved_by' => auth('admin')->id(),
+                ])->saveQuietly();
+            }
+
+            $product->syncChildStatuses();
+        });
+    }
+
+    public function syncChildStatuses(): void
+    {
+        $variantStatus = $this->status === GeneralStatus::Active
+            ? ProductVariantStatus::Active
+            : ProductVariantStatus::Draft;
+
+        $listingStatus = $this->status === GeneralStatus::Active
+            ? ProductListingStatus::Active
+            : ProductListingStatus::Draft;
+
+        $this->variants()->update([
+            'status' => $variantStatus->value,
+        ]);
+
+        ProductListing::query()
+            ->whereHas('variant', function ($query): void {
+                $query->where('product_id', $this->id);
+            })
+            ->update([
+                'status' => $listingStatus->value,
+            ]);
     }
 }

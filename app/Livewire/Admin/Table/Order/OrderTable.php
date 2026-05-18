@@ -10,6 +10,7 @@ use App\Enums\PaymentStatus;
 use App\Livewire\Admin\Action\Order\OrderIndex;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
@@ -146,7 +147,15 @@ final class OrderTable extends PowerGridComponent
         return [
             Column::make('#', 'id')->index(),
             Column::make(__('admin.common.order_code'), 'order_code')->sortable()->searchable(),
-            Column::make(__('admin.common.buyer'), 'buyer_name', 'buyer.username')->sortable()->searchable(),
+            Column::make(__('admin.common.buyer'), 'buyer_name', 'buyer.username')
+                ->sortUsing(fn (Builder $query, string $direction) => $query->orderBy(
+                    User::query()
+                        ->select('username')
+                        ->whereColumn('users.id', 'orders.buyer_id')
+                        ->limit(1),
+                    $direction
+                ))
+                ->searchable(),
             Column::make(__('admin.common.total'), 'total_price_formatted', 'total_price')->sortable()->bodyAttribute('text-right'),
             Column::make(__('admin.common.status'), 'status_label', 'aggregated_status')->sortable(),
             Column::make(__('admin.common.payment'), 'payment_method_label', 'payment_method')->sortable(),

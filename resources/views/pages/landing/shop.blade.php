@@ -1,90 +1,85 @@
+@php
+    $posterProduct = $featuredProducts->first();
+    $posterImage = data_get($posterProduct, 'image');
+@endphp
+
 <div class="relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-b from-[#F6EBD9] via-[#FCF9F4] to-transparent dark:from-gray-900 dark:via-gray-950"></div>
     <div aria-hidden="true" class="pointer-events-none absolute -top-8 right-0 -z-10 h-56 w-56 rounded-full bg-[#D32F2F]/8 blur-3xl dark:bg-[#D32F2F]/12"></div>
     <div aria-hidden="true" class="pointer-events-none absolute left-0 top-36 -z-10 h-56 w-56 rounded-full bg-indigo-500/8 blur-3xl dark:bg-indigo-400/10"></div>
 
-    <div class="mx-auto max-w-7xl space-y-8">
-        <section class="relative overflow-hidden rounded-[2rem] border border-black/8 bg-linear-to-br from-white via-[#FCF9F4] to-[#F6EBD9] p-6 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)] sm:p-8 lg:p-10 dark:border-white/10 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-            <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-radial from-white/80 via-white/10 to-transparent lg:block dark:from-white/10 dark:via-white/5"></div>
-            <div class="relative grid gap-8 lg:grid-cols-[minmax(0,1.25fr)_18rem] lg:items-end">
-                <div class="space-y-5">
-                    <p class="inline-flex w-fit items-center gap-2 rounded-full border border-[#D32F2F]/15 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D32F2F] shadow-sm dark:border-[#D32F2F]/20 dark:bg-white/5 dark:text-[#ff9c9c]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
-                        Trang chủ marketplace
-                    </p>
+    <div class="mx-auto max-w-7xl space-y-10">
+        <section class="relative overflow-hidden rounded-[2.2rem] bg-gray-950 shadow-[0_32px_90px_-44px_rgba(0,0,0,0.55)]">
+            <div class="relative min-h-[360px] sm:min-h-[430px] lg:min-h-[500px]">
+                @if($posterImage)
+                    <img src="https://wallpapercave.com/wp/wp14808655.webp" alt="{{ data_get($posterProduct, 'name', 'KeyCove poster') }}" class="absolute inset-0 h-full w-full object-cover">
+                @else
+                    <div class="absolute inset-0 bg-linear-to-br from-gray-950 via-gray-800 to-[#D32F2F]"></div>
+                @endif
 
-                    <div class="space-y-3">
-                        <h1 class="max-w-4xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl dark:text-white">
-                            Tìm nhanh, duyệt theo danh mục và khám phá các listing tốt nhất tại một nơi.
-                        </h1>
-                        <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base dark:text-gray-400">
-                            Bắt đầu từ trang chủ để đi thẳng vào catalog sản phẩm với các bộ lọc quen thuộc.
-                        </p>
-                    </div>
+                <div class="absolute inset-0 bg-linear-to-r from-gray-950/90 via-gray-950/50 to-gray-950/10"></div>
+                <div class="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-gray-950/80 to-transparent"></div>
 
-                    <form action="{{ route('app.products.index') }}" method="GET" class="flex flex-col gap-3 rounded-[1.6rem] border border-black/8 bg-white/90 p-3 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.45)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-gray-950/80">
-                        <label class="flex-1">
-                            <span class="sr-only">Tìm sản phẩm</span>
-                            <input name="search" value="{{ request('search') }}" type="search" placeholder="Tìm theo tên, nhà phát hành, phiên bản..." class="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
-                        </label>
+                <div class="relative flex min-h-[360px] flex-col justify-end p-6 text-white sm:min-h-[430px] sm:p-8 lg:min-h-[500px] lg:p-12">
+                    <div class="max-w-2xl space-y-5">
+                        <span class="inline-flex w-fit rounded-full bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] backdrop-blur">
+                            KeyCove Marketplace
+                        </span>
 
-                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
-                            Tìm kiếm
-                        </button>
-                    </form>
-                </div>
+                        <div class="space-y-3">
+                            <h1 class="text-4xl font-semibold tracking-tight sm:text-6xl lg:text-7xl">
+                                Game keys, mua nhanh.
+                            </h1>
+                            <p class="max-w-xl text-base text-white/78 sm:text-lg">
+                                Tìm game, so sánh listing, thanh toán gọn.
+                            </p>
+                        </div>
 
-                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Danh mục</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($categories->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Truy cập nhanh vào catalog</p>
-                    </div>
-
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Sản phẩm nổi bật</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($featuredProducts->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sản phẩm bán chạy và gợi ý khám phá</p>
-                    </div>
-
-                    <div class="rounded-3xl border border-black/8 bg-white/80 px-4 py-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Listing người bán</p>
-                        <p class="mt-3 text-2xl font-semibold text-gray-950 dark:text-white">{{ number_format($sellerListings->count()) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Listing đang hoạt động từ người bán</p>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{{ route('app.products.index') }}" wire:navigate.hover class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition hover:bg-[#D32F2F] hover:text-white">
+                                Khám phá ngay
+                            </a>
+                            <a href="{{ route('app.sellers.index') }}" wire:navigate.hover class="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white hover:text-gray-950">
+                                Xem người bán
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="space-y-4">
-            <div class="flex items-end justify-between gap-4">
+        <form action="{{ route('app.products.index') }}" method="GET" class="relative z-10 mx-auto -mt-5 flex max-w-4xl flex-col gap-3 rounded-[1.7rem] border border-black/8 bg-white/95 p-3 shadow-[0_28px_70px_-42px_rgba(0,0,0,0.55)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-gray-950/90">
+            <label class="flex-1">
+                <span class="sr-only">Tìm sản phẩm</span>
+                <input name="search" value="{{ request('search') }}" type="search" placeholder="Tìm game hoặc listing..." class="w-full rounded-2xl border border-black/10 bg-white px-5 py-4 text-base shadow-sm focus:border-[#D32F2F] focus:ring-0 dark:border-white/10 dark:bg-gray-950 dark:text-gray-100">
+            </label>
+
+            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-black px-6 py-4 text-base font-semibold text-white transition-colors hover:bg-[#D32F2F] dark:bg-white dark:text-gray-950 dark:hover:bg-[#D32F2F] dark:hover:text-white">
+                Tìm kiếm
+            </button>
+        </form>
+
+        <section class="space-y-5">
+            <div class="flex items-center justify-between gap-4">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Danh mục</p>
-                    <h2 class="mt-2 text-xl font-semibold text-gray-950 dark:text-white">Duyệt theo danh mục</h2>
+                    <h2 class="mt-2 text-2xl font-semibold text-gray-950 dark:text-white">Chọn nhanh</h2>
                 </div>
                 <button type="button" wire:click="toggleCategories" class="text-sm font-medium text-[#D32F2F] hover:underline dark:text-[#ff9c9c]">
                     {{ $showAllCategories ? 'Thu gọn' : 'Xem tất cả' }}
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                @foreach(($showAllCategories ? $categories : $categories->take(6)) as $category)
-                    <a href="{{ route('app.products.index', ['category' => $category['slug']]) }}" wire:navigate.hover class="group rounded-[1.5rem] border border-black/8 bg-white/90 p-4 shadow-[0_20px_40px_-28px_rgba(0,0,0,0.35)] transition-all hover:-translate-y-1 hover:border-[#D32F2F]/20 hover:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.4)] dark:border-white/10 dark:bg-gray-900/90">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FCF9F4] text-[#D32F2F] transition-colors group-hover:bg-[#D32F2F] group-hover:text-white dark:bg-white/5 dark:text-[#ff9c9c] dark:group-hover:bg-[#D32F2F] dark:group-hover:text-white">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach(($showAllCategories ? $categories : $categories->take(4)) as $category)
+                    <a href="{{ route('app.products.index', ['category' => $category['slug']]) }}" wire:navigate.hover class="group rounded-[1.8rem] border border-black/8 bg-white/95 p-6 shadow-[0_24px_54px_-34px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-1 hover:border-[#D32F2F]/25 hover:shadow-[0_30px_70px_-36px_rgba(0,0,0,0.5)] dark:border-white/10 dark:bg-gray-900/90">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-3xl bg-[#FCF9F4] text-xl text-[#D32F2F] transition-colors group-hover:bg-[#D32F2F] group-hover:text-white dark:bg-white/5 dark:text-[#ff9c9c] dark:group-hover:bg-[#D32F2F] dark:group-hover:text-white">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
-                        <div class="mt-4 space-y-1">
-                            <h3 class="line-clamp-2 text-sm font-semibold text-gray-950 dark:text-white">{{ $category['name'] }}</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($category['products_count']) }} sản phẩm</p>
+                        <div class="mt-5 space-y-2">
+                            <h3 class="line-clamp-1 text-lg font-semibold text-gray-950 dark:text-white">{{ $category['name'] }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($category['products_count']) }} sản phẩm</p>
                         </div>
-
-                        @if($category['children']->isNotEmpty())
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                @foreach($category['children']->take(2) as $child)
-                                    <span class="rounded-full bg-[#FCF9F4] px-2.5 py-1 text-[10px] font-medium text-gray-700 dark:bg-white/5 dark:text-gray-300">{{ $child['name'] }}</span>
-                                @endforeach
-                            </div>
-                        @endif
                     </a>
                 @endforeach
             </div>

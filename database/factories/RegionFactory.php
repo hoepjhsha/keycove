@@ -47,12 +47,13 @@ class RegionFactory extends Factory
         ];
 
         $country = fake()->randomElement($countries);
+        $slug = Str::slug($country['name']).'-'.Str::lower(Str::random(8));
 
         return [
             'parent_id' => null,
             'name'      => $country['name'],
-            'slug'      => Str::slug($country['name']),
-            'flag_code' => $country['code'],
+            'slug'      => $slug,
+            'flag_code' => $country['code'].'-'.Str::lower(Str::random(4)),
             'status'    => GeneralStatus::Active,
         ];
     }

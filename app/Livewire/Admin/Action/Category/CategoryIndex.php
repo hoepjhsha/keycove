@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\Category;
 
+use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Form\Category\CategoryBulkChangeStatusForm;
 use App\Livewire\Admin\Form\Category\CategoryCreateForm;
 use App\Livewire\Admin\Form\Category\CategoryEditForm;
-use App\Models\Category;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -35,10 +36,17 @@ class CategoryIndex extends Component
 
     public CategoryBulkChangeStatusForm $bulkChangeStatusForm;
 
+    protected CategoryRepositoryInterface $categories;
+
+    public function boot(CategoryRepositoryInterface $categories): void
+    {
+        $this->categories = $categories;
+    }
+
     #[Computed]
     public function parentCategories()
     {
-        return Category::select('id', 'name')->get();
+        return $this->categories->getParentOptions();
     }
 
     public function createCategory(): void
@@ -69,11 +77,7 @@ class CategoryIndex extends Component
 
     public function bulkChangeStatusCategory(): void
     {
-        if (Category::withTrashed()
-            ->whereIn('id', $this->bulkSelectedIds)
-            ->where('status', GeneralStatus::Deleted)
-            ->exists()
-        ) {
+        if ($this->categories->hasDeletedStatus($this->bulkSelectedIds)) {
             sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
@@ -110,43 +114,47 @@ class CategoryIndex extends Component
     #[On('viewCategory')]
     public function viewCategory($rowId): void
     {
-        $category = Category::with('parent')->find($rowId);
-
-        if ($category) {
-            $colorClass = match ($category->status) {
-                GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
-                GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
-                GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
-                default                 => 'bg-primary-500/10 text-primary-500',
-            };
-
-            $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$category->status->label().'</span>';
-
-            $this->viewData = [
-                'id'           => $category->id,
-                'name'         => $category->name,
-                'slug'         => $category->slug,
-                'parent_name'  => $category->parent->name ?? __('admin.common.none'),
-                'status_label' => $statusLabel,
-                'created_at'   => $category->created_at->format('d/m/Y H:i:s'),
-                'updated_at'   => $category->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at'   => $category->deleted_at?->format('d/m/Y H:i:s'),
-            ];
-
-            $this->showViewModal = true;
+        try {
+            $category = $this->categories->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $colorClass = match ($category->status) {
+            GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
+            GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
+            GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+            GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+            default                 => 'bg-primary-500/10 text-primary-500',
+        };
+
+        $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$category->status->label().'</span>';
+
+        $this->viewData = [
+            'id'           => $category->id,
+            'name'         => $category->name,
+            'slug'         => $category->slug,
+            'parent_name'  => $category->parent->name ?? __('admin.common.none'),
+            'status_label' => $statusLabel,
+            'created_at'   => $category->created_at->format('d/m/Y H:i:s'),
+            'updated_at'   => $category->updated_at->format('d/m/Y H:i:s'),
+            'deleted_at'   => $category->deleted_at?->format('d/m/Y H:i:s'),
+        ];
+
+        $this->showViewModal = true;
     }
 
     #[On('editCategory')]
     public function editCategory($rowId): void
     {
-        $category = Category::find($rowId);
-
-        if ($category) {
-            $this->editForm->setCategory($category);
-            $this->showEditModal = true;
+        try {
+            $category = $this->categories->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $this->editForm->setCategory($category);
+        $this->showEditModal = true;
     }
 
     #[On('openBulkStatusModal')]

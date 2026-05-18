@@ -7,6 +7,8 @@ namespace App\Livewire\Admin\Table\Complaint;
 use App\Enums\ComplaintStatus;
 use App\Livewire\Admin\Action\Complaint\ComplaintIndex;
 use App\Models\Complaint;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
@@ -39,10 +41,10 @@ final class ComplaintTable extends PowerGridComponent
     public function datasource(): Builder
     {
         return Complaint::query()
+            ->withCount('messages')
             ->with([
                 'orderItem.order.buyer',
                 'orderItem.listing.seller.user',
-                'messages',
             ]);
     }
 
@@ -63,7 +65,7 @@ final class ComplaintTable extends PowerGridComponent
             ->add('buyer_name', fn (Complaint $model) => $model->orderItem?->order?->buyer?->username ?? '-')
             ->add('seller_name', fn (Complaint $model) => $model->orderItem?->listing?->seller?->user?->username ?? __('admin.common.shop_admin'))
             ->add('reason')
-            ->add('message_count', fn (Complaint $model) => $model->messages()->count())
+            ->add('message_count', fn (Complaint $model) => (int) $model->messages_count)
             ->add('status_label', function (Complaint $model) {
                 $status = $model->status;
                 $labelText = method_exists($status, 'label') ? $status->label() : $status->name;
@@ -86,11 +88,40 @@ final class ComplaintTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'complaint_id', 'id')->index(),
-            Column::make(__('admin.common.order_code'), 'order_code', 'orderItem.order.order_code')->sortable()->searchable(),
-            Column::make(__('admin.common.buyer'), 'buyer_name', 'orderItem.order.buyer.username')->sortable()->searchable(),
-            Column::make(__('admin.common.seller'), 'seller_name', 'orderItem.listing.seller.user.username')->sortable()->searchable(),
+            Column::make(__('admin.common.order_code'), 'order_code', 'orderItem.order.order_code')
+                ->sortUsing(fn (Builder $query, string $direction) => $query->orderBy(
+                    Order::query()
+                        ->select('orders.order_code')
+                        ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                        ->whereColumn('order_items.id', 'complaints.order_item_id')
+                        ->limit(1),
+                    $direction
+                ))
+                ->searchable(),
+            Column::make(__('admin.common.buyer'), 'buyer_name', 'orderItem.order.buyer.username')
+                ->sortUsing(fn (Builder $query, string $direction) => $query->orderBy(
+                    User::query()
+                        ->select('users.username')
+                        ->join('orders', 'users.id', '=', 'orders.buyer_id')
+                        ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                        ->whereColumn('order_items.id', 'complaints.order_item_id')
+                        ->limit(1),
+                    $direction
+                ))
+                ->searchable(),
+            Column::make(__('admin.common.seller'), 'seller_name', 'orderItem.listing.seller.user.username')
+                ->sortUsing(fn (Builder $query, string $direction) => $query->orderBy(
+                    User::query()
+                        ->select('users.username')
+                        ->join('sellers', 'users.id', '=', 'sellers.user_id')
+                        ->join('order_items', 'sellers.id', '=', 'order_items.seller_id')
+                        ->whereColumn('order_items.id', 'complaints.order_item_id')
+                        ->limit(1),
+                    $direction
+                ))
+                ->searchable(),
             Column::make(__('admin.common.reason'), 'reason')->sortable()->searchable(),
-            Column::make(__('admin.common.messages'), 'message_count')->sortable(),
+            Column::make(__('admin.common.messages'), 'message_count', 'messages_count')->sortable(),
             Column::make(__('admin.common.status'), 'status_label', 'status')->sortable(),
             Column::make(__('admin.common.created_at_short'), 'created_at_formatted', 'created_at')->sortable(),
             Column::action(__('admin.common.action')),
