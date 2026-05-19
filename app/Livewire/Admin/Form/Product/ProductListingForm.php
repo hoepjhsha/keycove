@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Form\Product;
 
-use App\Enums\ProductKeyStatus;
 use App\Enums\ProductListingStatus;
 use App\Models\ProductListing;
+use App\Services\ProductListingService;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -41,87 +41,51 @@ class ProductListingForm extends Form
         $this->status = $listing->status->value;
     }
 
-    public function store(): ProductListing
+    /**
+     * @return array{display_name: ?string, variant_id: int, seller_id: ?int, price: float, status: int}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        if ($this->status === ProductListingStatus::Deleted->value) {
-            throw ValidationException::withMessages([
-                'listingForm.status' => __('admin.validation.status_deleted_create'),
-            ]);
-        }
-
-        return ProductListing::create([
+        return [
+            'display_name' => $this->normalizeDisplayName(),
             'variant_id'   => $this->variant_id,
             'seller_id'    => $this->seller_id,
-            'display_name' => filled($this->display_name) ? trim($this->display_name) : null,
             'price'        => $this->price,
             'status'       => $this->status,
-        ]);
+        ];
+    }
+
+    public function store(): ProductListing
+    {
+        return app(ProductListingService::class)->create($this->validatedData(), 'listingForm.status');
     }
 
     public function update(): bool
     {
-        $this->validate();
+        if (! $this->listing instanceof ProductListing) {
+            throw ValidationException::withMessages([
+                'listing' => 'Listing không hợp lệ.',
+            ]);
+        }
 
-        return $this->listing->update([
-            'display_name' => filled($this->display_name) ? trim($this->display_name) : null,
-            'seller_id'    => $this->seller_id,
-            'price'        => $this->price,
-            'status'       => $this->status,
-        ]);
+        return app(ProductListingService::class)->update($this->listing, $this->validatedData());
     }
 
     public function bulkChangeStatus(array $ids, int $status): bool
     {
-        if (! in_array($status, array_column(ProductListingStatus::cases(), 'value'))) {
-            throw ValidationException::withMessages([
-                'status' => __('admin.validation.invalid_status'),
-            ]);
-        }
-
-        $hasSoldKeys = ProductListing::whereIn('id', $ids)
-            ->whereHas('keys', function ($query) {
-                $query->where('status', ProductKeyStatus::Sold->value);
-            })
-            ->exists();
-
-        if ($hasSoldKeys && in_array($status, [ProductListingStatus::Closed->value, ProductListingStatus::Deleted->value])) {
-            throw ValidationException::withMessages([
-                'status' => __('admin.validation.listing_cannot_close_sold_keys'),
-            ]);
-        }
-
-        return ProductListing::whereIn('id', $ids)->update(['status' => $status]);
+        return app(ProductListingService::class)->bulkChangeStatus($ids, $status);
     }
 
     public function deleteListing(int $id): bool
     {
-        $listing = ProductListing::findOrFail($id);
-
-        $hasSoldKeys = $listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists();
-
-        if ($hasSoldKeys) {
-            throw ValidationException::withMessages([
-                'general' => __('admin.validation.listing_delete_sold_keys'),
-            ]);
-        }
-
-        $listing->status = ProductListingStatus::Deleted;
-        $listing->save();
-
-        return $listing->delete();
+        return app(ProductListingService::class)->delete(ProductListing::findOrFail($id));
     }
 
     public function restoreListing(int $id): bool
     {
-        $listing = ProductListing::withTrashed()->findOrFail($id);
-
-        $listing->restore();
-        $listing->status = ProductListingStatus::Draft;
-        $listing->save();
-
-        return true;
+        return app(ProductListingService::class)->restore(ProductListing::withTrashed()->findOrFail($id));
     }
 
     public function resetForm(): void
@@ -133,5 +97,16 @@ class ProductListingForm extends Form
         $this->price = 0.00;
         $this->status = ProductListingStatus::Draft->value;
         $this->resetValidation();
+    }
+
+    private function normalizeDisplayName(): ?string
+    {
+        if ($this->display_name === null) {
+            return null;
+        }
+
+        $displayName = trim($this->display_name);
+
+        return $displayName === '' ? null : $displayName;
     }
 }

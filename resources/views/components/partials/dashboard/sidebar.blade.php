@@ -1,4 +1,4 @@
-<aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+<aside class="hidden md:flex h-screen min-h-0 w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
     <a href="{{ route('admin.dashboard.index') }}" class="h-16 flex justify-center items-center px-6 hover:opacity-80 transition-opacity">
         <img class="block dark:hidden max-h-10 w-auto object-contain"
              src="{{ Vite::asset('resources/images/logo-light-horizontal.png') }}"
@@ -100,8 +100,8 @@
             </li>
 
             <li>
-                <details class="group/finance [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.transactions.*', 'admin.internal_wallet.*', 'admin.withdrawals.*']) ? 'open' : '' }}>
-                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.transactions.*', 'admin.internal_wallet.*', 'admin.withdrawals.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
+                <details class="group/finance [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['admin.transactions.*', 'admin.internal_wallet.*', 'admin.withdrawals.*', 'admin.platform_payouts.*']) ? 'open' : '' }}>
+                    <summary class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs(['admin.transactions.*', 'admin.internal_wallet.*', 'admin.withdrawals.*', 'admin.platform_payouts.*']) ? 'bg-gray-50 text-indigo-600 dark:bg-gray-800/50 dark:text-indigo-400' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white' }} transition-colors cursor-pointer list-none">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-money-bill-transfer text-lg w-5 text-center shrink-0"></i>
                             {{ __('admin.nav.finance_wallet') }}
@@ -113,6 +113,7 @@
                             <li><a href="{{ route('admin.transactions.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.transactions.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.transactions') }}</a></li>
                             <li><a href="{{ route('admin.internal_wallet.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.internal_wallet.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.internal_wallet') }}</a></li>
                             <li><a href="{{ route('admin.withdrawals.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.withdrawals.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.withdrawal_requests') }}</a></li>
+                            <li><a href="{{ route('admin.platform_payouts.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.platform_payouts.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.platform_payouts') }}</a></li>
                         </ul>
                     </div>
                 </details>
@@ -131,7 +132,7 @@
                         <ul class="overflow-hidden flex flex-col gap-1 mt-1 pl-11 pr-3">
                             <li><a href="{{ route('admin.users.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.users_list') }}</a></li>
                             <li><a href="{{ route('admin.seller_verifications.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.seller_verifications.*') ? 'text-indigo-600 bg-gray-50 dark:text-white dark:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800' }}">{{ __('admin.nav.seller_approvals') }}</a></li>
-                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">{{ __('admin.nav.roles_permissions') }}</a></li>
+{{--                            <li><a href="#" class="block px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">{{ __('admin.nav.roles_permissions') }}</a></li>--}}
                         </ul>
                     </div>
                 </details>

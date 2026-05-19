@@ -63,7 +63,9 @@ class PaymentSettlementService
 
             foreach ($order->items as $item) {
                 $item->forceFill([
-                    'status' => OrderStatus::Delivered,
+                    'status'       => OrderStatus::Delivered,
+                    'delivered_at' => now(),
+                    'completed_at' => null,
                 ])->save();
 
                 $item->keys()->update([

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\OperatingSystem;
 
+use App\Contracts\Repositories\OperatingSystemRepositoryInterface;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Form\OperatingSystem\OperatingSystemBulkChangeStatusForm;
 use App\Livewire\Admin\Form\OperatingSystem\OperatingSystemCreateForm;
 use App\Livewire\Admin\Form\OperatingSystem\OperatingSystemEditForm;
-use App\Models\OperatingSystem;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -36,6 +37,13 @@ class OperatingSystemIndex extends Component
     public OperatingSystemEditForm $editForm;
 
     public OperatingSystemBulkChangeStatusForm $bulkChangeStatusForm;
+
+    protected OperatingSystemRepositoryInterface $operatingSystems;
+
+    public function boot(OperatingSystemRepositoryInterface $operatingSystems): void
+    {
+        $this->operatingSystems = $operatingSystems;
+    }
 
     public function createOperatingSystem(): void
     {
@@ -65,11 +73,7 @@ class OperatingSystemIndex extends Component
 
     public function bulkChangeStatusOperatingSystem(): void
     {
-        if (OperatingSystem::withTrashed()
-            ->whereIn('id', $this->bulkSelectedIds)
-            ->where('status', GeneralStatus::Deleted)
-            ->exists()
-        ) {
+        if ($this->operatingSystems->hasDeletedStatus($this->bulkSelectedIds)) {
             sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
@@ -106,43 +110,47 @@ class OperatingSystemIndex extends Component
     #[On('viewOperatingSystem')]
     public function viewOperatingSystem($rowId): void
     {
-        $operatingSystem = OperatingSystem::find($rowId);
-
-        if ($operatingSystem) {
-            $colorClass = match ($operatingSystem->status) {
-                GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
-                GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
-                GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
-                default                 => 'bg-primary-500/10 text-primary-500',
-            };
-
-            $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$operatingSystem->status->label().'</span>';
-
-            $this->viewData = [
-                'id'           => $operatingSystem->id,
-                'name'         => $operatingSystem->name,
-                'slug'         => $operatingSystem->slug,
-                'icon_path'    => $operatingSystem->icon_path,
-                'status_label' => $statusLabel,
-                'created_at'   => $operatingSystem->created_at->format('d/m/Y H:i:s'),
-                'updated_at'   => $operatingSystem->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at'   => $operatingSystem->deleted_at?->format('d/m/Y H:i:s'),
-            ];
-
-            $this->showViewModal = true;
+        try {
+            $operatingSystem = $this->operatingSystems->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $colorClass = match ($operatingSystem->status) {
+            GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
+            GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
+            GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+            GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+            default                 => 'bg-primary-500/10 text-primary-500',
+        };
+
+        $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$operatingSystem->status->label().'</span>';
+
+        $this->viewData = [
+            'id'           => $operatingSystem->id,
+            'name'         => $operatingSystem->name,
+            'slug'         => $operatingSystem->slug,
+            'icon_path'    => $operatingSystem->icon_path,
+            'status_label' => $statusLabel,
+            'created_at'   => $operatingSystem->created_at->format('d/m/Y H:i:s'),
+            'updated_at'   => $operatingSystem->updated_at->format('d/m/Y H:i:s'),
+            'deleted_at'   => $operatingSystem->deleted_at?->format('d/m/Y H:i:s'),
+        ];
+
+        $this->showViewModal = true;
     }
 
     #[On('editOperatingSystem')]
     public function editOperatingSystem($rowId): void
     {
-        $operatingSystem = OperatingSystem::find($rowId);
-
-        if ($operatingSystem) {
-            $this->editForm->setOperatingSystem($operatingSystem);
-            $this->showEditModal = true;
+        try {
+            $operatingSystem = $this->operatingSystems->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $this->editForm->setOperatingSystem($operatingSystem);
+        $this->showEditModal = true;
     }
 
     #[On('openBulkStatusModal')]

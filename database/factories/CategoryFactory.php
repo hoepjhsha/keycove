@@ -47,11 +47,12 @@ class CategoryFactory extends Factory
         ];
 
         $name = fake()->randomElement($categories);
+        $slug = Str::slug($name).'-'.Str::lower(Str::random(8));
 
         return [
             'parent_id' => null,
             'name'      => $name,
-            'slug'      => Str::slug($name).random_int(1, 100),
+            'slug'      => $slug,
             'status'    => GeneralStatus::Active,
         ];
     }

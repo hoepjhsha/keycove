@@ -42,5 +42,5 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     return redirect()
         ->route('app.profile.show', ['section' => 'security'])
-        ->with('profile-status', 'Your email address has been verified.');
+        ->with('profile-status', __('ui.auth.email_verified_status'));
 })->middleware(['auth', 'signed'])->name('verification.verify');

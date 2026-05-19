@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\Region;
 
+use App\Contracts\Repositories\RegionRepositoryInterface;
 use App\Enums\GeneralStatus;
 use App\Livewire\Admin\Form\Region\RegionBulkChangeStatusForm;
 use App\Livewire\Admin\Form\Region\RegionCreateForm;
 use App\Livewire\Admin\Form\Region\RegionEditForm;
-use App\Models\Region;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -35,10 +36,17 @@ class RegionIndex extends Component
 
     public RegionBulkChangeStatusForm $bulkChangeStatusForm;
 
+    protected RegionRepositoryInterface $regions;
+
+    public function boot(RegionRepositoryInterface $regions): void
+    {
+        $this->regions = $regions;
+    }
+
     #[Computed]
     public function parentRegions()
     {
-        return Region::select('id', 'name')->get();
+        return $this->regions->getParentOptions();
     }
 
     public function createRegion(): void
@@ -69,11 +77,7 @@ class RegionIndex extends Component
 
     public function bulkChangeStatusRegion(): void
     {
-        if (Region::withTrashed()
-            ->whereIn('id', $this->bulkSelectedIds)
-            ->where('status', GeneralStatus::Deleted)
-            ->exists()
-        ) {
+        if ($this->regions->hasDeletedStatus($this->bulkSelectedIds)) {
             sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.cannot_change_deleted_status'));
             $this->showBulkStatusModal = false;
 
@@ -110,44 +114,48 @@ class RegionIndex extends Component
     #[On('viewRegion')]
     public function viewRegion($rowId): void
     {
-        $region = Region::with('parent')->find($rowId);
-
-        if ($region) {
-            $colorClass = match ($region->status) {
-                GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
-                GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
-                GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
-                GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
-                default                 => 'bg-primary-500/10 text-primary-500',
-            };
-
-            $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$region->status->label().'</span>';
-
-            $this->viewData = [
-                'id'           => $region->id,
-                'name'         => $region->name,
-                'slug'         => $region->slug,
-                'flag_code'    => $region->flag_code,
-                'parent_name'  => $region->parent->name ?? __('admin.common.none'),
-                'status_label' => $statusLabel,
-                'created_at'   => $region->created_at->format('d/m/Y H:i:s'),
-                'updated_at'   => $region->updated_at->format('d/m/Y H:i:s'),
-                'deleted_at'   => $region->deleted_at?->format('d/m/Y H:i:s'),
-            ];
-
-            $this->showViewModal = true;
+        try {
+            $region = $this->regions->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $colorClass = match ($region->status) {
+            GeneralStatus::Active   => 'bg-green-500/10 text-green-500',
+            GeneralStatus::Inactive => 'bg-gray-500/10 text-gray-500',
+            GeneralStatus::Hidden   => 'bg-yellow-500/10 text-yellow-500',
+            GeneralStatus::Deleted  => 'bg-red-500/10 text-red-500',
+            default                 => 'bg-primary-500/10 text-primary-500',
+        };
+
+        $statusLabel = '<span class="'.$colorClass.' text-[11px] font-medium mr-1 px-2.5 py-0.5 rounded-full">'.$region->status->label().'</span>';
+
+        $this->viewData = [
+            'id'           => $region->id,
+            'name'         => $region->name,
+            'slug'         => $region->slug,
+            'flag_code'    => $region->flag_code,
+            'parent_name'  => $region->parent->name ?? __('admin.common.none'),
+            'status_label' => $statusLabel,
+            'created_at'   => $region->created_at->format('d/m/Y H:i:s'),
+            'updated_at'   => $region->updated_at->format('d/m/Y H:i:s'),
+            'deleted_at'   => $region->deleted_at?->format('d/m/Y H:i:s'),
+        ];
+
+        $this->showViewModal = true;
     }
 
     #[On('editRegion')]
     public function editRegion($rowId): void
     {
-        $region = Region::find($rowId);
-
-        if ($region) {
-            $this->editForm->setRegion($region);
-            $this->showEditModal = true;
+        try {
+            $region = $this->regions->findForAdminOrFail((int) $rowId);
+        } catch (ModelNotFoundException) {
+            return;
         }
+
+        $this->editForm->setRegion($region);
+        $this->showEditModal = true;
     }
 
     #[On('openBulkStatusModal')]

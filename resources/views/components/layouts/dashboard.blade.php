@@ -1,15 +1,15 @@
 <x-layouts.app :title="$title ?? __('admin.titles.dashboard')">
     @section('pre-app-name', __('admin.brand.admin'))
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="fixed inset-0 flex h-dvh min-h-0 w-full overflow-hidden">
 
         <x-partials.dashboard.sidebar />
 
-        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div class="flex h-dvh min-h-0 flex-1 flex-col overflow-hidden">
 
             <x-partials.dashboard.header />
 
-            <div class="flex-1 overflow-y-auto flex flex-col bg-slate-50 dark:bg-gray-950">
+            <div class="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-slate-50 dark:bg-gray-950">
 
                 <main class="flex-1 p-2 sm:p-4 lg:p-6">
                     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

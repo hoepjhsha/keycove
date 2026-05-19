@@ -38,11 +38,12 @@ class OperatingSystemFactory extends Factory
         ];
 
         $osName = fake()->randomElement($operatingSystems);
+        $slug = Str::slug($osName).'-'.Str::lower(Str::random(8));
 
         return [
             'name'      => $osName,
-            'slug'      => Str::slug($osName),
-            'icon_path' => 'icons/os/'.Str::slug($osName).'.svg',
+            'slug'      => $slug,
+            'icon_path' => 'icons/os/'.$slug.'.svg',
             'status'    => GeneralStatus::Active,
         ];
     }

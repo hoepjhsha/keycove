@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Form\OperatingSystem;
 
 use App\Models\OperatingSystem;
-use App\Utilities\StorageUtility;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
+use App\Services\Admin\OperatingSystemService;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -41,30 +39,23 @@ class OperatingSystemCreateForm extends Form
     ])]
     public string $icon_path = '';
 
-    public function store(): ?OperatingSystem
+    /**
+     * @return array{name: string, slug: string, icon_file: mixed, icon_path: string}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        if (empty($this->slug)) {
-            $this->slug = Str::slug($this->name);
-        }
-
-        if (OperatingSystem::where('slug', $this->slug)->exists()) {
-            throw ValidationException::withMessages([
-                'createForm.slug' => __('admin.validation.duplicate_operating_system_slug'),
-            ]);
-        }
-
-        $iconPath = $this->icon_path;
-        if ($this->icon_file) {
-            $storedPath = StorageUtility::store($this->icon_file, 'icons/operating-systems');
-            $iconPath = $storedPath;
-        }
-
-        return OperatingSystem::create([
+        return [
             'name'      => $this->name,
             'slug'      => $this->slug,
-            'icon_path' => $iconPath,
-        ]);
+            'icon_file' => $this->icon_file,
+            'icon_path' => $this->icon_path,
+        ];
+    }
+
+    public function store(): OperatingSystem
+    {
+        return app(OperatingSystemService::class)->create($this->validatedData(), 'createForm.slug');
     }
 }

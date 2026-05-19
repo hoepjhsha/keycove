@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Table\Product;
 
-use App\Enums\ProductKeyStatus;
+use App\Contracts\Repositories\ProductListingRepositoryInterface;
 use App\Enums\ProductListingStatus;
 use App\Livewire\Admin\Action\Product\ProductDetail;
-use App\Models\ProductListing;
+use App\Services\ProductListingService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -27,6 +27,18 @@ final class ProductListingsTable extends PowerGridComponent
     public string $sortField = 'created_at';
 
     public string $sortDirection = 'desc';
+
+    protected ProductListingService $productListingService;
+
+    protected ProductListingRepositoryInterface $productListingRepository;
+
+    public function boot(
+        ProductListingService $productListingService,
+        ProductListingRepositoryInterface $productListingRepository,
+    ): void {
+        $this->productListingService = $productListingService;
+        $this->productListingRepository = $productListingRepository;
+    }
 
     public static function position(): int
     {
@@ -49,12 +61,7 @@ final class ProductListingsTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return ProductListing::query()
-            ->where('variant_id', $this->variantId)
-            ->with(['seller.user'])
-            ->withCount(['keys' => function ($query) {
-                $query->where('status', ProductKeyStatus::Available->value);
-            }]);
+        return $this->productListingRepository->getAdminTableQuery($this->variantId);
     }
 
     public function relationSearch(): array
@@ -66,11 +73,11 @@ final class ProductListingsTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('seller_name', fn (ProductListing $model) => $model->seller?->shop_name ?? __('admin.common.shop_admin'))
-            ->add('seller_email', fn (ProductListing $model) => $model->seller?->user?->email ?? 'KeyCove')
-            ->add('price_formatted', fn (ProductListing $model) => number_format((float) $model->price, 2).' VND')
-            ->add('price', fn (ProductListing $model) => (float) $model->price)
-            ->add('status_label', fn (ProductListing $model) => $this->getStatusLabel($model->status))
+            ->add('seller_name', fn ($model) => $model->seller?->shop_name ?? __('admin.common.shop_admin'))
+            ->add('seller_email', fn ($model) => $model->seller?->user?->email ?? 'KeyCove')
+            ->add('price_formatted', fn ($model) => number_format((float) $model->price, 2).' VND')
+            ->add('price', fn ($model) => (float) $model->price)
+            ->add('status_label', fn ($model) => $this->getStatusLabel($model->status))
             ->add('keys_count')
             ->add('created_at')
             ->add('updated_at');
@@ -222,18 +229,9 @@ final class ProductListingsTable extends PowerGridComponent
     #[On('performToggleListingStatus')]
     public function performToggleListingStatus($id): void
     {
-        $listing = ProductListing::findOrFail($id);
+        $listing = $this->productListingRepository->findForAdminDetailOrFail((int) $id, true);
 
-        $newStatus = match ($listing->status) {
-            ProductListingStatus::Draft   => ProductListingStatus::Active,
-            ProductListingStatus::Active  => ProductListingStatus::Hidden,
-            ProductListingStatus::Hidden  => ProductListingStatus::Draft,
-            ProductListingStatus::Pending => ProductListingStatus::Active,
-            default                       => ProductListingStatus::Draft,
-        };
-
-        $listing->status = $newStatus;
-        $listing->save();
+        $this->productListingService->toggleAdminStatus($listing);
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.common.listing')])]);
     }
@@ -253,21 +251,11 @@ final class ProductListingsTable extends PowerGridComponent
     public function performDeleteListing($id): void
     {
         try {
-            DB::transaction(function () use ($id) {
-                $listing = ProductListing::findOrFail($id);
-
-                $hasSoldKeys = $listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists();
-
-                if ($hasSoldKeys) {
-                    throw new \Exception(__('admin.validation.listing_delete_sold_keys'));
-                }
-
-                $listing->status = ProductListingStatus::Deleted;
-                $listing->save();
-                $listing->delete();
-            });
+            $this->productListingService->delete($this->productListingRepository->findForAdminDetailOrFail((int) $id, true));
 
             $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.common.listing')])]);
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -287,10 +275,8 @@ final class ProductListingsTable extends PowerGridComponent
     #[On('performRestoreListing')]
     public function performRestoreListing($id): void
     {
-        $listing = ProductListing::withTrashed()->findOrFail($id);
-        $listing->restore();
-        $listing->status = ProductListingStatus::Draft;
-        $listing->save();
+        $listing = $this->productListingRepository->findForAdminDetailOrFail((int) $id, true);
+        $this->productListingService->restore($listing, ProductListingStatus::Draft);
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.common.listing')])]);
     }
@@ -315,21 +301,7 @@ final class ProductListingsTable extends PowerGridComponent
     public function performBulkDeleteListing(): void
     {
         try {
-            DB::transaction(function () {
-                $listings = ProductListing::whereIn('id', $this->checkboxValues)->get();
-
-                foreach ($listings as $listing) {
-                    $hasSoldKeys = $listing->keys()->where('status', ProductKeyStatus::Sold->value)->exists();
-
-                    if ($hasSoldKeys) {
-                        continue;
-                    }
-
-                    $listing->status = ProductListingStatus::Deleted;
-                    $listing->save();
-                    $listing->delete();
-                }
-            });
+            $this->productListingService->bulkDelete($this->checkboxValues);
 
             $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed_short')]);
         } catch (\Exception $e) {
@@ -347,5 +319,13 @@ final class ProductListingsTable extends PowerGridComponent
         }
 
         $this->dispatch('openListingBulkStatusModal', ids: $this->checkboxValues)->to(ProductDetail::class);
+    }
+
+    protected function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())
+            ->flatten()
+            ->filter(fn ($message): bool => is_string($message) && $message !== '')
+            ->first() ?? $exception->getMessage();
     }
 }

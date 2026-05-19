@@ -227,10 +227,12 @@ final class OperatingSystemTable extends PowerGridComponent
     public function performToggleStatus($id): void
     {
         $operatingSystem = OperatingSystem::findOrFail($id);
+
         $operatingSystem->status = match ($operatingSystem->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
             default                 => GeneralStatus::Inactive,
         };
+
         $operatingSystem->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.operating_systems')])]);
@@ -250,12 +252,11 @@ final class OperatingSystemTable extends PowerGridComponent
     #[On('performDelete')]
     public function performDelete($id): void
     {
-        DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id): void {
             $operatingSystem = OperatingSystem::findOrFail($id);
 
             $operatingSystem->status = GeneralStatus::Deleted;
             $operatingSystem->save();
-
             $operatingSystem->delete();
         });
 
@@ -277,10 +278,10 @@ final class OperatingSystemTable extends PowerGridComponent
     public function performRevertDelete($id): void
     {
         $operatingSystem = OperatingSystem::withTrashed()->findOrFail($id);
-
         $operatingSystem->restore();
 
         $operatingSystem->status = GeneralStatus::Inactive;
+
         $operatingSystem->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.operating_systems')])]);
@@ -317,13 +318,10 @@ final class OperatingSystemTable extends PowerGridComponent
             return;
         }
 
-        DB::transaction(function () {
-
-            OperatingSystem::whereIn('id', $this->checkboxValues)
-                ->update([
-                    'status' => GeneralStatus::Deleted,
-                ]);
-
+        DB::transaction(function (): void {
+            OperatingSystem::whereIn('id', $this->checkboxValues)->update([
+                'status' => GeneralStatus::Deleted,
+            ]);
             OperatingSystem::whereIn('id', $this->checkboxValues)->delete();
         });
 

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\SystemConfig;
 
-use App\Livewire\Admin\Form\SystemConfig\SystemConfigCreateForm;
-use App\Livewire\Admin\Form\SystemConfig\SystemConfigEditForm;
+use App\Enums\KycStatus;
+use App\Models\Seller;
 use App\Models\SystemConfig;
+use App\Notifications\CommissionRateChangedNotification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -18,10 +21,6 @@ use Livewire\Component;
 #[Title('Manage System Settings')]
 class SystemConfigIndex extends Component
 {
-    public bool $showCreateModal = false;
-
-    public bool $showEditModal = false;
-
     public bool $showViewModal = false;
 
     public ?array $viewData = null;
@@ -30,10 +29,6 @@ class SystemConfigIndex extends Component
 
     /** @var array<int, string> */
     public array $inlineValues = [];
-
-    public SystemConfigCreateForm $createForm;
-
-    public SystemConfigEditForm $editForm;
 
     public function mount(): void
     {
@@ -44,6 +39,7 @@ class SystemConfigIndex extends Component
     public function configs(): Collection
     {
         return SystemConfig::query()
+            ->managed()
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($subQuery): void {
                     $subQuery->where('key', 'like', '%'.$this->search.'%')
@@ -55,50 +51,15 @@ class SystemConfigIndex extends Component
             ->get();
     }
 
-    public function createSystemConfig(): void
-    {
-        $result = $this->createForm->store();
-
-        if ($result) {
-            $this->reset('createForm');
-            $this->syncInlineValues();
-
-            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.created', ['Name' => __('admin.nav.system_settings')]));
-        } else {
-            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.create_failed', ['name' => __('admin.nav.system_settings')]));
-        }
-
-        $this->showCreateModal = false;
-    }
-
-    public function updateSystemConfig(): void
-    {
-        $result = $this->editForm->update();
-
-        if ($result) {
-            sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.system_settings')]));
-        } else {
-            sweetalert()->title(__('admin.common.error'))->showConfirmButton(false)->error(__('admin.messages.update_failed', ['name' => __('admin.nav.system_settings')]));
-        }
-
-        $this->showEditModal = false;
-    }
-
     public function render(): View
     {
         return view('pages.admin.system-settings.index')->layout('components.layouts.dashboard');
     }
 
-    #[On('openCreateModal')]
-    public function openCreateModal(): void
-    {
-        $this->showCreateModal = true;
-    }
-
     #[On('viewSystemConfig')]
     public function viewSystemConfig(int $rowId): void
     {
-        $systemConfig = SystemConfig::find($rowId);
+        $systemConfig = SystemConfig::query()->managed()->find($rowId);
 
         if ($systemConfig) {
             $this->viewData = [
@@ -112,51 +73,33 @@ class SystemConfigIndex extends Component
         }
     }
 
-    #[On('editSystemConfig')]
-    public function editSystemConfig(int $rowId): void
-    {
-        $systemConfig = SystemConfig::find($rowId);
-
-        if ($systemConfig) {
-            $this->editForm->setSystemConfig($systemConfig);
-            $this->showEditModal = true;
-        }
-    }
-
-    #[On('deleteSystemConfig')]
-    public function deleteSystemConfig(int $rowId): void
-    {
-        $this->dispatch('swal:confirm', [
-            'title'  => __('admin.swal.confirm_delete', ['name' => __('admin.nav.system_settings')]),
-            'text'   => __('admin.swal.delete_text_irreversible', ['name' => __('admin.nav.system_settings')]),
-            'method' => 'performDeleteSystemConfig',
-            'id'     => $rowId,
-        ]);
-    }
-
-    #[On('performDeleteSystemConfig')]
-    public function performDeleteSystemConfig(int $id): void
-    {
-        $systemConfig = SystemConfig::findOrFail($id);
-        $systemConfig->delete();
-
-        unset($this->inlineValues[$id]);
-
-        sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.deleted_sentence', ['Name' => __('admin.nav.system_settings')]));
-    }
-
     public function saveInlineValue(int $id): void
     {
-        $value = $this->inlineValues[$id] ?? '';
+        $systemConfig = SystemConfig::findOrFail($id);
+        $field = 'inlineValues.'.$id;
+
+        if (! SystemConfig::isManagedKey($systemConfig->key)) {
+            throw ValidationException::withMessages([
+                $field => __('admin.validation.unmanaged_system_config_key'),
+            ]);
+        }
+
+        $value = $this->normaliseValue($systemConfig->key, (string) ($this->inlineValues[$id] ?? ''));
 
         Validator::make([
-            'value' => $value,
+            'inlineValues' => [$id => $value],
         ], [
-            'value' => ['required', 'string', 'max:255'],
+            $field => SystemConfig::validationRules($systemConfig->key, $value),
         ])->validate();
 
-        $systemConfig = SystemConfig::findOrFail($id);
+        $oldValue = $systemConfig->value;
+
         $systemConfig->update(['value' => $value]);
+        $this->inlineValues[$id] = $value;
+
+        if ($oldValue !== $value && SystemConfig::notifiesSellers($systemConfig->key)) {
+            $this->notifyApprovedSellersOfCommissionRateChange($oldValue, $value);
+        }
 
         sweetalert()->title(__('admin.common.success'))->showConfirmButton(false)->success(__('admin.messages.updated', ['Name' => __('admin.nav.system_settings')]));
     }
@@ -186,9 +129,36 @@ class SystemConfigIndex extends Component
     private function syncInlineValues(): void
     {
         $this->inlineValues = SystemConfig::query()
+            ->managed()
             ->orderBy('key')
             ->pluck('value', 'id')
             ->map(fn (string $value): string => $value)
             ->all();
+    }
+
+    private function normaliseValue(string $key, string $value): string
+    {
+        $value = trim($value);
+        $definition = SystemConfig::managedDefinition($key);
+
+        if (($definition['type'] ?? null) === SystemConfig::TYPE_BOOLEAN) {
+            return strtolower($value);
+        }
+
+        return $value;
+    }
+
+    private function notifyApprovedSellersOfCommissionRateChange(string $oldRate, string $newRate): void
+    {
+        Seller::query()
+            ->where('kyc_status', KycStatus::Approved)
+            ->whereHas('user')
+            ->with('user')
+            ->chunkById(100, function (Collection $sellers) use ($oldRate, $newRate): void {
+                Notification::send(
+                    $sellers->pluck('user')->filter(),
+                    new CommissionRateChangedNotification($oldRate, $newRate),
+                );
+            });
     }
 }

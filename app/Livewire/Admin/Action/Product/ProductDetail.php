@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Action\Product;
 
-use App\Enums\GeneralStatus;
-use App\Enums\KycStatus;
-use App\Enums\ProductKeyStatus;
-use App\Enums\ProductListingStatus;
+use App\Contracts\Repositories\OperatingSystemRepositoryInterface;
+use App\Contracts\Repositories\PlatformRepositoryInterface;
+use App\Contracts\Repositories\ProductKeyRepositoryInterface;
+use App\Contracts\Repositories\ProductListingRepositoryInterface;
+use App\Contracts\Repositories\ProductRepositoryInterface;
+use App\Contracts\Repositories\ProductVariantRepositoryInterface;
+use App\Contracts\Repositories\RegionRepositoryInterface;
+use App\Contracts\Repositories\SellerRepositoryInterface;
 use App\Livewire\Admin\Form\Product\ProductKeyForm;
 use App\Livewire\Admin\Form\Product\ProductListingForm;
 use App\Livewire\Admin\Form\Product\ProductVariantForm;
-use App\Models\OperatingSystem;
-use App\Models\Platform;
 use App\Models\Product;
-use App\Models\ProductKey;
-use App\Models\ProductListing;
-use App\Models\ProductVariant;
-use App\Models\Region;
-use App\Models\Seller;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -68,95 +66,106 @@ class ProductDetail extends Component
 
     public array $expandedVariantRows = [];
 
+    protected ProductRepositoryInterface $productRepository;
+
+    protected ProductVariantRepositoryInterface $productVariantRepository;
+
+    protected ProductListingRepositoryInterface $productListingRepository;
+
+    protected ProductKeyRepositoryInterface $productKeyRepository;
+
+    protected RegionRepositoryInterface $regionRepository;
+
+    protected PlatformRepositoryInterface $platformRepository;
+
+    protected OperatingSystemRepositoryInterface $operatingSystemRepository;
+
+    protected SellerRepositoryInterface $sellerRepository;
+
+    public function boot(
+        ProductRepositoryInterface $productRepository,
+        ProductVariantRepositoryInterface $productVariantRepository,
+        ProductListingRepositoryInterface $productListingRepository,
+        ProductKeyRepositoryInterface $productKeyRepository,
+        RegionRepositoryInterface $regionRepository,
+        PlatformRepositoryInterface $platformRepository,
+        OperatingSystemRepositoryInterface $operatingSystemRepository,
+        SellerRepositoryInterface $sellerRepository,
+    ): void {
+        $this->productRepository = $productRepository;
+        $this->productVariantRepository = $productVariantRepository;
+        $this->productListingRepository = $productListingRepository;
+        $this->productKeyRepository = $productKeyRepository;
+        $this->regionRepository = $regionRepository;
+        $this->platformRepository = $platformRepository;
+        $this->operatingSystemRepository = $operatingSystemRepository;
+        $this->sellerRepository = $sellerRepository;
+    }
+
     #[Computed]
-    public function productVariants()
+    public function productVariants(): Collection
     {
         if (! $this->product) {
-            return collect();
+            return new Collection;
         }
 
-        return ProductVariant::where('product_id', $this->product->id)
-            ->when(! $this->showTrashedVariants, fn ($q) => $q->withoutTrashed())
-            ->when($this->showTrashedVariants, fn ($q) => $q->withTrashed())
-            ->with(['region', 'platform', 'operatingSystem'])
-            ->withCount(['listings' => function ($q) {
-                $q->where('status', '!=', ProductListingStatus::Deleted);
-            }])
-            ->get();
+        return $this->productVariantRepository->getForAdminProductDetail($this->product->id, $this->showTrashedVariants);
     }
 
     #[Computed]
-    public function productListings()
+    public function productListings(): Collection
     {
         if (! $this->product) {
-            return collect();
+            return new Collection;
         }
 
-        return ProductListing::whereIn('variant_id', $this->product->variants()->pluck('id'))
-            ->when(! $this->showTrashedListings, fn ($q) => $q->withoutTrashed())
-            ->when($this->showTrashedListings, fn ($q) => $q->withTrashed())
-            ->with(['seller.user', 'variant'])
-            ->withCount(['keys' => function ($query) {
-                $query->where('status', ProductKeyStatus::Available->value);
-            }])
-            ->get();
+        return $this->productListingRepository->getForAdminProductDetail($this->product->id, $this->showTrashedListings);
     }
 
     #[Computed]
-    public function regions()
+    public function regions(): Collection
     {
-        return Region::where('status', GeneralStatus::Active)
-            ->orderBy('name')
-            ->get();
+        return $this->regionRepository->getActiveOrdered();
     }
 
     #[Computed]
-    public function platforms()
+    public function platforms(): Collection
     {
-        return Platform::where('status', GeneralStatus::Active)
-            ->orderBy('name')
-            ->get();
+        return $this->platformRepository->getActiveOrdered();
     }
 
     #[Computed]
-    public function operatingSystems()
+    public function operatingSystems(): Collection
     {
-        return OperatingSystem::where('status', GeneralStatus::Active)
-            ->orderBy('name')
-            ->get();
+        return $this->operatingSystemRepository->getActiveOrdered();
     }
 
     #[Computed]
-    public function sellers()
+    public function sellers(): Collection
     {
-        return Seller::where('kyc_status', KycStatus::Approved)
-            ->with('user')
-            ->orderBy('shop_name')
-            ->get();
+        return $this->sellerRepository->getApprovedWithUser();
     }
 
     #[Computed]
-    public function viewingListingKeys()
+    public function viewingListingKeys(): Collection
     {
         if (! $this->viewingKeysListingId) {
-            return collect();
+            return new Collection;
         }
 
-        return ProductKey::where('listing_id', $this->viewingKeysListingId)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->productKeyRepository->getForAdminListing($this->viewingKeysListingId);
     }
 
     public function mount(int $id): void
     {
-        $this->product = Product::with(['categories', 'submittedBySeller.user'])->findOrFail($id);
+        $this->product = $this->productRepository->findForAdminDetailOrFail($id);
     }
 
     #[On('openVariantModal')]
     public function openVariantModal(?int $variantId = null): void
     {
         if ($variantId) {
-            $variant = ProductVariant::findOrFail($variantId);
+            $variant = $this->productVariantRepository->findForAdminDetailOrFail($variantId, true);
             $this->variantForm->setVariant($variant);
             $this->editingVariantId = $variantId;
         } else {
@@ -177,20 +186,24 @@ class ProductDetail extends Component
 
     public function saveVariant(): void
     {
-        if ($this->editingVariantId) {
-            $result = $this->variantForm->update();
-            $message = __('admin.messages.updated', ['Name' => __('admin.common.variant')]);
-        } else {
-            $result = $this->variantForm->store();
-            $message = __('admin.messages.created', ['Name' => __('admin.common.variant')]);
-        }
+        try {
+            if ($this->editingVariantId) {
+                $result = $this->variantForm->update();
+                $message = __('admin.messages.updated', ['Name' => __('admin.common.variant')]);
+            } else {
+                $result = $this->variantForm->store();
+                $message = __('admin.messages.created', ['Name' => __('admin.common.variant')]);
+            }
 
-        if ($result) {
-            $this->variantForm->resetForm();
-            $this->showVariantModal = false;
-            $this->dispatch('swal:success', ['message' => $message]);
-            $this->dispatch('pg:eventRefresh-productVariantsTable');
-            $this->refreshProduct();
+            if ($result) {
+                $this->variantForm->resetForm();
+                $this->showVariantModal = false;
+                $this->dispatch('swal:success', ['message' => $message]);
+                $this->dispatch('pg:eventRefresh-productVariantsTable');
+                $this->refreshProduct();
+            }
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         }
     }
 
@@ -200,7 +213,7 @@ class ProductDetail extends Component
         $this->selectedVariantIdForListing = $variantId;
 
         if ($listingId) {
-            $listing = ProductListing::findOrFail($listingId);
+            $listing = $this->productListingRepository->findForAdminDetailOrFail($listingId, true);
             $this->listingForm->setListing($listing);
             $this->editingListingId = $listingId;
         } else {
@@ -221,22 +234,26 @@ class ProductDetail extends Component
 
     public function saveListing(): void
     {
-        $this->listingForm->variant_id = $this->selectedVariantIdForListing;
+        try {
+            $this->listingForm->variant_id = $this->selectedVariantIdForListing;
 
-        if ($this->editingListingId) {
-            $result = $this->listingForm->update();
-            $message = __('admin.messages.updated', ['Name' => __('admin.common.listing')]);
-        } else {
-            $result = $this->listingForm->store();
-            $message = __('admin.messages.created', ['Name' => __('admin.common.listing')]);
-        }
+            if ($this->editingListingId) {
+                $result = $this->listingForm->update();
+                $message = __('admin.messages.updated', ['Name' => __('admin.common.listing')]);
+            } else {
+                $result = $this->listingForm->store();
+                $message = __('admin.messages.created', ['Name' => __('admin.common.listing')]);
+            }
 
-        if ($result) {
-            $this->listingForm->resetForm();
-            $this->showListingModal = false;
-            $this->dispatch('swal:success', ['message' => $message]);
-            $this->dispatch('pg:eventRefresh-productListingsTable');
-            $this->refreshProduct();
+            if ($result) {
+                $this->listingForm->resetForm();
+                $this->showListingModal = false;
+                $this->dispatch('swal:success', ['message' => $message]);
+                $this->dispatch('pg:eventRefresh-productListingsTable');
+                $this->refreshProduct();
+            }
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         }
     }
 
@@ -251,13 +268,17 @@ class ProductDetail extends Component
 
     public function saveKey(): void
     {
-        $result = $this->keyForm->store();
+        try {
+            $result = $this->keyForm->store();
 
-        if ($result) {
-            $this->keyForm->resetForm();
-            $this->dispatch('swal:success', ['message' => __('admin.messages.created', ['Name' => __('admin.common.product_key')])]);
-            $this->dispatch('pg:eventRefresh-productListingsTable');
-            $this->dispatch('pg:eventRefresh-productKeysTable');
+            if ($result) {
+                $this->keyForm->resetForm();
+                $this->dispatch('swal:success', ['message' => __('admin.messages.created', ['Name' => __('admin.common.product_key')])]);
+                $this->dispatch('pg:eventRefresh-productListingsTable');
+                $this->dispatch('pg:eventRefresh-productKeysTable');
+            }
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         }
     }
 
@@ -278,6 +299,8 @@ class ProductDetail extends Component
             $this->keyForm->deleteKey($id);
             $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.product_key')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -301,6 +324,8 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.variant')])]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -313,6 +338,8 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.restored_sentence', ['Name' => __('admin.common.variant')])]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -327,6 +354,8 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.status_updated_selected')]);
             $this->dispatch('pg:eventRefresh-productVariantsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -341,6 +370,8 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.status_updated_selected')]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -348,7 +379,7 @@ class ProductDetail extends Component
 
     protected function refreshProduct(): void
     {
-        $this->product = Product::findOrFail($this->product->id);
+        $this->product = $this->productRepository->findForAdminDetailOrFail($this->product->id);
     }
 
     public function toggleVariantRow(int $variantId): void
@@ -378,14 +409,7 @@ class ProductDetail extends Component
 
     public function getVariantListings(int $variantId): Collection
     {
-        return ProductListing::where('variant_id', $variantId)
-            ->when(! $this->showTrashedListings, fn ($q) => $q->withoutTrashed())
-            ->when($this->showTrashedListings, fn ($q) => $q->withTrashed())
-            ->with(['seller.user'])
-            ->withCount(['keys' => function ($query) {
-                $query->where('status', ProductKeyStatus::Available->value);
-            }])
-            ->get();
+        return $this->productListingRepository->getForAdminVariantDetail($variantId, $this->showTrashedListings);
     }
 
     public function deleteListing(int $listingId): void
@@ -406,6 +430,8 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.deleted_sentence', ['Name' => __('admin.common.listing')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -418,9 +444,19 @@ class ProductDetail extends Component
             $this->dispatch('swal:success', ['message' => __('admin.messages.restored_sentence', ['Name' => __('admin.common.listing')])]);
             $this->dispatch('pg:eventRefresh-productListingsTable');
             $this->refreshProduct();
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
+    }
+
+    protected function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())
+            ->flatten()
+            ->filter(fn ($message): bool => is_string($message) && $message !== '')
+            ->first() ?? $exception->getMessage();
     }
 
     public function render()

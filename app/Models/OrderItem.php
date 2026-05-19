@@ -28,6 +28,8 @@ class OrderItem extends Model
         'platform_fee',
         'seller_amount',
         'status',
+        'delivered_at',
+        'completed_at',
         'buyer_key_viewed_at',
     ];
 
@@ -42,6 +44,8 @@ class OrderItem extends Model
             'platform_fee'        => 'decimal:2',
             'seller_amount'       => 'decimal:2',
             'status'              => OrderStatus::class,
+            'delivered_at'        => 'datetime',
+            'completed_at'        => 'datetime',
             'buyer_key_viewed_at' => 'datetime',
         ];
     }
@@ -79,5 +83,10 @@ class OrderItem extends Model
     public function complaint(): HasOne
     {
         return $this->hasOne(Complaint::class);
+    }
+
+    public function platformPayoutItem(): HasOne
+    {
+        return $this->hasOne(PlatformPayoutItem::class);
     }
 }

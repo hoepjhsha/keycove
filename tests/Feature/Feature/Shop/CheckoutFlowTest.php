@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\GeneralStatus;
+use App\Enums\KycStatus;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
@@ -103,7 +104,46 @@ it('does not apply commission to platform-owned listings during checkout', funct
 
     expect($orderItem->seller_id)->toBeNull()
         ->and($orderItem->platform_fee)->toBe('0.00')
-        ->and($orderItem->seller_amount)->toBe('199000.00');
+        ->and($orderItem->seller_amount)->toBe('199000.00')
+        ->and($orderItem->escrow)->toBeNull();
+});
+
+it('applies commission and creates escrow for seller-owned listings during checkout', function (): void {
+    $buyer = User::factory()->create();
+    $sellerUser = User::factory()->seller()->create();
+    $seller = Seller::query()->create([
+        'user_id'             => $sellerUser->id,
+        'shop_name'           => 'Checkout Seller Escrow',
+        'cccd_number'         => '123456789012',
+        'cccd_front_image'    => null,
+        'cccd_back_image'     => null,
+        'kyc_status'          => KycStatus::Approved,
+        'kyc_rejected_reason' => null,
+    ]);
+
+    $listing = activeCheckoutListing();
+    $listing->forceFill(['seller_id' => $seller->id])->save();
+    ProductKey::factory()->withListing($listing)->available()->count(1)->create();
+
+    $cart = Cart::factory()->forUser($buyer)->create();
+    $cartItem = CartItem::factory()->forCart($cart)->withListing($listing)->create(['quantity' => 1]);
+
+    $this->actingAs($buyer)
+        ->post(route('app.cart.checkout'), ['item_codes' => [$cartItem->cart_item_code]])
+        ->assertRedirect();
+
+    $orderItem = Order::query()
+        ->where('buyer_id', $buyer->id)
+        ->firstOrFail()
+        ->items()
+        ->with('escrow')
+        ->firstOrFail();
+
+    expect($orderItem->seller_id)->toBe($seller->id)
+        ->and($orderItem->platform_fee)->toBe('19900.00')
+        ->and($orderItem->seller_amount)->toBe('179100.00')
+        ->and($orderItem->escrow)->not->toBeNull()
+        ->and($orderItem->escrow?->amount)->toBe('179100.00');
 });
 
 it('shows a checkout review page for selected cart items', function (): void {

@@ -38,8 +38,8 @@ test('verified users can submit a seller application', function (): void {
 
     $user = User::factory()->create();
 
-    $frontImage = UploadedFile::fake()->image('front.jpg');
-    $backImage = UploadedFile::fake()->image('back.jpg');
+    $frontImage = UploadedFile::fake()->create('front.jpg', 120, 'image/jpeg');
+    $backImage = UploadedFile::fake()->create('back.jpg', 120, 'image/jpeg');
 
     Livewire::actingAs($user)
         ->test(Apply::class)
@@ -100,7 +100,7 @@ test('approved sellers can access the seller dashboard', function (): void {
         ->get('/seller/dashboard')
         ->assertOk()
         ->assertSeeLivewire(Dashboard::class)
-        ->assertSee('Tổng quan người bán')
+        ->assertSee('Dashboard người bán')
         ->assertSee('Sản phẩm gần đây')
         ->assertSee('Listing gần đây');
 });

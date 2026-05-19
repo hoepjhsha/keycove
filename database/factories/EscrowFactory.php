@@ -84,4 +84,11 @@ class EscrowFactory extends Factory
             'status' => EscrowStatus::Refunded,
         ]);
     }
+
+    public function frozen(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => EscrowStatus::Frozen,
+        ]);
+    }
 }

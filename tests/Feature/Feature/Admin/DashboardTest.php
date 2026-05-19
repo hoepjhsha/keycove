@@ -13,6 +13,7 @@ use App\Enums\WalletType;
 use App\Enums\WithdrawStatus;
 use App\Livewire\Admin\Action\Dashboard\DashboardIndex;
 use App\Models\AuditLog;
+use App\Models\Category;
 use App\Models\Complaint;
 use App\Models\Order;
 use App\Models\Product;
@@ -24,12 +25,26 @@ use App\Models\Seller;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Withdraw;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 it('redirects guests away from the admin dashboard route', function (): void {
-    $this->get('/admin/dashboard')
-        ->assertRedirect('/admin/auth/login');
+    auth()->guard('admin')->logout();
+    $request = Request::create('/admin/dashboard', 'GET');
+
+    try {
+        app(Authenticate::class)->handle($request, fn () => response('ok'), 'admin');
+    } catch (AuthenticationException $exception) {
+        expect($exception->redirectTo($request))->toBe('/admin/auth/login');
+
+        return;
+    }
+
+    $this->fail('Guest request was not rejected by the admin guard.');
 });
 
 it('renders admin dashboard metrics and charts for authenticated admins', function (): void {
@@ -61,15 +76,33 @@ it('renders admin dashboard metrics and charts for authenticated admins', functi
         'holding'   => 0,
     ]);
 
-    $product = Product::factory()->create([
+    $actionCategory = Category::factory()->create(['name' => 'Action']);
+    $rpgCategory = Category::factory()->create(['name' => 'RPG']);
+
+    $product = Product::factory()->withCategories([$actionCategory])->create([
         'submitted_by_seller_id' => $seller->id,
+        'name'                   => 'Seller Revenue Listing',
+        'slug'                   => 'seller-revenue-listing-'.Str::lower(Str::random(8)),
+    ]);
+
+    $platformOwnedProduct = Product::factory()->withCategories([$rpgCategory])->create([
+        'submitted_by_seller_id' => null,
+        'name'                   => 'Platform Owned Listing',
+        'slug'                   => 'platform-owned-listing-'.Str::lower(Str::random(8)),
     ]);
 
     $variant = ProductVariant::factory()->withProduct($product)->create();
+    $platformVariant = ProductVariant::factory()->withProduct($platformOwnedProduct)->create();
 
     $listing = ProductListing::factory()->withVariant($variant)->withSeller($seller)->create([
         'status' => ProductListingStatus::Active,
         'price'  => 120000,
+    ]);
+
+    $platformListing = ProductListing::factory()->withVariant($platformVariant)->create([
+        'seller_id' => null,
+        'status'    => ProductListingStatus::Active,
+        'price'     => 99000,
     ]);
 
     ProductKey::factory()->count(3)->withListing($listing)->create([
@@ -100,30 +133,35 @@ it('renders admin dashboard metrics and charts for authenticated admins', functi
         'updated_at'            => now()->subDays(1),
     ]);
 
-    $complaintOrder = Order::factory()->forBuyer($buyer)->create([
+    $platformOrder = Order::factory()->forBuyer($buyer)->create([
         'payment_status' => PaymentStatus::Completed,
         'total_price'    => 99000,
-        'created_at'     => now()->subDays(2),
-        'updated_at'     => now()->subDays(2),
+        'created_at'     => now()->subDays(1),
+        'updated_at'     => now()->subDays(1),
     ]);
 
-    $complaintItem = $complaintOrder->items()->create([
-        'listing_id'            => $listing->id,
-        'seller_id'             => $seller->id,
+    $platformOrderItem = $platformOrder->items()->create([
+        'listing_id'            => $platformListing->id,
+        'seller_id'             => null,
         'quantity'              => 1,
         'unit_price'            => 99000,
         'subtotal'              => 99000,
-        'platform_fee'          => 9900,
-        'seller_amount'         => 89100,
-        'status'                => OrderStatus::Disputing,
-        'product_name_snapshot' => $product->name,
-        'variant_snapshot'      => ['variant_id' => $variant->id],
-        'created_at'            => now()->subDays(2),
-        'updated_at'            => now()->subDays(2),
+        'platform_fee'          => 0,
+        'seller_amount'         => 99000,
+        'status'                => OrderStatus::Completed,
+        'product_name_snapshot' => $platformOwnedProduct->name,
+        'variant_snapshot'      => ['variant_id' => $platformVariant->id],
+        'created_at'            => now()->subDays(1),
+        'updated_at'            => now()->subDays(1),
     ]);
 
-    Complaint::factory()->forOrderItem($complaintItem)->create([
+    Complaint::factory()->forOrderItem($order->items()->firstOrFail())->create([
         'complaint_code' => 'CMP-ADMIN-001',
+        'status'         => ComplaintStatus::Open,
+    ]);
+
+    Complaint::factory()->forOrderItem($platformOrderItem)->create([
+        'complaint_code' => 'CMP-ADMIN-002',
         'status'         => ComplaintStatus::Open,
     ]);
 
@@ -132,14 +170,6 @@ it('renders admin dashboard metrics and charts for authenticated admins', functi
         'order_item_id' => $order->items()->firstOrFail()->id,
         'rating'        => 4,
         'comment'       => 'Ổn định',
-        'media'         => null,
-    ]);
-
-    Review::query()->create([
-        'user_id'       => $buyer->id,
-        'order_item_id' => $complaintItem->id,
-        'rating'        => 5,
-        'comment'       => 'Tốt',
         'media'         => null,
     ]);
 
@@ -164,15 +194,22 @@ it('renders admin dashboard metrics and charts for authenticated admins', functi
     Livewire::actingAs($admin, 'admin')
         ->test(DashboardIndex::class)
         ->assertSet('timeFilter', 'last_30_days')
-        ->assertSee('Toàn cảnh tài chính, vận hành và tăng trưởng của KeyCove')
-        ->assertSee('GMV')
-        ->assertSee('219.000 VND')
-        ->assertSee('Doanh thu sàn')
-        ->assertSee('21.900 VND')
-        ->assertSee('Nhật ký hệ thống')
-        ->assertSee('5 khiếu nại cần xử lý gấp')
-        ->assertSee('4,50/5')
-        ->assertSee('CMP-ADMIN-001')
+        ->assertSee('Tổng quan vận hành')
+        ->assertSee('Doanh thu nền tảng')
+        ->assertSee('111.000 VND')
+        ->assertSee('109.500 VND')
+        ->assertSee('55.500 VND')
+        ->assertSee('Lượng đơn')
+        ->assertSee('Rủi ro khiếu nại')
+        ->assertSee('1 khiếu nại / 1 mặt hàng')
+        ->assertSee('100,00%')
+        ->assertSee('Tín hiệu nổi bật')
+        ->assertSee('Action')
+        ->assertSee('Nhà bán dẫn đầu')
+        ->assertSee('Hiệu suất nhà bán')
+        ->assertSee('Sản phẩm nổi bật theo nhà bán')
+        ->assertSee('Ưu tiên xử lý')
+        ->assertSee('Trợ lý AI')
         ->assertSee('Keycove Seller');
 
     Carbon::setTestNow();

@@ -6,10 +6,8 @@ namespace App\Livewire\Admin\Form\Product;
 
 use App\Enums\GeneralStatus;
 use App\Models\Product;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Services\ProductService;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
@@ -117,63 +115,51 @@ class ProductEditForm extends Form
         }
     }
 
-    public function update(): bool
+    /**
+     * @return array{name: string, slug: string, publisher: ?string, developer: ?string, release_date: ?string, description: ?string, status: int, categories: array<int, int|string>, image: mixed, system_requirements: ?array<string, string>}
+     */
+    public function validatedData(): array
     {
         $this->validate();
 
-        if (empty($this->slug)) {
-            $this->slug = Str::slug($this->name);
+        return [
+            'name'                => $this->name,
+            'slug'                => $this->slug,
+            'publisher'           => $this->publisher,
+            'developer'           => $this->developer,
+            'release_date'        => $this->release_date,
+            'description'         => $this->description,
+            'status'              => $this->status,
+            'categories'          => $this->categories,
+            'image'               => $this->image,
+            'system_requirements' => $this->normalizeSystemRequirements(),
+        ];
+    }
+
+    public function update(): bool
+    {
+        if (! $this->product instanceof Product) {
+            throw new \LogicException('Product has not been set for editing.');
         }
 
-        if (Product::where('slug', $this->slug)->where('id', '!=', $this->product->id)->exists()) {
-            throw ValidationException::withMessages([
-                'editForm.slug' => __('admin.validation.duplicate_product_slug'),
-            ]);
-        }
+        return app(ProductService::class)->update(
+            $this->product,
+            $this->validatedData(),
+            'editForm.slug',
+            'editForm.status',
+        );
+    }
 
-        if ($this->status === GeneralStatus::Deleted->value) {
-            throw ValidationException::withMessages([
-                'editForm.status' => __('admin.validation.status_deleted_update'),
-            ]);
-        }
-
-        $imagePath = $this->product->image_thumbnail_path;
-        if ($this->image) {
-            $disk = config('filesystems.public_disk');
-
-            if ($imagePath) {
-                Storage::disk($disk)->delete($imagePath);
-            }
-
-            $imagePath = $this->image->store(
-                'products/thumbnails',
-                $disk,
-            );
-        }
-
+    /**
+     * @return ?array<string, string>
+     */
+    private function normalizeSystemRequirements(): ?array
+    {
         $requirements = collect($this->systemRequirements)
-            ->filter(fn ($item) => ! empty($item['key']) && ! empty($item['value']))
-            ->mapWithKeys(fn ($item) => [$item['key'] => $item['value']])
+            ->filter(fn (array $item): bool => ! empty($item['key']) && ! empty($item['value']))
+            ->mapWithKeys(fn (array $item): array => [$item['key'] => $item['value']])
             ->all();
 
-        $updated = $this->product->update([
-            'name'                 => $this->name,
-            'slug'                 => $this->slug,
-            'publisher'            => $this->publisher,
-            'developer'            => $this->developer,
-            'release_date'         => $this->release_date,
-            'description'          => $this->description,
-            'status'               => $this->status,
-            'image_thumbnail_path' => $imagePath,
-            'system_requirement'   => ! empty($requirements) ? $requirements : null,
-        ]);
-
-        if ($updated && ! empty($this->categories)) {
-            $this->product->categories()->sync($this->categories);
-        } elseif ($updated) {
-            $this->product->categories()->detach();
-        }
-
-        return $updated;
+        return $requirements !== [] ? $requirements : null;
     }
 }

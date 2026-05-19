@@ -222,10 +222,12 @@ final class RegionTable extends PowerGridComponent
     public function performToggleStatus($id): void
     {
         $region = Region::findOrFail($id);
+
         $region->status = match ($region->status) {
             GeneralStatus::Inactive => GeneralStatus::Active,
             default                 => GeneralStatus::Inactive,
         };
+
         $region->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.nav.regions')])]);
@@ -245,12 +247,11 @@ final class RegionTable extends PowerGridComponent
     #[On('performDelete')]
     public function performDelete($id): void
     {
-        DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id): void {
             $region = Region::findOrFail($id);
 
             $region->status = GeneralStatus::Deleted;
             $region->save();
-
             $region->delete();
         });
 
@@ -272,10 +273,10 @@ final class RegionTable extends PowerGridComponent
     public function performRevertDelete($id): void
     {
         $region = Region::withTrashed()->findOrFail($id);
-
         $region->restore();
 
         $region->status = GeneralStatus::Inactive;
+
         $region->save();
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.nav.regions')])]);
@@ -312,13 +313,10 @@ final class RegionTable extends PowerGridComponent
             return;
         }
 
-        DB::transaction(function () {
-
-            Region::whereIn('id', $this->checkboxValues)
-                ->update([
-                    'status' => GeneralStatus::Deleted,
-                ]);
-
+        DB::transaction(function (): void {
+            Region::whereIn('id', $this->checkboxValues)->update([
+                'status' => GeneralStatus::Deleted,
+            ]);
             Region::whereIn('id', $this->checkboxValues)->delete();
         });
 

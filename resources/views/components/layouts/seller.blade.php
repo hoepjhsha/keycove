@@ -19,6 +19,14 @@
         ? route('seller.listings.index')
         : url('/seller/listings');
 
+    $productsUrl = \Illuminate\Support\Facades\Route::has('seller.products.index')
+        ? route('seller.products.index')
+        : url('/seller/products');
+
+    $ordersUrl = \Illuminate\Support\Facades\Route::has('seller.orders.index')
+        ? route('seller.orders.index')
+        : url('/seller/orders');
+
     $complaintsUrl = \Illuminate\Support\Facades\Route::has('seller.complaints.index')
         ? route('seller.complaints.index')
         : url('/seller/complaints');
@@ -38,10 +46,26 @@
     $navItems = [
         ['label' => 'Tổng quan', 'url' => $dashboardUrl, 'section' => 'dashboard', 'icon' => 'fa-solid fa-chart-line'],
         ['label' => 'Hồ sơ đăng ký', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
+        ['label' => 'Sản phẩm', 'url' => $productsUrl, 'section' => 'products', 'icon' => 'fa-solid fa-boxes-stacked'],
         ['label' => 'Listing', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
+        ['label' => 'Đơn hàng', 'url' => $ordersUrl, 'section' => 'orders', 'icon' => 'fa-solid fa-bag-shopping'],
         ['label' => 'Khiếu nại', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
         ['label' => 'Rút tiền', 'url' => $withdrawalsUrl, 'section' => 'withdrawals', 'icon' => 'fa-solid fa-money-bill-transfer'],
         ['label' => 'Về cửa hàng', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
+    ];
+
+    $managementItems = [
+        ['label' => 'Sản phẩm', 'url' => $productsUrl, 'section' => 'products', 'icon' => 'fa-solid fa-boxes-stacked'],
+        ['label' => 'Listing', 'url' => $listingsUrl, 'section' => 'listings', 'icon' => 'fa-solid fa-tags'],
+        ['label' => 'Đơn hàng', 'url' => $ordersUrl, 'section' => 'orders', 'icon' => 'fa-solid fa-bag-shopping'],
+        ['label' => 'Khiếu nại', 'url' => $complaintsUrl, 'section' => 'complaints', 'icon' => 'fa-regular fa-comment-dots'],
+        ['label' => 'Rút tiền', 'url' => $withdrawalsUrl, 'section' => 'withdrawals', 'icon' => 'fa-solid fa-money-bill-transfer'],
+    ];
+
+    $accountItems = [
+        ['label' => 'Hồ sơ đăng ký', 'url' => $applicationUrl, 'section' => 'application', 'icon' => 'fa-regular fa-id-card'],
+        ['label' => 'Về cửa hàng', 'url' => $shopHomeUrl, 'section' => 'shop', 'icon' => 'fa-solid fa-house'],
+        ['label' => 'Đăng xuất', 'url' => $logoutUrl, 'section' => 'logout', 'icon' => 'fa-solid fa-right-from-bracket'],
     ];
 @endphp
 
@@ -61,18 +85,75 @@
                     </div>
                 </div>
 
-                <nav class="hidden flex-wrap items-center gap-2 text-sm font-semibold lg:flex">
-                    @foreach($navItems as $item)
-                        <a href="{{ $item['url'] }}" class="inline-flex items-center gap-2 rounded-full px-4 py-2 transition-colors {{ $activeSection === $item['section'] ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
-                            <i class="{{ $item['icon'] }} text-[12px]"></i>
-                            {{ $item['label'] }}
-                        </a>
-                    @endforeach
-
-                    <a href="{{ $logoutUrl }}" class="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-4 py-2 text-rose-700 transition-colors hover:bg-rose-500/15 dark:text-rose-300">
-                        <i class="fa-solid fa-right-from-bracket text-[12px]"></i>
-                        Đăng xuất
+                <nav class="hidden items-center gap-2 text-sm font-semibold lg:flex lg:flex-nowrap">
+                    <a href="{{ $dashboardUrl }}" class="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 transition-colors {{ $activeSection === 'dashboard' ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
+                        <i class="fa-solid fa-chart-line text-[12px]"></i>
+                        Tổng quan
                     </a>
+
+                    <div class="relative shrink-0" x-data="{ open: false }">
+                        <button type="button" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-full px-4 py-2 transition-colors {{ in_array($activeSection, ['products', 'listings', 'orders', 'complaints', 'withdrawals'], true) ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
+                            <i class="fa-solid fa-layer-group text-[12px]"></i>
+                            Quản lý
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70 transition-transform duration-300" x-bind:class="open ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <div x-show="open" x-on:click.outside="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" style="display: none;" class="absolute right-0 z-50 mt-2 w-60 origin-top-right overflow-hidden rounded-3xl border border-black/10 bg-white/95 p-2 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-gray-950/95">
+                            <div class="rounded-2xl bg-[#FCF9F4] px-4 py-3 dark:bg-white/5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Quản lý bán hàng</p>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Đơn hàng, listing, khiếu nại và rút tiền.</p>
+                            </div>
+
+                            <div class="mt-2 space-y-1">
+                                @foreach($managementItems as $item)
+                                    <a href="{{ $item['url'] }}" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-colors {{ $activeSection === $item['section'] ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'text-black hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]' }}">
+                                        <span class="flex items-center gap-3">
+                                            <i class="{{ $item['icon'] }} text-[15px]"></i>
+                                            {{ $item['label'] }}
+                                        </span>
+                                        <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative shrink-0" x-data="{ open: false }">
+                        <button type="button" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" class="inline-flex items-center gap-2 rounded-full px-4 py-2 transition-colors {{ in_array($activeSection, ['application', 'shop'], true) ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10' }}">
+                            <i class="fa-solid fa-user-gear text-[12px]"></i>
+                            Tài khoản
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70 transition-transform duration-300" x-bind:class="open ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <div x-show="open" x-on:click.outside="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" style="display: none;" class="absolute right-0 z-50 mt-2 w-56 origin-top-right overflow-hidden rounded-3xl border border-black/10 bg-white/95 p-2 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-gray-950/95">
+                            <div class="rounded-2xl bg-[#FCF9F4] px-4 py-3 dark:bg-white/5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Tài khoản</p>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Thông tin seller và phiên làm việc.</p>
+                            </div>
+
+                            <div class="mt-2 space-y-1">
+                                @foreach($accountItems as $item)
+                                    @if($item['section'] === 'logout')
+                                        <a href="{{ $item['url'] }}" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10">
+                                            <span class="flex items-center gap-3">
+                                                <i class="{{ $item['icon'] }} text-[15px]"></i>
+                                                {{ $item['label'] }}
+                                            </span>
+                                            <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ $item['url'] }}" class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-colors {{ $activeSection === $item['section'] ? 'bg-black text-white dark:bg-white dark:text-gray-950' : 'text-black hover:bg-[#FCF9F4] hover:text-[#D32F2F] dark:text-white dark:hover:bg-white/5 dark:hover:text-[#ff8b8b]' }}">
+                                            <span class="flex items-center gap-3">
+                                                <i class="{{ $item['icon'] }} text-[15px]"></i>
+                                                {{ $item['label'] }}
+                                            </span>
+                                            <i class="fa-solid fa-arrow-right text-[11px] opacity-60"></i>
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="flex items-center gap-2 lg:hidden">

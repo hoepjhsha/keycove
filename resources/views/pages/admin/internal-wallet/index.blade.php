@@ -8,30 +8,53 @@
         ]" />
     @endpush
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <div class="rounded-md border border-emerald-200/70 bg-white p-5 shadow dark:border-emerald-900/40 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.cash_in') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['cashIn'], 2) }} VND</p>
+    <div class="grid gap-4 xl:grid-cols-3">
+        <div class="rounded-md border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-white p-6 shadow dark:border-emerald-900/40 dark:from-emerald-950/20 dark:to-slate-800">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.internal_wallet.internal_balance') }}</p>
+                    <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['internalBalance'], 2) }} VND</p>
+                </div>
+                <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">Balance</span>
+            </div>
         </div>
-        <div class="rounded-md border border-rose-200/70 bg-white p-5 shadow dark:border-rose-900/40 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.cash_out') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['cashOut'], 2) }} VND</p>
+        <div class="rounded-md border border-indigo-200/70 bg-white p-6 shadow dark:border-indigo-900/40 dark:bg-slate-800">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.internal_wallet.platform_revenue') }}</p>
+                    <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['platformRevenue'], 2) }} VND</p>
+                </div>
+                <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">Revenue</span>
+            </div>
+            <div class="mt-4 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                <div class="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/40">
+                    <span>{{ __('admin.internal_wallet.platform_fee_revenue') }}</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ number_format($metrics['platformFeeRevenue'], 2) }} VND</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/40">
+                    <span>{{ __('admin.internal_wallet.platform_owned_revenue') }}</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ number_format($metrics['platformOwnedRevenue'], 2) }} VND</span>
+                </div>
+            </div>
         </div>
-        <div class="rounded-md border border-sky-200/70 bg-white p-5 shadow dark:border-sky-900/40 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.net_balance') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['netBalance'], 2) }} VND</p>
-        </div>
-        <div class="rounded-md border border-slate-200 bg-white p-5 shadow dark:border-slate-700 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.seller_available_liability') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['sellerAvailableLiability'], 2) }} VND</p>
-        </div>
-        <div class="rounded-md border border-slate-200 bg-white p-5 shadow dark:border-slate-700 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.seller_holding_liability') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['sellerHoldingLiability'], 2) }} VND</p>
-        </div>
-        <div class="rounded-md border border-slate-200 bg-white p-5 shadow dark:border-slate-700 dark:bg-slate-800">
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.common.pending_withdrawal_liability') }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['pendingWithdrawalLiability'], 2) }} VND</p>
+        <div class="rounded-md border border-sky-200/70 bg-white p-6 shadow dark:border-sky-900/40 dark:bg-slate-800">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('admin.internal_wallet.escrow_exposure') }}</p>
+                    <p class="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">{{ number_format($metrics['escrowHolding'], 2) }} VND</p>
+                </div>
+                <span class="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300">Escrow</span>
+            </div>
+            <div class="mt-4 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                <div class="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/40">
+                    <span>{{ __('admin.internal_wallet.escrow_holding') }}</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ number_format($metrics['escrowHolding'], 2) }} VND</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/40">
+                    <span>{{ __('admin.internal_wallet.escrow_released') }}</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ number_format($metrics['escrowReleased'], 2) }} VND</span>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Table\Product;
 
-use App\Enums\ProductListingStatus;
+use App\Contracts\Repositories\ProductVariantRepositoryInterface;
 use App\Enums\ProductVariantStatus;
 use App\Livewire\Admin\Action\Product\ProductDetail;
-use App\Models\ProductVariant;
+use App\Services\ProductVariantService;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -29,6 +29,18 @@ final class ProductVariantsTable extends PowerGridComponent
     public string $sortDirection = 'desc';
 
     public array $expandedRows = [];
+
+    protected ProductVariantService $productVariantService;
+
+    protected ProductVariantRepositoryInterface $productVariantRepository;
+
+    public function boot(
+        ProductVariantService $productVariantService,
+        ProductVariantRepositoryInterface $productVariantRepository,
+    ): void {
+        $this->productVariantService = $productVariantService;
+        $this->productVariantRepository = $productVariantRepository;
+    }
 
     public static function position(): int
     {
@@ -51,12 +63,7 @@ final class ProductVariantsTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return ProductVariant::query()
-            ->where('product_id', $this->productId)
-            ->with(['region', 'platform', 'operatingSystem'])
-            ->withCount(['listings' => function ($query) {
-                $query->where('status', '!=', ProductListingStatus::Deleted);
-            }]);
+        return $this->productVariantRepository->getAdminTableQuery($this->productId);
     }
 
     public function relationSearch(): array
@@ -68,14 +75,14 @@ final class ProductVariantsTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('id')
-            ->add('region_name', fn (ProductVariant $model) => $model->region->name ?? '-')
-            ->add('region_flag', fn (ProductVariant $model) => $model->region->flag_code ?? '')
-            ->add('platform_name', fn (ProductVariant $model) => $model->platform->name ?? '-')
-            ->add('platform_icon', fn (ProductVariant $model) => $model->platform->icon ?? '')
-            ->add('os_name', fn (ProductVariant $model) => $model->operatingSystem->name ?? '-')
-            ->add('os_icon', fn (ProductVariant $model) => $model->operatingSystem->icon ?? '')
+            ->add('region_name', fn ($model) => $model->region->name ?? '-')
+            ->add('region_flag', fn ($model) => $model->region->flag_code ?? '')
+            ->add('platform_name', fn ($model) => $model->platform->name ?? '-')
+            ->add('platform_icon', fn ($model) => $model->platform->icon ?? '')
+            ->add('os_name', fn ($model) => $model->operatingSystem->name ?? '-')
+            ->add('os_icon', fn ($model) => $model->operatingSystem->icon ?? '')
             ->add('edition')
-            ->add('status_label', fn (ProductVariant $model) => $this->getStatusLabel($model->status))
+            ->add('status_label', fn ($model) => $this->getStatusLabel($model->status))
             ->add('listings_count')
             ->add('created_at')
             ->add('updated_at');
@@ -232,17 +239,9 @@ final class ProductVariantsTable extends PowerGridComponent
     #[On('performToggleVariantStatus')]
     public function performToggleVariantStatus($id): void
     {
-        $variant = ProductVariant::findOrFail($id);
+        $variant = $this->productVariantRepository->findForAdminDetailOrFail((int) $id, true);
 
-        $newStatus = match ($variant->status) {
-            ProductVariantStatus::Draft  => ProductVariantStatus::Active,
-            ProductVariantStatus::Active => ProductVariantStatus::Hidden,
-            ProductVariantStatus::Hidden => ProductVariantStatus::Draft,
-            default                      => ProductVariantStatus::Draft,
-        };
-
-        $variant->status = $newStatus;
-        $variant->save();
+        $this->productVariantService->toggleAdminStatus($variant);
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.status_changed', ['Name' => __('admin.common.variant')])]);
     }
@@ -262,19 +261,11 @@ final class ProductVariantsTable extends PowerGridComponent
     public function performDeleteVariant($id): void
     {
         try {
-            DB::transaction(function () use ($id) {
-                $variant = ProductVariant::findOrFail($id);
-
-                if ($variant->listings()->where('status', '!=', ProductListingStatus::Deleted)->exists()) {
-                    throw new \Exception(__('admin.validation.variant_delete_active_listings'));
-                }
-
-                $variant->status = ProductVariantStatus::Deleted;
-                $variant->save();
-                $variant->delete();
-            });
+            $this->productVariantService->delete($this->productVariantRepository->findForAdminDetailOrFail((int) $id, true), true, 'general');
 
             $this->dispatch('swal:success', ['message' => __('admin.messages.deleted', ['Name' => __('admin.common.variant')])]);
+        } catch (ValidationException $exception) {
+            $this->dispatch('swal:error', ['message' => $this->firstValidationMessage($exception)]);
         } catch (\Exception $e) {
             $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
@@ -294,10 +285,8 @@ final class ProductVariantsTable extends PowerGridComponent
     #[On('performRestoreVariant')]
     public function performRestoreVariant($id): void
     {
-        $variant = ProductVariant::withTrashed()->findOrFail($id);
-        $variant->restore();
-        $variant->status = ProductVariantStatus::Draft;
-        $variant->save();
+        $variant = $this->productVariantRepository->findForAdminDetailOrFail((int) $id, true);
+        $this->productVariantService->restore($variant, ProductVariantStatus::Draft);
 
         $this->dispatch('swal:success', ['message' => __('admin.messages.restored', ['Name' => __('admin.common.variant')])]);
     }
@@ -322,19 +311,7 @@ final class ProductVariantsTable extends PowerGridComponent
     public function performBulkDeleteVariant(): void
     {
         try {
-            DB::transaction(function () {
-                $variants = ProductVariant::whereIn('id', $this->checkboxValues)->get();
-
-                foreach ($variants as $variant) {
-                    if ($variant->listings()->where('status', '!=', ProductListingStatus::Deleted)->exists()) {
-                        continue;
-                    }
-
-                    $variant->status = ProductVariantStatus::Deleted;
-                    $variant->save();
-                    $variant->delete();
-                }
-            });
+            $this->productVariantService->bulkDelete($this->checkboxValues, true);
 
             $this->dispatch('swal:success', ['message' => __('admin.messages.bulk_delete_completed_short')]);
         } catch (\Exception $e) {
@@ -352,5 +329,13 @@ final class ProductVariantsTable extends PowerGridComponent
         }
 
         $this->dispatch('openVariantBulkStatusModal', ids: $this->checkboxValues)->to(ProductDetail::class);
+    }
+
+    protected function firstValidationMessage(ValidationException $exception): string
+    {
+        return collect($exception->errors())
+            ->flatten()
+            ->filter(fn ($message): bool => is_string($message) && $message !== '')
+            ->first() ?? $exception->getMessage();
     }
 }

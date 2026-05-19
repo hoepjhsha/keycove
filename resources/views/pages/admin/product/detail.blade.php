@@ -4,7 +4,7 @@
     @push('breadcrumbs')
         <x-partials.dashboard.breadcrumb :items="[
             ['label' => __('admin.nav.catalog_keys'), 'url' => 'javascript:void(0)'],
-            ['label' => 'Products List', 'url' => route('admin.products.index')],
+            ['label' => 'Products List', 'url' => \Illuminate\Support\Facades\Route::has('admin.products.index') ? route('admin.products.index') : url('/admin/products')],
             ['label' => $product->name, 'url' => 'javascript:void(0)'],
         ]" />
     @endpush
@@ -107,14 +107,14 @@
 
         <div class="bg-white dark:bg-slate-800 shadow rounded-md w-full relative">
             <div class="border-b border-dashed border-slate-200 dark:border-slate-700 py-3 px-4 flex items-center justify-between">
-                <h4 class="font-medium dark:text-slate-300">Product Variants ({{ $this->productVariants->count() }})</h4>
+                <h4 class="font-medium dark:text-slate-300">Biến thể ({{ $this->productVariants->count() }})</h4>
                 <div class="flex items-center gap-3">
-                    <button wire:click="toggleShowTrashedVariants" class="inline-flex items-center px-3 py-1.5 text-sm font-medium {{ $showTrashedVariants ? 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800' }} rounded-md transition-colors" title="{{ $showTrashedVariants ? 'Hide Trashed' : 'Show Trashed' }}">
+                    <button wire:click="toggleShowTrashedVariants" class="inline-flex items-center px-3 py-1.5 text-sm font-medium {{ $showTrashedVariants ? 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800' }} rounded-md transition-colors" title="{{ $showTrashedVariants ? 'Ẩn đã xóa' : 'Hiện đã xóa' }}">
                         <i class="fa-solid {{ $showTrashedVariants ? 'fa-eye-slash' : 'fa-eye' }} mr-1.5"></i>
-                        {{ $showTrashedVariants ? 'Hide Trashed' : 'Show Trashed' }}
+                        {{ $showTrashedVariants ? 'Ẩn đã xóa' : 'Hiện đã xóa' }}
                     </button>
                     <button wire:click="openVariantModal()" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-                        <i class="fa-solid fa-plus mr-1.5"></i> Create
+                        <i class="fa-solid fa-plus mr-1.5"></i> Tạo
                     </button>
                 </div>
             </div>
@@ -184,15 +184,15 @@
                                             <td colspan="8" class="px-3 py-4 bg-slate-50 dark:bg-slate-700/20">
                                                 <div class="pl-4 border-l-2 border-blue-500">
                                                     <div class="flex items-center justify-between mb-3">
-                                                         <h5 class="text-sm font-medium text-slate-700 dark:text-slate-300">Listings for this variant</h5>
-                                                         <button wire:click="toggleShowTrashedListings" class="inline-flex items-center px-2 py-1 text-xs font-medium {{ $showTrashedListings ? 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }} rounded transition-colors" title="{{ $showTrashedListings ? 'Hide Trashed' : 'Show Trashed' }}">
+                                                         <h5 class="text-sm font-medium text-slate-700 dark:text-slate-300">Danh sách listing của biến thể</h5>
+                                                         <button wire:click="toggleShowTrashedListings" class="inline-flex items-center px-2 py-1 text-xs font-medium {{ $showTrashedListings ? 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }} rounded transition-colors" title="{{ $showTrashedListings ? 'Ẩn đã xóa' : 'Hiện đã xóa' }}">
                                                              <i class="fa-solid {{ $showTrashedListings ? 'fa-eye-slash' : 'fa-eye' }} mr-1"></i>
-                                                             {{ $showTrashedListings ? 'Hide Trashed' : 'Show Trashed' }}
+                                                             {{ $showTrashedListings ? 'Ẩn đã xóa' : 'Hiện đã xóa' }}
                                                          </button>
                                                      </div>
                                                     @php $variantListings = $this->getVariantListings($variant->id); @endphp
                                                     @if($variantListings->isEmpty())
-                                                        <p class="text-sm text-slate-500 dark:text-slate-400 italic">No listings for this variant.</p>
+                                                        <p class="text-sm text-slate-500 dark:text-slate-400 italic">Không có listing nào cho biên thể này.</p>
                                                     @else
                                                         <table class="w-full text-xs">
                                                             <thead>
@@ -252,13 +252,13 @@
         </div>
     </div>
 
-    <x-reusable.modal wire:model="showVariantModal" title="{{ $editingVariantId ? 'Edit Variant' : 'Create Variant' }}" max-width="lg">
+    <x-reusable.modal wire:model="showVariantModal" title="{{ $editingVariantId ? 'Sửa biến thể' : 'Tạo biến thể' }}" max-width="lg">
         <form class="space-y-4" wire:submit="saveVariant">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.region') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.region_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                        <option value="">-- Select Region --</option>
+                        <option value="">-- Chọn vùng --</option>
                         @foreach($this->regions as $region)
                             <option value="{{ $region->id }}">{{ $region->name }} ({{ $region->flag_code }})</option>
                         @endforeach
@@ -270,7 +270,7 @@
                 <div>
                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.platforms') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.platform_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                        <option value="">-- Select Platform --</option>
+                        <option value="">-- Chọn nền tảng --</option>
                         @foreach($this->platforms as $platform)
                             <option value="{{ $platform->id }}">{{ $platform->name }}</option>
                         @endforeach
@@ -285,7 +285,7 @@
                 <div>
                     <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.nav.operating_systems') }} <span class="text-red-400">*</span></label>
                     <select wire:model="variantForm.os_id" class="form-select w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" required>
-                        <option value="">-- Select OS --</option>
+                        <option value="">-- Chọn hệ điều hành --</option>
                         @foreach($this->operatingSystems as $os)
                             <option value="{{ $os->id }}">{{ $os->name }}</option>
                         @endforeach
@@ -353,9 +353,9 @@
 
             <div>
                 <label class="font-medium text-sm text-slate-600 dark:text-slate-400">{{ __('admin.common.price') }} <span class="text-red-400">*</span></label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">VND</span>
-                    <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md mt-1 border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-8 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
+                <div class="relative mt-1">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-500 dark:text-slate-400">VND</span>
+                    <input wire:model="listingForm.price" type="number" step="0.01" min="0" class="form-input w-full rounded-md border border-slate-300/60 dark:border-slate-700 dark:text-slate-300 bg-transparent pl-14 pr-3 py-2 focus:outline-none focus:ring-0 hover:border-slate-400 focus:border-primary-500" placeholder="0.00" required>
                 </div>
                 @error('listingForm.price')
                     <small class="error text-red-500 text-xs">{{ $message }}</small>
@@ -406,7 +406,7 @@
 
             <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                 <div class="bg-slate-50 dark:bg-slate-700/50 px-4 py-2 border-b border-slate-200 dark:border-slate-700">
-                    <h5 class="text-sm font-medium text-slate-700 dark:text-slate-300">Available Keys ({{ $this->viewingListingKeys->where('status', \App\Enums\ProductKeyStatus::Available->value)->count() }} / {{ $this->viewingListingKeys->count() }})</h5>
+                    <h5 class="text-sm font-medium text-slate-700 dark:text-slate-300">Key khả dụng ({{ $this->viewingListingKeys->where('status', \App\Enums\ProductKeyStatus::Available->value)->count() }} / {{ $this->viewingListingKeys->count() }})</h5>
                 </div>
                 <div class="max-h-64 overflow-y-auto">
                     @if($this->viewingListingKeys->isEmpty())

@@ -1,6 +1,8 @@
 <?php
 
+use App\Console\Commands\CompleteSettledOrderItems;
 use App\Console\Commands\ExpirePendingOrders;
+use App\Console\Commands\ProcessPlatformProfitPayouts;
 use App\Console\Commands\RetryProcessingWithdrawals;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -11,9 +13,17 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(ExpirePendingOrders::class)
-    ->hourly()
+    ->everyMinute()
+    ->withoutOverlapping();
+
+Schedule::command(CompleteSettledOrderItems::class)
+    ->everyMinute()
     ->withoutOverlapping();
 
 Schedule::command(RetryProcessingWithdrawals::class, ['--minutes' => 5])
-    ->everyFiveMinutes()
+    ->everyMinute()
     ->withoutOverlapping(10);
+
+Schedule::command(ProcessPlatformProfitPayouts::class)
+    ->everyMinute()
+    ->withoutOverlapping();

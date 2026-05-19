@@ -38,8 +38,18 @@ final class EscrowException extends Exception
         return new self('Only escrows with Holding status can be frozen.');
     }
 
+    public static function invalidStatusForUnfreeze(): self
+    {
+        return new self('Only escrows with Frozen status can be unfrozen.');
+    }
+
     public static function statusChangedDuringFreeze(): self
     {
         return new self('Escrow status is no longer Holding. Freeze cancelled.');
+    }
+
+    public static function statusChangedDuringUnfreeze(): self
+    {
+        return new self('Escrow status is no longer Frozen. Unfreeze cancelled.');
     }
 }

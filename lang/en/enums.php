@@ -122,14 +122,25 @@ return [
     ],
 
     'internal_wallet_entry_type' => [
-        'PaymentReceived'       => 'Payment Received',
-        'EscrowHeld'            => 'Escrow Held',
-        'EscrowReleased'        => 'Escrow Released',
-        'RefundPaid'            => 'Refund Paid',
-        'SellerPayoutRequested' => 'Seller Payout Requested',
-        'SellerPayoutCompleted' => 'Seller Payout Completed',
-        'SellerPayoutFailed'    => 'Seller Payout Failed',
-        'Adjustment'            => 'Adjustment',
+        'PaymentReceived'               => 'Payment Received',
+        'EscrowHeld'                    => 'Escrow Held',
+        'EscrowReleased'                => 'Escrow Released',
+        'RefundPaid'                    => 'Refund Paid',
+        'SellerPayoutRequested'         => 'Seller Payout Requested',
+        'SellerPayoutCompleted'         => 'Seller Payout Completed',
+        'SellerPayoutFailed'            => 'Seller Payout Failed',
+        'Adjustment'                    => 'Adjustment',
+        'PlatformProfitPayoutRequested' => 'Platform Profit Payout Requested',
+        'PlatformProfitPayoutCompleted' => 'Platform Profit Payout Completed',
+        'PlatformProfitPayoutFailed'    => 'Platform Profit Payout Failed',
+    ],
+
+    'platform_payout_status' => [
+        'Pending'    => 'Pending',
+        'Processing' => 'Processing',
+        'Completed'  => 'Completed',
+        'Failed'     => 'Failed',
+        'Cancelled'  => 'Cancelled',
     ],
 
     'withdraw_status' => [
@@ -159,6 +170,7 @@ return [
     'audit_event' => [
         'EscrowReleased' => 'Released',
         'EscrowFrozen'   => 'Frozen',
+        'EscrowUnfrozen' => 'Unfrozen',
         'EscrowExtended' => 'Extended',
         'EscrowVoided'   => 'Voided',
     ],
