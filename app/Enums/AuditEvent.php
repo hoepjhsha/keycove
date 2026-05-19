@@ -12,6 +12,7 @@ enum AuditEvent: string
 
     case EscrowReleased = 'release';
     case EscrowFrozen = 'frozen';
+    case EscrowUnfrozen = 'unfrozen';
     case EscrowExtended = 'extended';
     case EscrowVoided = 'voided';
 }

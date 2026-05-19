@@ -171,6 +171,15 @@ final class EscrowTable extends PowerGridComponent
                 ])
                 ->dispatch('freezeEscrow', ['rowId' => $row->id]),
 
+            Button::add('unfreeze')
+                ->slot('<i class="fa-solid fa-lock-open"></i>')
+                ->id()
+                ->class('text-sky-600 hover:text-sky-800 px-1 py-1 transition-all hover:scale-110')
+                ->attributes([
+                    'x-tooltip' => __('admin.common.unfreeze_escrow'),
+                ])
+                ->dispatch('unfreezeEscrow', ['rowId' => $row->id]),
+
             Button::add('extend')
                 ->slot('<i class="fa-solid fa-hourglass-end"></i>')
                 ->id()
@@ -196,6 +205,10 @@ final class EscrowTable extends PowerGridComponent
         return [
             Rule::button('freeze')
                 ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Holding)
+                ->hide(),
+
+            Rule::button('unfreeze')
+                ->when(fn (Escrow $model) => $model->status !== EscrowStatus::Frozen)
                 ->hide(),
 
             Rule::button('extend')
@@ -377,6 +390,74 @@ final class EscrowTable extends PowerGridComponent
         } catch (Exception $e) {
             $this->dispatch('swal:error', [
                 'message' => __('admin.messages.escrow_freeze_failed', ['error' => $e->getMessage()]),
+            ]);
+        }
+    }
+
+    #[On('unfreezeEscrow')]
+    public function unfreezeEscrow($rowId): void
+    {
+        $escrow = Escrow::findOrFail($rowId);
+
+        if ($escrow->status !== EscrowStatus::Frozen) {
+            $this->dispatch('swal:error', [
+                'message' => EscrowException::invalidStatusForUnfreeze()->getMessage(),
+            ]);
+
+            return;
+        }
+
+        $this->dispatch('swal:confirm', [
+            'title'  => __('admin.swal.unfreeze_escrow'),
+            'text'   => __('admin.swal.unfreeze_escrow_text'),
+            'method' => 'performUnfreezeEscrow',
+            'id'     => $rowId,
+        ]);
+    }
+
+    #[On('performUnfreezeEscrow')]
+    public function performUnfreezeEscrow($id): void
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $escrow = Escrow::lockForUpdate()->findOrFail($id);
+
+                if ($escrow->status !== EscrowStatus::Frozen) {
+                    throw EscrowException::statusChangedDuringUnfreeze();
+                }
+
+                $oldValues = [
+                    'status'     => $escrow->status->name,
+                    'updated_at' => $escrow->updated_at->toDateTimeString(),
+                ];
+
+                $escrow->status = EscrowStatus::Holding;
+                $escrow->save();
+
+                $newValues = [
+                    'status'     => $escrow->status->name,
+                    'updated_at' => $escrow->updated_at->toDateTimeString(),
+                ];
+
+                AuditLog::create([
+                    'user_id'        => Auth::id(),
+                    'auditable_type' => Escrow::class,
+                    'auditable_id'   => $escrow->id,
+                    'event'          => AuditEvent::EscrowUnfrozen,
+                    'old_values'     => $oldValues,
+                    'new_values'     => $newValues,
+                    'ip_address'     => request()->ip(),
+                    'user_agent'     => request()->userAgent(),
+                    'created_at'     => now(),
+                ]);
+            });
+
+            $this->dispatch('swal:success', [
+                'message' => __('admin.messages.escrow_unfrozen'),
+            ]);
+        } catch (Exception $e) {
+            $this->dispatch('swal:error', [
+                'message' => __('admin.messages.escrow_unfreeze_failed', ['error' => $e->getMessage()]),
             ]);
         }
     }
